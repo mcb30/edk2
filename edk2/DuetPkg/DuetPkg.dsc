@@ -84,6 +84,7 @@
 [LibraryClasses.common.UEFI_DRIVER]
   MemoryAllocationLib|MdePkg/Library/DxeMemoryAllocationLib/DxeMemoryAllocationLib.inf
   SerialPortLib|DuetPkg/Library/DuetSerialIoLib/DuetSerialIoLib.inf
+  UsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
   DebugLib|IntelFrameworkModulePkg/Library/PeiDxeDebugLibReportStatusCode/PeiDxeDebugLibReportStatusCode.inf
   ReportStatusCodeLib|IntelFrameworkModulePkg/Library/DxeReportStatusCodeLibFramework/DxeReportStatusCodeLib.inf
 

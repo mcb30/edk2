@@ -1,3 +1,4 @@
+ifeq ($(TOOLCHAIN_TAG), MSFT)
 
 BASETOOLS_DIR = $(EDK_TOOLS_PATH)\Bin\Win32
 
@@ -37,11 +38,8 @@ LIBS =
 
 COMMON_DEPS = 
 
-ifeq ($(TOOLCHAIN_TAG), MSFT)
 all: $(TARGET_FILES)
-else
-all:
-endif
+
           
 #=============                
 $(OUTPUT_DIR)\bootsect.obj:$(MODULE_DIR)\bootsect.asm
@@ -162,3 +160,41 @@ clean:
 	if exist $(OUTPUT_DIR) rmdir /s /q $(OUTPUT_DIR)
 
 
+
+else # MSFT
+
+
+
+TARGET_FILES =	$(OUTPUT_DIR)/bootsect.com \
+		$(OUTPUT_DIR)/bs16.com \
+		$(OUTPUT_DIR)/bs32.com \
+		$(OUTPUT_DIR)/efi32.com2 \
+		$(OUTPUT_DIR)/efi64.com2 \
+		$(OUTPUT_DIR)/Gpt.com \
+		$(OUTPUT_DIR)/Mbr.com \
+		$(OUTPUT_DIR)/st16_64.com \
+		$(OUTPUT_DIR)/st32_64.com \
+		$(OUTPUT_DIR)/start16.com \
+		$(OUTPUT_DIR)/start32.com \
+		$(OUTPUT_DIR)/start64.com \
+		$(OUTPUT_DIR)/start.com
+
+MKNASM = $(MODULE_DIR)/mknasm.pl
+NASM   = nasm
+
+all : $(TARGET_FILES)
+
+$(OUTPUT_DIR)/%.nasm : $(MODULE_DIR)/%.asm $(MKNASM)
+	$(MKNASM) $< > $@
+
+$(OUTPUT_DIR)/%.com : $(OUTPUT_DIR)/%.nasm
+	$(NASM) -f bin -o $@ -O999 $<
+
+%.com2 : %.com
+	tail -c +135169 $< > $@
+
+clean :
+	rm -f $(OUTPUT_DIR)/*.nasm $(OUTPUT_DIR)/*.com $(OUTPUT_DIR)/*.com2
+
+
+endif  #  MSFT

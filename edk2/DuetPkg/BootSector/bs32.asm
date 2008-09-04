@@ -286,9 +286,9 @@ Halt:
   jmp   Halt
 
 StartString:
-  db 'B', 0ch, 'S', 0ch, 't', 0ch, 'a', 0ch, 'r', 0ch, 't', 0ch, '!', 0ch
+  db 'B', 0ch, 'S', 0ch, 't', 0ch, 'a', 0ch, 'r', 0ch, 't', 0ch
 ErrorString:
-  db 'B', 0ch, 'E', 0ch, 'r', 0ch, 'r', 0ch, 'o', 0ch, 'r', 0ch, '!', 0ch
+  db 'B', 0ch, 'E', 0ch, 'r', 0ch, 'r', 0ch
 
 ; ****************************************************************************
 ; LBA Offset for BootSector, need patched by tool for HD boot.

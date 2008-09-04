@@ -91,8 +91,8 @@
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
   UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
   HobLib|MdePkg/Library/DxeCoreHobLib/DxeCoreHobLib.inf
-  DxeCoreEntryPoint|MdeMPkg/Library/DxeCoreEntryPoint/DxeCoreEntryPoint.inf
-  MemoryAllocationLib|MdeMdeModulePkg/Library/DxeCoreMemoryAllocationLib/DxeCoreMemoryAllocationLib.inf
+  DxeCoreEntryPoint|MdePkg/Library/DxeCoreEntryPoint/DxeCoreEntryPoint.inf
+  MemoryAllocationLib|MdeModulePkg/Library/DxeCoreMemoryAllocationLib/DxeCoreMemoryAllocationLib.inf
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
   ReportStatusCodeLib|IntelFrameworkModulePkg/Library/DxeReportStatusCodeLibFramework/DxeReportStatusCodeLib.inf
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
@@ -181,6 +181,10 @@
   UnixLib|UnixPkg/Library/DxeUnixLib/DxeUnixLib.inf
   OemHookStatusCodeLib|UnixPkg/Library/DxeUnixOemHookStatusCodeLib/DxeUnixOemHookStatusCodeLib.inf
   DebugLib|IntelFrameworkModulePkg/Library/PeiDxeDebugLibReportStatusCode/PeiDxeDebugLibReportStatusCode.inf
+  NetLib|MdeModulePkg/Library/DxeNetLib/DxeNetLib.inf
+  IpIoLib|MdeModulePkg/Library/DxeIpIoLib/DxeIpIoLib.inf
+  UdpIoLib|MdeModulePkg/Library/DxeUdpIoLib/DxeUdpIoLib.inf
+  DpcLib|MdeModulePkg/Library/DxeDpcLib/DxeDpcLib.inf
 
 [LibraryClasses.common.DXE_DRIVER]
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf

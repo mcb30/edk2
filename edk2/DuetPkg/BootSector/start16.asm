@@ -327,7 +327,7 @@ start:
 ;        mov es,ax
 
         mov ebx,0
-        lea edi,MemoryMap
+        lea edi,[MemoryMap]
 MemMapLoop:
         mov eax,0e820h
         mov ecx,20
@@ -339,7 +339,7 @@ MemMapLoop:
         je  MemMapDone
         jmp MemMapLoop
 MemMapDone:
-        lea eax,MemoryMap
+        lea eax,[MemoryMap]
         sub edi,eax                         ; Get the address of the memory map
         mov dword ptr [MemoryMapSize],edi   ; Save the size of the memory map
 

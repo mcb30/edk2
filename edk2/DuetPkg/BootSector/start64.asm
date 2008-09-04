@@ -346,7 +346,7 @@ start:
 ;        mov es,ax
 
         mov ebx,0
-        lea edi,MemoryMap
+        lea edi,[MemoryMap]
 MemMapLoop:
         mov eax,0e820h
         mov ecx,20
@@ -358,7 +358,7 @@ MemMapLoop:
         je  MemMapDone
         jmp MemMapLoop
 MemMapDone:
-        lea eax,MemoryMap
+        lea eax,[MemoryMap]
         sub edi,eax                         ; Get the address of the memory map
         mov dword ptr [MemoryMapSize],edi   ; Save the size of the memory map
 
@@ -420,11 +420,11 @@ A20GateEnabled:
 ;        mov ax,cs
 ;        mov es,ax
 
-    lea eax, OffsetIn32BitProtectedMode
+    lea eax, [OffsetIn32BitProtectedMode]
     add eax, 20000h + 6h
     mov dword ptr[OffsetIn32BitProtectedMode], eax
 
-    lea eax, OffsetInLongMode
+    lea eax, [OffsetInLongMode]
     add eax, 20000h + 6h
     mov dword ptr[OffsetInLongMode], eax
 
@@ -1075,7 +1075,6 @@ IDT_END:
 
 MemoryMapSize   dd  0
 MemoryMap   dd  0,0,0,0,0,0,0,0
-        dd  0,0,0,0,0,0,0,0
         dd  0,0,0,0,0,0,0,0
         dd  0,0,0,0,0,0,0,0
         dd  0,0,0,0,0,0,0,0

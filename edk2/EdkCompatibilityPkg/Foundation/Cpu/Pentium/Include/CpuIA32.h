@@ -22,7 +22,7 @@ Abstract:
 
 #include "Tiano.h"
 
-#define IA32API __cdecl
+#define IA32API _EFIAPI
 
 typedef struct {
   UINT32  RegEax;
