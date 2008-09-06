@@ -164,6 +164,9 @@ clean:
 else # MSFT
 
 
+MODULE_DIR ?= .
+OUTPUT_DIR ?= .
+
 
 TARGET_FILES =	$(OUTPUT_DIR)/bootsect.com \
 		$(OUTPUT_DIR)/bs16.com \
@@ -177,7 +180,8 @@ TARGET_FILES =	$(OUTPUT_DIR)/bootsect.com \
 		$(OUTPUT_DIR)/start16.com \
 		$(OUTPUT_DIR)/start32.com \
 		$(OUTPUT_DIR)/start64.com \
-		$(OUTPUT_DIR)/start.com
+		$(OUTPUT_DIR)/start.com \
+		$(OUTPUT_DIR)/multiboot.bin
 
 MKNASM = $(MODULE_DIR)/mknasm.pl
 NASM   = nasm
@@ -190,11 +194,18 @@ $(OUTPUT_DIR)/%.nasm : $(MODULE_DIR)/%.asm $(MKNASM)
 $(OUTPUT_DIR)/%.com : $(OUTPUT_DIR)/%.nasm
 	$(NASM) -f bin -o $@ -O999 $<
 
-%.com2 : %.com
+$(OUTPUT_DIR)/%.com2 : $(OUTPUT_DIR)/%.com
 	tail -c +135169 $< > $@
 
+$(OUTPUT_DIR)/%.o : $(MODULE_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OUTPUT_DIR)/%.bin : $(OUTPUT_DIR)/%.o $(MODULE_DIR)/multiboot.lds
+	ld --nostdlib --oformat binary -T$(MODULE_DIR)/multiboot.lds -o $@ $<
+
 clean :
-	rm -f $(OUTPUT_DIR)/*.nasm $(OUTPUT_DIR)/*.com $(OUTPUT_DIR)/*.com2
+	rm -f $(OUTPUT_DIR)/*.nasm $(OUTPUT_DIR)/*.com $(OUTPUT_DIR)/*.com2 \
+	      $(OUTPUT_DIR)/*.bin $(OUTPUT_DIR)/*.o
 
 
 endif  #  MSFT
