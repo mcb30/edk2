@@ -109,6 +109,15 @@ InternalX86Delay (
   INT32                             Ticks;
 
   //
+  // Ensure the APIC timer is actually running in periodic mode with
+  // an initial value of 0xffffffff; it doesn't power-up into this
+  // state by default...
+  //
+  MmioWrite32 (ApicBase + 0x380, 0xffffffff);
+  MmioWrite32 (ApicBase + 0x320,
+	       MmioRead32 (ApicBase + 0x320) | (1<<17));
+
+  //
   // The target timer count is calculated here
   //
   Ticks = InternalX86GetTimerTick (ApicBase) - Delay;
