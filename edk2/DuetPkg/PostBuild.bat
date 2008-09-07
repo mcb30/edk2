@@ -5,8 +5,7 @@
 @REM 
 
 @set BUILD_DIR=%WORKSPACE%\Build\DuetPkg\DEBUG_MYTOOLS
-@REM @set BASETOOLS_DIR=%WORKSPACE_TOOLS_PATH%\Bin\Win32
-@set BASETOOLS_DIR=m:\tree\BaseTools\Bin\Win32
+@set BASETOOLS_DIR=%WORKSPACE_TOOLS_PATH%\Bin\Win32
 @set PROCESSOR=""
 
 @if "%1"=="" goto NoArch
