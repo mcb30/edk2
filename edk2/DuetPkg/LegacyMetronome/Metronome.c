@@ -41,6 +41,7 @@ EFI_CPU_IO_PROTOCOL         *mCpuIo = NULL;
 //
 // Worker Functions
 //
+STATIC
 VOID
 IoWrite8 (
   UINT16  Port,
