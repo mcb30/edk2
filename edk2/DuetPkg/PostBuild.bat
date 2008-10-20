@@ -4,7 +4,7 @@
 @REM  Originally, following post building command is for EfiLoader module.
 @REM 
 
-@set BUILD_DIR=%WORKSPACE%\Build\DuetPkg\DEBUG_MYTOOLS
+@set BUILD_DIR=%WORKSPACE%\Build\DuetPkg\DEBUG_WINDDK3790x1830
 @set BASETOOLS_DIR=%WORKSPACE_TOOLS_PATH%\Bin\Win32
 @set PROCESSOR=""
 
