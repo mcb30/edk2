@@ -31,12 +31,6 @@
 
 #if __INTEL_COMPILER
 //
-// Disable ICC's remark #593: "LocalVariable" was set but never used
-// This is legal ANSI C code so we disable the remark that is turned on with -Wall
-//
-#pragma warning ( disable : 593 )
-
-//
 // Disable ICC's remark #869: "Parameter" was never referenced warning.
 // This is legal ANSI C code so we disable the remark that is turned on with -Wall
 //
@@ -240,7 +234,11 @@ typedef INT64   INTN;
 // For symbol name in GNU assembly code, an extra "_" is necessary
 //
 #if __GNUC__
-  #define ASM_PFX(name) _##name    
+  #if defined(linux)
+    #define ASM_PFX(name) name
+  #else
+    #define ASM_PFX(name) _##name
+  #endif  
 #endif
 
 #define FUNCTION_ENTRY_POINT(p) (p)

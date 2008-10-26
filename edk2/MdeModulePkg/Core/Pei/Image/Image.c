@@ -78,7 +78,7 @@ PeiImageRead (
   Destination8  = Buffer;
   Source8       = (CHAR8 *) ((UINTN) FileHandle + FileOffset);
   Length        = *ReadSize;
-  while (Length--) {
+  while ((Length--) > 0) {
     *(Destination8++) = *(Source8++);
   }
 
@@ -215,7 +215,7 @@ LoadAndRelocatePeCoffImage (
 **/
 EFI_STATUS
 PeiLoadImageLoadImage (
-  IN     EFI_PEI_SERVICES             **PeiServices,
+  IN     CONST EFI_PEI_SERVICES       **PeiServices,
   IN     EFI_PEI_FILE_HANDLE          FileHandle,
   OUT    EFI_PHYSICAL_ADDRESS         *ImageAddressArg,  OPTIONAL
   OUT    UINT64                       *ImageSizeArg,     OPTIONAL
@@ -420,7 +420,7 @@ PeiLoadImageLoadImageWrapper (
 **/
 EFI_STATUS
 PeiLoadImage (
-  IN     EFI_PEI_SERVICES             **PeiServices,
+  IN     CONST EFI_PEI_SERVICES       **PeiServices,
   IN     EFI_PEI_FILE_HANDLE          FileHandle,
   OUT    EFI_PHYSICAL_ADDRESS         *EntryPoint,
   OUT    UINT32                       *AuthenticationState

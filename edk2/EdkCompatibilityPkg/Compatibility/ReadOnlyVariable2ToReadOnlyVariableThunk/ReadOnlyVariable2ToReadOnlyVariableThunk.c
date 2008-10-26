@@ -101,6 +101,12 @@ Returns:
 {
   VOID        *Interface;
   EFI_STATUS  Status;
+  //
+  // This thunk module can only be used together with a PI PEI core, as we 
+  // assume PeiServices Pointer Table can be located in a standard way defined
+  // in PI spec.
+  //
+  ASSERT ((*PeiServices)->Hdr.Revision >= 0x00010000);
 
   //
   // Make sure ReadOnlyVariable2ToReadOnlyVariable module is not present. If so, the call chain will form a
@@ -156,7 +162,7 @@ PeiGetVariable (
   ASSERT_EFI_ERROR (Status);
 
   return ReadOnlyVariable->PeiGetVariable (
-                             GetPeiServicesTablePointer (),
+                             (EFI_PEI_SERVICES **) GetPeiServicesTablePointer (),
                              (CHAR16 *)VariableName,
                              (EFI_GUID *)VariableGuid,
                              Attributes,
@@ -201,7 +207,7 @@ PeiGetNextVariableName (
   ASSERT_EFI_ERROR (Status);
 
   return ReadOnlyVariable->PeiGetNextVariableName (
-                             GetPeiServicesTablePointer (),
+                             (EFI_PEI_SERVICES **) GetPeiServicesTablePointer (),
                              VariableNameSize,
                              VariableName,
                              VariableGuid

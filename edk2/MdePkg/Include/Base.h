@@ -57,34 +57,18 @@ struct _LIST_ENTRY {
 // Modifiers for Data Types used to self document code.
 // This concept is borrowed for UEFI specification.
 //
-#ifndef IN
-//
-// Some other envirnments use this construct, so #ifndef to prevent
-// mulitple definition.
-//
 #define IN
 #define OUT
 #define OPTIONAL
-#endif
 
-//
-// Constants. They may exist in other build structures, so #ifndef them.
-//
-#ifndef TRUE
 //
 //  UEFI specification claims 1 and 0. We are concerned about the 
 //  complier portability so we did it this way.
 //
 #define TRUE  ((BOOLEAN)(1==1))
-#endif
-
-#ifndef FALSE
 #define FALSE ((BOOLEAN)(0==1))
-#endif
 
-#ifndef NULL
 #define NULL  ((VOID *) 0)
-#endif
 
 #define  BIT0     0x00000001
 #define  BIT1     0x00000002
@@ -196,14 +180,10 @@ struct _LIST_ENTRY {
 //
 // Also support coding convention rules for var arg macros
 //
-#ifndef VA_START
-
 typedef CHAR8 *VA_LIST;
 #define VA_START(ap, v) (ap = (VA_LIST) & (v) + _INT_SIZE_OF (v))
 #define VA_ARG(ap, t)   (*(t *) ((ap += _INT_SIZE_OF (t)) - _INT_SIZE_OF (t)))
 #define VA_END(ap)      (ap = (VA_LIST) 0)
-
-#endif
 
 //
 // Macro that returns the byte offset of a field in a data structure. 
@@ -217,19 +197,20 @@ typedef CHAR8 *VA_LIST;
 #define _CR(Record, TYPE, Field)  ((TYPE *) ((CHAR8 *) (Record) - (CHAR8 *) &(((TYPE *) 0)->Field)))
 
 ///
+///  ALIGN_VALUE - aligns a value up to the next boundary of the given alignment.
+///
+#define ALIGN_VALUE(Value, Alignment) ((Value) + (((Alignment) - (Value)) & ((Alignment) - 1)))
+
+///
 ///  ALIGN_POINTER - aligns a pointer to the lowest boundry
 ///
-#define ALIGN_POINTER(p, s) ((VOID *) ((UINTN)(p) + (((s) - ((UINTN) (p))) & ((s) - 1))))
+#define ALIGN_POINTER(Pointer, Alignment) ((VOID *) (ALIGN_VALUE ((UINTN)(Pointer), (Alignment))))
 
 ///
 ///  ALIGN_VARIABLE - aligns a variable up to the next natural boundry for int size of a processor
 ///
-#define ALIGN_VARIABLE(Value, Adjustment) \
-  Adjustment = 0U; \
-  if ((UINTN) (Value) % sizeof (UINTN)) { \
-    (Adjustment) = (UINTN)(sizeof (UINTN) - ((UINTN) (Value) % sizeof (UINTN))); \
-  } \
-  (Value) = (UINTN)((UINTN) (Value) + (UINTN) (Adjustment))
+#define ALIGN_VARIABLE(Value)  ALIGN_VALUE ((Value), sizeof (UINTN))
+  
 
 //
 // Return the maximum of two operands. 

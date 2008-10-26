@@ -57,19 +57,11 @@ EFI_STATUS
   IN OUT EFI_HANDLE                                         *DriverImageHandle
   );
 
-//
-// Interface structure for the Bus Specific Driver Override Protocol
-//
-/**
-  @par Protocol Description:
-  This protocol matches one or more drivers to a controller. This protocol is produced by a bus driver,
-  and it is installed on the child handles of buses that require a bus specific algorithm for matching
-  drivers to controllers.
-
-  @param GetDriver
-  Uses a bus specific algorithm to retrieve a driver image handle for a controller.
- 
-**/
+///
+/// This protocol matches one or more drivers to a controller. This protocol is produced by a bus driver,
+/// and it is installed on the child handles of buses that require a bus specific algorithm for matching
+/// drivers to controllers.
+///
 struct _EFI_BUS_SPECIFIC_DRIVER_OVERRIDE_PROTOCOL {
   EFI_BUS_SPECIFIC_DRIVER_OVERRIDE_GET_DRIVER GetDriver;
 };

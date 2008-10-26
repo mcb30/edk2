@@ -1,6 +1,6 @@
 /** @file
-  The file contain all library functions and definitions for IFR opcode creation and 
-  related Form Browser utility Operations.
+  This library contains functions to do IFR opcode creation and utility functions 
+  to help module to interact with a UEFI Form Browser.
 
   Copyright (c) 2007 - 2008, Intel Corporation
   All rights reserved. This program and the accompanying materials
@@ -39,20 +39,10 @@
 #define UEFI_LANGUAGE_VARIABLE          L"PlatformLang"
 #define UEFI_LANGUAGE_CODES_VARIABLE    L"PlatformLangCodes"
 
-//
-// Limited buffer size recommended by RFC4646 (4.3.  Length Considerations)
-// (42 characters plus a NULL terminator)
-//
-#define RFC_3066_ENTRY_SIZE             (42 + 1)
-#define ISO_639_2_ENTRY_SIZE            3
-
 #define INVALID_VARSTORE_ID             0
 
 #define QUESTION_FLAGS              (EFI_IFR_FLAG_READ_ONLY | EFI_IFR_FLAG_CALLBACK | EFI_IFR_FLAG_RESET_REQUIRED | EFI_IFR_FLAG_OPTIONS_ONLY)
 #define QUESTION_FLAGS_MASK         (~QUESTION_FLAGS)
-
-extern EFI_HII_DATABASE_PROTOCOL *gIfrLibHiiDatabase;
-extern EFI_HII_STRING_PROTOCOL   *gIfrLibHiiString;
 
 #pragma pack(1)
 typedef struct {
@@ -89,7 +79,7 @@ typedef struct {
 
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
 
 **/
@@ -103,11 +93,13 @@ CreateEndOpCode (
 /**
   Create EFI_IFR_DEFAULT_OP opcode.
 
+  If Data is NULL or Data->Data is NULL, then ASSERT.
+
   @param  Value                  Value for the default
   @param  Type                   Type for the default
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
   @retval EFI_INVALID_PARAMETER The type is not valid.
 
@@ -124,6 +116,8 @@ CreateDefaultOpCode (
 /**
   Create EFI_IFR_ACTION_OP opcode.
 
+  If Data is NULL or Data->Data is NULL, then ASSERT.
+
   @param  QuestionId             Question ID
   @param  Prompt                 String ID for Prompt
   @param  Help                   String ID for Help
@@ -131,7 +125,7 @@ CreateDefaultOpCode (
   @param  QuestionConfig         String ID for configuration
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
   @retval EFI_INVALID_PARAMETER If QuestionFlags is not valid.
 
@@ -151,13 +145,15 @@ CreateActionOpCode (
 /**
   Create EFI_IFR_SUBTITLE_OP opcode.
 
+  If Data is NULL or Data->Data is NULL, then ASSERT.
+
   @param  Prompt                 String ID for Prompt
   @param  Help                   String ID for Help
   @param  Flags                  Subtitle opcode flags
   @param  Scope                  Subtitle Scope bit
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
   
 **/
@@ -175,12 +171,14 @@ CreateSubTitleOpCode (
 /**
   Create EFI_IFR_TEXT_OP opcode.
 
+  If Data is NULL or Data->Data is NULL, then ASSERT.
+
   @param  Prompt                 String ID for Prompt
   @param  Help                   String ID for Help
   @param  TextTwo                String ID for text two
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
 
 **/
@@ -197,6 +195,8 @@ CreateTextOpCode (
 /**
   Create EFI_IFR_REF_OP opcode.
 
+  If Data is NULL or Data->Data is NULL, then ASSERT.
+
   @param  FormId                 Destination Form ID
   @param  Prompt                 String ID for Prompt
   @param  Help                   String ID for Help
@@ -204,7 +204,7 @@ CreateTextOpCode (
   @param  QuestionId             Question ID
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
   @retval EFI_INVALID_PARAMETER If QuestionFlags is not valid.
 
@@ -224,13 +224,16 @@ CreateGotoOpCode (
 /**
   Create EFI_IFR_ONE_OF_OPTION_OP opcode.
 
+  If Data is NULL or Data->Data is NULL, then ASSERT.
+
   @param  OptionCount            The number of options.
   @param  OptionsList            The list of Options.
   @param  Type                   The data type.
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
+  @retval EFI_INVALID_PARAMETER If OptionCount is not zero but OptionsList is NULL.
 
 **/
 EFI_STATUS
@@ -246,6 +249,8 @@ CreateOneOfOptionOpCode (
 /**
   Create EFI_IFR_ONE_OF_OP opcode.
 
+  If Data is NULL or Data->Data is NULL, then ASSERT.
+
   @param  QuestionId             Question ID
   @param  VarStoreId             Storage ID
   @param  VarOffset              Offset in Storage
@@ -257,7 +262,7 @@ CreateOneOfOptionOpCode (
   @param  OptionCount            Number of options in option list
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
   @retval EFI_INVALID_PARAMETER If QuestionFlags is not valid.
 
@@ -281,6 +286,8 @@ CreateOneOfOpCode (
 /**
   Create EFI_IFR_ORDERED_LIST_OP opcode.
 
+  If Data is NULL or Data->Data is NULL, then ASSERT.
+
   @param  QuestionId             Question ID
   @param  VarStoreId             Storage ID
   @param  VarOffset              Offset in Storage
@@ -294,7 +301,7 @@ CreateOneOfOpCode (
   @param  OptionCount            Number of options in option list
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
   @retval EFI_INVALID_PARAMETER If QuestionFlags is not valid.
 
@@ -312,13 +319,15 @@ CreateOrderedListOpCode (
   IN      UINT8               DataType,
   IN      UINT8               MaxContainers,
   IN      IFR_OPTION          *OptionsList,
-  IN     UINTN                OptionCount,
-  IN OUT EFI_HII_UPDATE_DATA  *Data
+  IN      UINTN               OptionCount,
+  IN OUT  EFI_HII_UPDATE_DATA *Data
   )
 ;
 
 /**
   Create EFI_IFR_CHECKBOX_OP opcode.
+
+  If Data is NULL or Data->Data is NULL, then ASSERT.
 
   @param  QuestionId             Question ID
   @param  VarStoreId             Storage ID
@@ -329,7 +338,7 @@ CreateOrderedListOpCode (
   @param  CheckBoxFlags          Flags for checkbox opcode
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
   @retval EFI_INVALID_PARAMETER If QuestionFlags is not valid.
 
@@ -351,6 +360,8 @@ CreateCheckBoxOpCode (
 /**
   Create EFI_IFR_NUMERIC_OP opcode.
 
+  If Data is NULL or Data->Data is NULL, then ASSERT.
+
   @param  QuestionId             Question ID
   @param  VarStoreId             Storage ID
   @param  VarOffset              Offset in Storage
@@ -364,7 +375,7 @@ CreateCheckBoxOpCode (
   @param  Default                Numeric default value
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
   @retval EFI_INVALID_PARAMETER If QuestionFlags is not valid.
 
@@ -390,6 +401,8 @@ CreateNumericOpCode (
 /**
   Create EFI_IFR_STRING_OP opcode.
 
+  If Data is NULL or Data->Data is NULL, then ASSERT.
+
   @param  QuestionId             Question ID
   @param  VarStoreId             Storage ID
   @param  VarOffset              Offset in Storage
@@ -401,7 +414,7 @@ CreateNumericOpCode (
   @param  MaxSize                String maximum length
   @param  Data                   Destination for the created opcode binary
 
-  @retval EFI_SUCCESS            Opcode create success
+  @retval EFI_SUCCESS            Opcode is created successfully.
   @retval EFI_BUFFER_TOO_SMALL The space reserved in Data field is too small.
   @retval EFI_INVALID_PARAMETER If QuestionFlags is not valid.
 
@@ -437,18 +450,20 @@ ToLower (
 ;
 
 /**
-  Converts binary buffer to Unicode string in reversed byte order to BufToHexString().
+  Converts binary buffer to a Unicode string. The byte buffer is in a reversed byte order 
+  compared with the byte order defined in BufToHexString().
 
   @param  Str                    String for output
   @param  Buffer                 Binary buffer.
   @param  BufferSize             Size of the buffer in bytes.
 
   @retval EFI_SUCCESS            The function completed successfully.
+  @retval EFI_OUT_OF_RESOURCES   There is no enough available memory space.
 
 **/
 EFI_STATUS
 EFIAPI
-BufferToHexString (
+BufInReverseOrderToHexString (
   IN OUT CHAR16    *Str,
   IN UINT8         *Buffer,
   IN UINTN         BufferSize
@@ -467,11 +482,13 @@ BufferToHexString (
   @param  Str                    String to be converted from.
 
   @retval EFI_SUCCESS            The function completed successfully.
+  @retval RETURN_BUFFER_TOO_SMALL   The input BufferSize is too small to hold the output. BufferSize
+                                   will be updated to the size required for the converstion.
 
 **/
 EFI_STATUS
 EFIAPI
-HexStringToBuffer (
+HexStringToBufInReverseOrder (
   IN OUT UINT8         *Buffer,
   IN OUT UINTN         *BufferSize,
   IN CHAR16            *Str
@@ -487,11 +504,11 @@ HexStringToBuffer (
   @param StrBufferLen   On input: Length in bytes of buffer to hold the Unicode string.
                                     Includes tailing '\0' character.
                                     On output:
-                                      If return EFI_SUCCESS, containing length of Unicode string buffer.
-                                      If return EFI_BUFFER_TOO_SMALL, containg length of string buffer desired.
+                                      containing length of Unicode string buffer when returning EFI_SUCCESS;
+                                      containg length of string buffer desired when returning EFI_BUFFER_TOO_SMALL.
   @param ConfigString   Binary representation of Unicode String, <string> := (<HexCh>4)+
 
-  @retval EFI_SUCCESS          Routine success.
+  @retval EFI_SUCCESS          Operation completes successfully.
   @retval EFI_BUFFER_TOO_SMALL The string buffer is too small.
 
 **/
@@ -517,7 +534,7 @@ ConfigStringToUnicode (
                                       If return EFI_BUFFER_TOO_SMALL, containg length of string buffer desired.
   @param  UnicodeString  Original Unicode string.
 
-  @retval EFI_SUCCESS           Routine success.
+  @retval EFI_SUCCESS           Operation completes successfully.
   @retval EFI_BUFFER_TOO_SMALL  The string buffer is too small.
 
 **/
@@ -545,7 +562,7 @@ UnicodeToConfigString (
   @param  DriverHandle           Driver handle which contains the routing
                                  information: PATH.
 
-  @retval EFI_SUCCESS            Routine success.
+  @retval EFI_SUCCESS            Operation completes successfully.
   @retval EFI_BUFFER_TOO_SMALL   The ConfigHdr string buffer is too small.
 
 **/
@@ -554,7 +571,7 @@ EFIAPI
 ConstructConfigHdr (
   IN OUT CHAR16                *ConfigHdr,
   IN OUT UINTN                 *StrBufferLen,
-  IN EFI_GUID                  *Guid,
+  IN CONST EFI_GUID            *Guid,
   IN CHAR16                    *Name, OPTIONAL
   IN EFI_HANDLE                *DriverHandle
   )
@@ -576,8 +593,8 @@ BOOLEAN
 EFIAPI
 FindBlockName (
   IN OUT CHAR16                *String,
-  UINTN                        Offset,
-  UINTN                        Width
+  IN UINTN                     Offset,
+  IN UINTN                     Width
   )
 ;
 
@@ -594,17 +611,17 @@ FindBlockName (
                                  desired.
   @param  Buffer                 Buffer to hold retrived data.
 
-  @retval EFI_SUCCESS            Routine success.
+  @retval EFI_SUCCESS            Operation completes successfully.
   @retval EFI_BUFFER_TOO_SMALL   The intput buffer is too small.
 
 **/
 EFI_STATUS
 EFIAPI
 GetBrowserData (
-  EFI_GUID                   *VariableGuid, OPTIONAL
-  CHAR16                     *VariableName, OPTIONAL
-  UINTN                      *BufferSize,
-  UINT8                      *Buffer
+  IN CONST EFI_GUID          *VariableGuid, OPTIONAL
+  IN CONST CHAR16            *VariableName, OPTIONAL
+  IN OUT UINTN               *BufferSize,
+  IN OUT UINT8               *Buffer
   )
 ;
 
@@ -623,18 +640,18 @@ GetBrowserData (
                                  Browser. <RequestElement> ::=
                                  &OFFSET=<Number>&WIDTH=<Number>*
 
-  @retval EFI_SUCCESS            Routine success.
+  @retval EFI_SUCCESS            Operation completes successfully.
   @retval Other                  Updating Browser uncommitted data failed.
 
 **/
 EFI_STATUS
 EFIAPI
 SetBrowserData (
-  EFI_GUID                   *VariableGuid, OPTIONAL
-  CHAR16                     *VariableName, OPTIONAL
-  UINTN                      BufferSize,
-  UINT8                      *Buffer,
-  CHAR16                     *RequestElement  OPTIONAL
+  IN CONST EFI_GUID          *VariableGuid, OPTIONAL
+  IN CONST CHAR16            *VariableName, OPTIONAL
+  IN UINTN                   BufferSize,
+  IN CONST UINT8             *Buffer,
+  IN CONST CHAR16            *RequestElement  OPTIONAL
   )
 ;
 
@@ -667,7 +684,6 @@ IfrLibCreatePopUp (
 
   @param  NumberOfLines          The number of lines for the dialog box
   @param  KeyValue               The EFI_KEY value returned if HotKey is TRUE..
-  @param  String                 Pointer to the first string in the list
   @param  Args                   VA_LIST marker for the variable argument list.
                                  A series of (quantity == NumberOfLines - 1) text
                                  strings which will be used to construct the dialog

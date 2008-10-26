@@ -33,7 +33,7 @@
 typedef struct _EFI_TCP4_PROTOCOL EFI_TCP4_PROTOCOL;
 
 typedef struct {
-  EFI_HANDLE        InstanceHandle;
+  EFI_HANDLE              InstanceHandle;
   EFI_IPv4_ADDRESS        LocalAddress;
   UINT16                  LocalPort;
   EFI_IPv4_ADDRESS        RemoteAddress;
@@ -475,48 +475,13 @@ EFI_STATUS
   IN EFI_TCP4_PROTOCOL                   *This
   );
 
-/**  
-  @par Protocol Description:
-  The EFI_TCP4_PROTOCOL defines the EFI TCPv4 Protocol child to be used by 
-  any network drivers or applications to send or receive data stream. 
-  It can either listen on a specified port as a service or actively connected 
-  to remote peer as a client. Each instance has its own independent settings, 
-  such as the routing table.
-
-  @param GetModeData
-  Get the current operational status. 
-
-  @param Configure
-  Initialize, change, or brutally reset operational settings of the EFI TCPv4 Protocol. 
-
-  @param Routes
-  Add or delete routing entries for this TCP4 instance. 
-
-  @param Connect
-  Initiate the TCP three-way handshake to connect to the remote peer 
-  configured in this TCP instance. The function is a nonblocking operation. 
-
-  @param Accept
-  Listen for incoming TCP connection request. This function is a nonblocking operation. 
-
-  @param Transmit
-  Queue outgoing data to the transmit queue. This function is a nonblocking operation. 
-
-  @param Receive
-  Queue a receiving request token to the receive queue. This function is 
-  a nonblocking operation. 
-
-  @param Close
-  Gracefully disconnecting a TCP connection follow RFC 793 or reset a TCP 
-  connection. This function is a nonblocking operation. 
-
-  @param Cancel
-  Abort a pending connect, listen, transmit or receive request. 
-
-  @param Poll
-  Poll to receive incoming data and transmit outgoing TCP segments. 
-
-**/
+///
+/// The EFI_TCP4_PROTOCOL defines the EFI TCPv4 Protocol child to be used by 
+/// any network drivers or applications to send or receive data stream. 
+/// It can either listen on a specified port as a service or actively connected 
+/// to remote peer as a client. Each instance has its own independent settings, 
+/// such as the routing table.
+///
 struct _EFI_TCP4_PROTOCOL {
   EFI_TCP4_GET_MODE_DATA                 GetModeData;
   EFI_TCP4_CONFIGURE                     Configure;

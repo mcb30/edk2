@@ -21,8 +21,6 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Library/BaseMemoryLib.h>
-
 
 EFI_HII_PROTOCOL *mHii = NULL;
 
@@ -287,7 +285,6 @@ HiiLibGetStringFromToken (
   @retval EFI_NOT_FOUND          String is not found.
   @retval EFI_SUCCESS            Operation is successful.
   @retval EFI_OUT_OF_RESOURCES   There is not enought memory in the system.
-  @retval EFI_INVALID_PARAMETER  The String is NULL.
 
 **/
 EFI_STATUS

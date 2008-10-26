@@ -1,7 +1,7 @@
 /** @file
   Switch Stack functions.
 
-  Copyright (c) 2006 - 2007, Intel Corporation<BR>
+  Copyright (c) 2006 - 2008, Intel Corporation<BR>
   All rights reserved. This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -11,11 +11,6 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
-
-//
-// Include common header file for this module.
-//
-
 
 #include <BaseLibInternals.h>
 
@@ -41,7 +36,6 @@
                       function.
   @param  NewStack    A pointer to the new stack to use for the EntryPoint
                       function.
-  @param  ...         Extended parameters.
 
 **/
 VOID

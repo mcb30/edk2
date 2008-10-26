@@ -164,44 +164,11 @@ BOOLEAN
   OUT CHAR8                                 *Fat
   );
 
-/**  
-  @par Protocol Description:
-  The EFI_UNICODE_COLLATION_PROTOCOL is used to perform case-insensitive 
-  comparisons of Unicode strings. 
-
-  @param StriColl
-  Performs a case-insensitive comparison of two Null-terminated Unicode strings. 
-
-  @param MetaiMatch
-  Performs a case-insensitive comparison between a Null-terminated Unicode 
-  pattern string and a Null-terminated Unicode string. The pattern string 
-  can use the '?' wildcard to match any character, and the '*' wildcard to 
-  match any substring. 
-
-  @param StrLwr
-  Converts all the Unicode characters in a Null-terminated Unicode string to 
-  lowercase Unicode characters. 
-
-  @param StrUpr
-  Converts all the Unicode characters in a Null-terminated Unicode string to 
-  uppercase Unicode characters. 
-
-  @param FatToStr
-  Converts an 8.3 FAT file name using an OEM character set to a Null-terminated 
-  Unicode string. 
-
-  @param StrToFat
-  Converts a Null-terminated Unicode string to legal characters in a FAT 
-  filename using an OEM character set. 
-
-  @param Supported
-  LanguagesA Null-terminated ASCII string array that contains one or more 
-  language codes. This array is specified in RFC 4646 format.
-**/
+///
+/// The EFI_UNICODE_COLLATION_PROTOCOL is used to perform case-insensitive 
+/// comparisons of Unicode strings. 
+///
 struct _EFI_UNICODE_COLLATION_PROTOCOL {
-  //
-  // general
-  //
   EFI_UNICODE_COLLATION_STRICOLL    StriColl;
   EFI_UNICODE_COLLATION_METAIMATCH  MetaiMatch;
   EFI_UNICODE_COLLATION_STRLWR      StrLwr;
@@ -212,7 +179,11 @@ struct _EFI_UNICODE_COLLATION_PROTOCOL {
   //
   EFI_UNICODE_COLLATION_FATTOSTR    FatToStr;
   EFI_UNICODE_COLLATION_STRTOFAT    StrToFat;
-
+  
+  ///
+  /// A Null-terminated ASCII string array that contains one or more 
+  /// language codes. This array is specified in RFC 4646 format.
+  ///
   CHAR8                             *SupportedLanguages;
 };
 

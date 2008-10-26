@@ -259,7 +259,9 @@ UefiRegisterPackageList(
   UINTN                       IfrPackageCount;
   EFI_HII_PACKAGE_LIST_HEADER *PackageListHeader;
   HII_THUNK_CONTEXT           *ThunkContext;
+  HII_THUNK_CONTEXT           *ThunkContextToRemove;
   EFI_GUID                    GuidId;
+  EFI_HII_PACKAGE_HEADER      *IfrPackage;
 
   PackageListHeader = NULL;
 
@@ -274,6 +276,12 @@ UefiRegisterPackageList(
     return EFI_UNSUPPORTED;
   }
 
+  ThunkContext = CreateThunkContext (Private, StringPackageCount, IfrPackageCount);
+  if (ThunkContext == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+  ThunkContext->ByFrameworkHiiNewPack = TRUE;
+  
   if (Packages->GuidId == NULL) {
     //
     // UEFI HII Database require Package List GUID must be unique.
@@ -284,38 +292,19 @@ UefiRegisterPackageList(
     // GUID.
     //
     ASSERT (StringPackageCount >=1 && IfrPackageCount == 1);
-    GenerateRandomGuid (&GuidId);
+    IfrPackage = GetIfrPackage (Packages);
+    GetFormSetGuid (IfrPackage, &ThunkContext->TagGuid);
   } else {
-    ThunkContext = TagGuidToIfrPackThunkContext (Private, Packages->GuidId);
+    ThunkContextToRemove = TagGuidToIfrPackThunkContext (Private, Packages->GuidId);
     
     if (IfrPackageCount > 0 && 
         StringPackageCount > 0 && 
-        (ThunkContext!= NULL)) {
+        (ThunkContextToRemove!= NULL)) {
         DEBUG((EFI_D_WARN, "Framework code registers HII package list with the same GUID more than once.\n"));
         DEBUG((EFI_D_WARN, "This package list should be already registered. Just return successfully.\n"));
-        HiiRemovePack (This, ThunkContext->FwHiiHandle);
+        HiiRemovePack (This, ThunkContextToRemove->FwHiiHandle);
     }
-    CopyGuid (&GuidId, Packages->GuidId);
-  }
-
-  ThunkContext = CreateThunkContext (Private, StringPackageCount, IfrPackageCount);
-  if (ThunkContext == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-  ThunkContext->ByFrameworkHiiNewPack = TRUE;
-  
-  //
-  // Record the Package List GUID, it is used as a name for the package list by Framework HII.
-  //
-  CopyGuid (&ThunkContext->TagGuid, &GuidId);
-
-  if ((StringPackageCount == 0) && (IfrPackageCount != 0)) {
-    //
-    // UEFI HII database does not allow two package list with the same GUID.
-    // In Framework HII implementation, Packages->GuidId is used as an identifier to associate 
-    // a PackageList with only IFR to a Package list the with String package.
-    //
-    GenerateRandomGuid (&GuidId);
+    CopyGuid (&ThunkContext->TagGuid, Packages->GuidId);
   }
 
   //
@@ -325,13 +314,31 @@ UefiRegisterPackageList(
   if (IfrPackageCount != 0) {
     InstallDefaultConfigAccessProtocol (Packages, ThunkContext);
   }
-  PackageListHeader = PrepareUefiPackageListFromFrameworkHiiPackages (Packages, &GuidId);
+  PackageListHeader = PrepareUefiPackageListFromFrameworkHiiPackages (Packages, &ThunkContext->TagGuid);
   Status = mHiiDatabase->NewPackageList (
               mHiiDatabase,
               PackageListHeader,  
               ThunkContext->UefiHiiDriverHandle,
               &ThunkContext->UefiHiiHandle
               );
+  if (Status == EFI_INVALID_PARAMETER) {
+    SafeFreePool (PackageListHeader);
+    
+    //
+    // UEFI HII database does not allow two package list with the same GUID.
+    // In Framework HII implementation, Packages->GuidId is used as an identifier to associate 
+    // a PackageList with only IFR to a Package list the with String package.
+    //
+    GenerateRandomGuid (&GuidId);
+
+    PackageListHeader = PrepareUefiPackageListFromFrameworkHiiPackages (Packages, &GuidId);
+    Status = mHiiDatabase->NewPackageList (
+                mHiiDatabase,
+                PackageListHeader,  
+                ThunkContext->UefiHiiDriverHandle,
+                &ThunkContext->UefiHiiHandle
+                );
+  }
 
   //
   // BUGBUG: Remove when development is done

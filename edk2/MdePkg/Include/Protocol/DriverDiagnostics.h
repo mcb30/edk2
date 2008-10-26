@@ -15,8 +15,6 @@
 #ifndef __EFI_DRIVER_DIAGNOSTICS_H__
 #define __EFI_DRIVER_DIAGNOSTICS_H__
 
-#include <PiDxe.h>
-
 ///
 /// Global ID for the Driver Diagnostics Protocol as defined in UEFI 2.0.
 ///
@@ -99,24 +97,15 @@ EFI_STATUS
   OUT CHAR16                                                **Buffer
   );
 
-
-//
-//
-
-/**
-  Interface structure for the Driver Diagnostics Protocol.
-
-  @par Protocol Description:
-  Used to perform diagnostics on a controller that an EFI Driver is managing.
-
-  @param RunDiagnostics      Runs diagnostics on a controller.
-  @param SupportedLanguages  A Null-terminated ASCII string that contains one or more
-                             ISO 639-2 language codes.  This is the list of language 
-                             codes that this protocol supports.
-
-**/
+///
+/// Used to perform diagnostics on a controller that an EFI Driver is managing.
+///
 struct _EFI_DRIVER_DIAGNOSTICS_PROTOCOL {
   EFI_DRIVER_DIAGNOSTICS_RUN_DIAGNOSTICS  RunDiagnostics;
+  ///
+  /// A Null-terminated ASCII string that contains one or more RFC 3066
+  /// language codes.  This is the list of language codes that this protocol supports.  
+  ///  
   CHAR8                                   *SupportedLanguages;
 };
 

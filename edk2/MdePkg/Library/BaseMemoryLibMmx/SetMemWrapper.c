@@ -1,6 +1,16 @@
 /** @file
   SetMem() implementation.
 
+  The following BaseMemoryLib instances contain the same copy of this file:
+    BaseMemoryLib
+    BaseMemoryLibMmx
+    BaseMemoryLibSse2
+    BaseMemoryLibRepStr
+    BaseMemoryLibOptDxe
+    BaseMemoryLibOptPei
+    PeiMemoryLib
+    DxeMemoryLib
+
   Copyright (c) 2006, Intel Corporation<BR>
   All rights reserved. This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
@@ -10,17 +20,6 @@
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
-  Module Name:  SetMemWrapper.c
-
-  The following BaseMemoryLib instances share the same version of this file:
-
-    BaseMemoryLib
-    BaseMemoryLibMmx
-    BaseMemoryLibSse2
-    BaseMemoryLibRepStr
-    PeiMemoryLib
-    DxeMemoryLib
-
 **/
 
 #include "MemLibInternals.h"
@@ -29,7 +28,7 @@
   Fills a target buffer with a byte value, and returns the target buffer.
 
   This function fills Length bytes of Buffer with Value, and returns Buffer.
-  If Length is greater than (MAX_ADDRESS ? Buffer + 1), then ASSERT(). 
+  If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT(). 
 
   @param  Buffer    Memory to set.
   @param  Length    Number of bytes to set.
@@ -46,7 +45,7 @@ SetMem (
   IN UINT8  Value
   )
 {
-  if (0 == Length) {
+  if (Length == 0) {
     return Buffer;
   }
 

@@ -26,8 +26,6 @@ typedef struct _EFI_TCG_PROTOCOL EFI_TCG_PROTOCOL;
 //
 // Set structure alignment to 1-byte
 //
-#pragma pack (push, 1)
-
 typedef struct {
   UINT8  Major;
   UINT8  Minor;
@@ -46,11 +44,6 @@ typedef struct _TCG_EFI_BOOT_SERVICE_CAPABILITY {
 } TCG_EFI_BOOT_SERVICE_CAPABILITY;
 
 typedef UINT32   TCG_ALGORITHM_ID;
-
-//
-// Restore original structure alignment
-//
-#pragma pack (pop)
 
 /**
   This service provides EFI protocol capability information, state information 
@@ -204,22 +197,9 @@ EFI_STATUS
      OUT  EFI_PHYSICAL_ADDRESS      *EventLogLastEntry
   );
 
-/**
-  @par Protocol Description:
-  The EFI_TCG Protocol abstracts TCG activity.
-
-  @param  StatusCheck        This service provides information on the TPM.
-  @param  HashAll            This service abstracts the capability to do a hash 
-                             operation on a data buffer.
-  @param  LogEvent           This service abstracts the capability to add 
-                             an entry to the Event Log.
-  @param  PassThroughToTPM   This service provides a pass-through capability 
-                             from the caller to the system's TPM.
-  @param  HashLogExtendEvent This service abstracts the capability to do a hash 
-                             operation on a data buffer, extend a specific TPM PCR 
-                             with the hash result, and add an entry to the Event Log. 
-
-**/
+///
+/// The EFI_TCG Protocol abstracts TCG activity.
+///
 struct _EFI_TCG_PROTOCOL {
   EFI_TCG_STATUS_CHECK              StatusCheck;
   EFI_TCG_HASH_ALL                  HashAll;

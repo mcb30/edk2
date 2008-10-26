@@ -1,10 +1,8 @@
 /** @file
-  Tiano PE/COFF loader.
-
-  This PE/COFF loader supports loading any PE32 or PE32+ image type, but
+  Base PE/COFF loader supports loading any PE32/PE32+ or TE image, but
   only supports relocating IA32, X64, IPF, and EBC images.
 
-  Copyright (c) 2006, Intel Corporation
+  Copyright (c) 2006 - 2008, Intel Corporation
   All rights reserved. This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -14,11 +12,6 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
-
-//
-// Include common header file for this module.
-//
-
 
 #include "BasePeCoffLibInternals.h"
 
@@ -122,8 +115,12 @@ PeCoffLoaderGetPeHeader (
     ImageContext->IsTeImage         = TRUE;
     ImageContext->Machine           = Hdr.Te->Machine;
     ImageContext->ImageType         = (UINT16)(Hdr.Te->Subsystem);
+    //
+    // For TeImage, SectionAlignment is undefined to be set to Zero
+    // ImageSize can be calculated.
+    //
     ImageContext->ImageSize         = 0;
-    ImageContext->SectionAlignment  = 4096;
+    ImageContext->SectionAlignment  = 0;
     ImageContext->SizeOfHeaders     = sizeof (EFI_TE_IMAGE_HEADER) + (UINTN)Hdr.Te->BaseOfCode - (UINTN)Hdr.Te->StrippedSize;
 
   } else if (Hdr.Pe32->Signature == EFI_IMAGE_NT_SIGNATURE)  {
@@ -175,13 +172,15 @@ PeCoffLoaderGetPeHeader (
 /**
   Retrieves information about a PE/COFF image.
 
-  Computes the PeCoffHeaderOffset, ImageAddress, ImageSize, DestinationAddress, CodeView,
-  PdbPointer, RelocationsStripped, SectionAlignment, SizeOfHeaders, and DebugDirectoryEntryRva
-  fields of the ImageContext structure.  If ImageContext is NULL, then return RETURN_INVALID_PARAMETER.
-  If the PE/COFF image accessed through the ImageRead service in the ImageContext structure is not
-  a supported PE/COFF image type, then return RETURN_UNSUPPORTED.  If any errors occur while
-  computing the fields of ImageContext, then the error status is returned in the ImageError field of
-  ImageContext.
+  Computes the PeCoffHeaderOffset, IsTeImage, ImageType, ImageAddress, ImageSize, 
+  DestinationAddress, RelocationsStripped, SectionAlignment, SizeOfHeaders, and 
+  DebugDirectoryEntryRva fields of the ImageContext structure.  
+  If ImageContext is NULL, then return RETURN_INVALID_PARAMETER.  
+  If the PE/COFF image accessed through the ImageRead service in the ImageContext 
+  structure is not a supported PE/COFF image type, then return RETURN_UNSUPPORTED.  
+  If any errors occur while computing the fields of ImageContext, 
+  then the error status is returned in the ImageError field of ImageContext.  
+  If the image is a TE image, then SectionAlignment is set to 0.
 
   @param  ImageContext              Pointer to the image context structure that describes the PE/COFF
                                     image that needs to be examined by this function.
@@ -211,7 +210,7 @@ PeCoffLoaderGetImageInfo (
   UINT32                                NumberOfRvaAndSizes;
   UINT16                                Magic;
 
-  if (NULL == ImageContext) {
+  if (ImageContext == NULL) {
     return RETURN_INVALID_PARAMETER;
   }
   //
@@ -414,11 +413,10 @@ PeCoffLoaderGetImageInfo (
       // section headers in the Section Table must appear in order of the RVA
       // values for the corresponding sections. So the ImageSize can be determined
       // by the RVA and the VirtualSize of the last section header in the
-      // Section Table.
+      // Section Table.  
       //
       if ((++Index) == (UINTN)Hdr.Te->NumberOfSections) {
-        ImageContext->ImageSize = (SectionHeader.VirtualAddress + SectionHeader.Misc.VirtualSize +
-                                   ImageContext->SectionAlignment - 1) & ~(ImageContext->SectionAlignment - 1);
+        ImageContext->ImageSize = (SectionHeader.VirtualAddress + SectionHeader.Misc.VirtualSize);
       }
 
       SectionHeaderOffset += sizeof (EFI_IMAGE_SECTION_HEADER);
@@ -516,9 +514,9 @@ PeCoffLoaderRelocateImage (
   UINT16                                *RelocEnd;
   CHAR8                                 *Fixup;
   CHAR8                                 *FixupBase;
-  UINT16                                *F16;
-  UINT32                                *F32;
-  UINT64                                *F64;
+  UINT16                                *Fixup16;
+  UINT32                                *Fixup32;
+  UINT64                                *Fixup64;
   CHAR8                                 *FixupData;
   PHYSICAL_ADDRESS                      BaseAddress;
   UINT32                                NumberOfRvaAndSizes;
@@ -646,39 +644,39 @@ PeCoffLoaderRelocateImage (
         break;
 
       case EFI_IMAGE_REL_BASED_HIGH:
-        F16   = (UINT16 *) Fixup;
-        *F16 = (UINT16) (*F16 + ((UINT16) ((UINT32) Adjust >> 16)));
+        Fixup16   = (UINT16 *) Fixup;
+        *Fixup16 = (UINT16) (*Fixup16 + ((UINT16) ((UINT32) Adjust >> 16)));
         if (FixupData != NULL) {
-          *(UINT16 *) FixupData = *F16;
+          *(UINT16 *) FixupData = *Fixup16;
           FixupData             = FixupData + sizeof (UINT16);
         }
         break;
 
       case EFI_IMAGE_REL_BASED_LOW:
-        F16   = (UINT16 *) Fixup;
-        *F16  = (UINT16) (*F16 + (UINT16) Adjust);
+        Fixup16   = (UINT16 *) Fixup;
+        *Fixup16  = (UINT16) (*Fixup16 + (UINT16) Adjust);
         if (FixupData != NULL) {
-          *(UINT16 *) FixupData = *F16;
+          *(UINT16 *) FixupData = *Fixup16;
           FixupData             = FixupData + sizeof (UINT16);
         }
         break;
 
       case EFI_IMAGE_REL_BASED_HIGHLOW:
-        F32   = (UINT32 *) Fixup;
-        *F32  = *F32 + (UINT32) Adjust;
+        Fixup32   = (UINT32 *) Fixup;
+        *Fixup32  = *Fixup32 + (UINT32) Adjust;
         if (FixupData != NULL) {
           FixupData             = ALIGN_POINTER (FixupData, sizeof (UINT32));
-          *(UINT32 *)FixupData  = *F32;
+          *(UINT32 *)FixupData  = *Fixup32;
           FixupData             = FixupData + sizeof (UINT32);
         }
         break;
 
       case EFI_IMAGE_REL_BASED_DIR64:
-        F64 = (UINT64 *) Fixup;
-        *F64 = *F64 + (UINT64) Adjust;
+        Fixup64 = (UINT64 *) Fixup;
+        *Fixup64 = *Fixup64 + (UINT64) Adjust;
         if (FixupData != NULL) {
           FixupData = ALIGN_POINTER (FixupData, sizeof(UINT64));
-          *(UINT64 *)(FixupData) = *F64;
+          *(UINT64 *)(FixupData) = *Fixup64;
           FixupData = FixupData + sizeof(UINT64);
         }
         break;
@@ -910,7 +908,7 @@ PeCoffLoaderLoadImage (
       Size = (UINTN) Section->SizeOfRawData;
     }
 
-    if (Section->SizeOfRawData) {
+    if (Section->SizeOfRawData > 0) {
       if (!(ImageContext->IsTeImage)) {
         Status = ImageContext->ImageRead (
                                 ImageContext->Handle,
@@ -1151,9 +1149,9 @@ PeCoffLoaderRelocateImageForRuntime (
   UINT16                              *RelocEnd;
   CHAR8                               *Fixup;
   CHAR8                               *FixupBase;
-  UINT16                              *F16;
-  UINT32                              *F32;
-  UINT64                              *F64;
+  UINT16                              *Fixup16;
+  UINT32                              *Fixup32;
+  UINT64                              *Fixup64;
   CHAR8                               *FixupData;
   UINTN                               Adjust;
   RETURN_STATUS                       Status;
@@ -1215,12 +1213,15 @@ PeCoffLoaderRelocateImageForRuntime (
     RelocBaseEnd  = (EFI_IMAGE_BASE_RELOCATION *)(UINTN)(ImageBase + RelocDir->VirtualAddress + RelocDir->Size);
   } else {
     //
-    // Cannot find relocations, cannot continue
+    // Cannot find relocations, cannot continue to relocate the image, ASSERT for this invalid image.
     //
     ASSERT (FALSE);
     return ;
   }
-
+  
+  //
+  // ASSERT for the invalid image when RelocBase and RelocBaseEnd are both NULL.
+  //
   ASSERT (RelocBase != NULL && RelocBaseEnd != NULL);
 
   //
@@ -1249,38 +1250,38 @@ PeCoffLoaderRelocateImageForRuntime (
         break;
 
       case EFI_IMAGE_REL_BASED_HIGH:
-        F16 = (UINT16 *) Fixup;
-        if (*(UINT16 *) FixupData == *F16) {
-          *F16 = (UINT16) (*F16 + ((UINT16) ((UINT32) Adjust >> 16)));
+        Fixup16 = (UINT16 *) Fixup;
+        if (*(UINT16 *) FixupData == *Fixup16) {
+          *Fixup16 = (UINT16) (*Fixup16 + ((UINT16) ((UINT32) Adjust >> 16)));
         }
 
         FixupData = FixupData + sizeof (UINT16);
         break;
 
       case EFI_IMAGE_REL_BASED_LOW:
-        F16 = (UINT16 *) Fixup;
-        if (*(UINT16 *) FixupData == *F16) {
-          *F16 = (UINT16) (*F16 + ((UINT16) Adjust & 0xffff));
+        Fixup16 = (UINT16 *) Fixup;
+        if (*(UINT16 *) FixupData == *Fixup16) {
+          *Fixup16 = (UINT16) (*Fixup16 + ((UINT16) Adjust & 0xffff));
         }
 
         FixupData = FixupData + sizeof (UINT16);
         break;
 
       case EFI_IMAGE_REL_BASED_HIGHLOW:
-        F32       = (UINT32 *) Fixup;
+        Fixup32       = (UINT32 *) Fixup;
         FixupData = ALIGN_POINTER (FixupData, sizeof (UINT32));
-        if (*(UINT32 *) FixupData == *F32) {
-          *F32 = *F32 + (UINT32) Adjust;
+        if (*(UINT32 *) FixupData == *Fixup32) {
+          *Fixup32 = *Fixup32 + (UINT32) Adjust;
         }
 
         FixupData = FixupData + sizeof (UINT32);
         break;
 
       case EFI_IMAGE_REL_BASED_DIR64:
-        F64       = (UINT64 *)Fixup;
+        Fixup64       = (UINT64 *)Fixup;
         FixupData = ALIGN_POINTER (FixupData, sizeof (UINT64));
-        if (*(UINT64 *) FixupData == *F64) {
-          *F64 = *F64 + (UINT64)Adjust;
+        if (*(UINT64 *) FixupData == *Fixup64) {
+          *Fixup64 = *Fixup64 + (UINT64)Adjust;
         }
 
         FixupData = FixupData + sizeof (UINT64);
@@ -1288,7 +1289,7 @@ PeCoffLoaderRelocateImageForRuntime (
 
       case EFI_IMAGE_REL_BASED_HIGHADJ:
         //
-        // Not implemented, but not used in UEFI 2.0
+        // Not valid Relocation type for UEFI image, ASSERT
         //
         ASSERT (FALSE);
         break;

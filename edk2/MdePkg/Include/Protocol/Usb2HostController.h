@@ -141,43 +141,38 @@ EFI_STATUS
   );
 
 /**
-
-  @param EfiUsbHcStateHalt          The host controller is in halt
-                                    state. No USB transactions can occur
-                                    while in this state. The host
-                                    controller can enter this state for
-                                    three reasons: 1) After host
-                                    controller hardware reset. 2)
-                                    Explicitly set by software. 3)
-                                    Triggered by a fatal error such as
-                                    consistency check failure.
-
-
-  @param EfiUsbHcStateOperational   The host controller is in an
-                                    operational state. When in
-                                    this state, the host
-                                    controller can execute bus
-                                    traffic. This state must be
-                                    explicitly set to enable the
-                                    USB bus traffic.
-
-
-  @param EfiUsbHcStateSuspend       The host controller is in the
-                                    suspend state. No USB
-                                    transactions can occur while in
-                                    this state. The host controller
-                                    enters this state for the
-                                    following reasons: 1) Explicitly
-                                    set by software. 2) Triggered
-                                    when there is no bus traffic for
-                                    3 microseconds.
-
+  Enumration value for status of USB HC.
 **/
 typedef enum {
-  EfiUsbHcStateHalt,
-  EfiUsbHcStateOperational,
-  EfiUsbHcStateSuspend,
-  EfiUsbHcStateMaximum
+  EfiUsbHcStateHalt,                ///< The host controller is in halt
+                                    ///< state. No USB transactions can occur
+                                    ///< while in this state. The host
+                                    ///< controller can enter this state for
+                                    ///< three reasons: 1) After host
+                                    ///< controller hardware reset. 2)
+                                    ///< Explicitly set by software. 3)
+                                    ///< Triggered by a fatal error such as
+                                    ///< consistency check failure.
+                                    
+  EfiUsbHcStateOperational,         ///< The host controller is in an
+                                    ///< operational state. When in
+                                    ///< this state, the host
+                                    ///< controller can execute bus
+                                    ///< traffic. This state must be
+                                    ///< explicitly set to enable the
+                                    ///< USB bus traffic.
+                                    
+  EfiUsbHcStateSuspend,             ///< The host controller is in the
+                                    ///< suspend state. No USB
+                                    ///< transactions can occur while in
+                                    ///< this state. The host controller
+                                    ///< enters this state for the
+                                    ///< following reasons: 1) Explicitly
+                                    ///< set by software. 2) Triggered
+                                    ///< when there is no bus traffic for
+                                    ///< 3 microseconds.
+                                    
+  EfiUsbHcStateMaximum              ///< Maximum value for enumration value of HC status.
 } EFI_USB_HC_STATE;
 
 /**
@@ -558,64 +553,14 @@ EFI_STATUS
   IN EFI_USB_PORT_FEATURE    PortFeature
   );
 
-/**  
-  @par Protocol Description:
-  The EFI_USB2_HC_PROTOCOL provides USB host controller management, basic 
-  data transactions over a USB bus, and USB root hub access. A device driver 
-  that wishes to manage a USB bus in a system retrieves the EFI_USB2_HC_PROTOCOL 
-  instance that is associated with the USB bus to be managed. A device handle 
-  for a USB host controller will minimally contain an EFI_DEVICE_PATH_PROTOCOL 
-  instance, and an EFI_USB2_HC_PROTOCOL instance.
-
-  @param GetCapability
-  Retrieves the capabilities of the USB host controller. 
-
-  @param Reset
-  Software reset of USB. 
-
-  @param GetState
-  Retrieves the current state of the USB host controller. 
-
-  @param SetState
-  Sets the USB host controller to a specific state. 
-
-  @param ControlTransfer
-  Submits a control transfer to a target USB device. 
-
-  @param BulkTransfer
-  Submits a bulk transfer to a bulk endpoint of a USB device. 
-
-  @param AsyncInterruptTransfer
-  Submits an asynchronous interrupt transfer to an interrupt endpoint of a USB device. 
-
-  @param SyncInterruptTransfer
-  Submits a synchronous interrupt transfer to an interrupt endpoint of a USB device. 
-
-  @param IsochronousTransfer
-  Submits isochronous transfer to an isochronous endpoint of a USB device. 
-
-  @param AsyncIsochronousTransfer
-  Submits nonblocking USB isochronous transfer. 
-
-  @param GetRootHubPortStatus
-  Retrieves the status of the specified root hub port. 
-
-  @param SetRootHubPortFeature
-  Sets the feature for the specified root hub port. 
-
-  @param ClearRootHubPortFeature
-  Clears the feature for the specified root hub port. 
-
-  @param MajorRevision
-  The major revision number of the USB host controller. The revision information 
-  indicates the release of the Universal Serial Bus Specification with which the 
-  host controller is compliant.
-
-  @param MinorRevision
-  The minor revision number of the USB host controller. The revision information 
-  indicates the release of the Universal Serial Bus Specification with which the 
-  host controller is compliant.
-**/
+///
+/// The EFI_USB2_HC_PROTOCOL provides USB host controller management, basic 
+/// data transactions over a USB bus, and USB root hub access. A device driver 
+/// that wishes to manage a USB bus in a system retrieves the EFI_USB2_HC_PROTOCOL 
+/// instance that is associated with the USB bus to be managed. A device handle 
+/// for a USB host controller will minimally contain an EFI_DEVICE_PATH_PROTOCOL 
+/// instance, and an EFI_USB2_HC_PROTOCOL instance.
+///
 struct _EFI_USB2_HC_PROTOCOL {
   EFI_USB2_HC_PROTOCOL_GET_CAPABILITY              GetCapability;
   EFI_USB2_HC_PROTOCOL_RESET                       Reset;
@@ -630,7 +575,19 @@ struct _EFI_USB2_HC_PROTOCOL {
   EFI_USB2_HC_PROTOCOL_GET_ROOTHUB_PORT_STATUS     GetRootHubPortStatus;
   EFI_USB2_HC_PROTOCOL_SET_ROOTHUB_PORT_FEATURE    SetRootHubPortFeature;
   EFI_USB2_HC_PROTOCOL_CLEAR_ROOTHUB_PORT_FEATURE  ClearRootHubPortFeature;
+  
+  ///
+  /// The major revision number of the USB host controller. The revision information 
+  /// indicates the release of the Universal Serial Bus Specification with which the 
+  /// host controller is compliant.
+  ///
   UINT16                                           MajorRevision;
+
+  ///
+  /// The minor revision number of the USB host controller. The revision information 
+  /// indicates the release of the Universal Serial Bus Specification with which the 
+  /// host controller is compliant.  
+  ///
   UINT16                                           MinorRevision;
 };
 

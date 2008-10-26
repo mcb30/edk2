@@ -61,17 +61,9 @@ EFI_DEVICE_PATH_PROTOCOL*
   IN CONST CHAR16                 *TextDevicePath
   );  
 
-/**
-  @par Protocol Description:
-  This protocol converts text to device paths and device nodes.
-
-  @param ConvertTextToDeviceNode
-  Convert text to a device node.
-  
-  @param ConvertTextToDevicePath
-  Convert text to a device path
-  
-**/   
+///
+/// This protocol converts text to device paths and device nodes.
+///
 typedef struct {
   EFI_DEVICE_PATH_FROM_TEXT_NODE  ConvertTextToDeviceNode;
   EFI_DEVICE_PATH_FROM_TEXT_PATH  ConvertTextToDevicePath;

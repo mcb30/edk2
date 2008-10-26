@@ -10,12 +10,14 @@
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
-  The following BaseMemoryLib instances share the same version of this file:
+  The following BaseMemoryLib instances contain the same copy of this file:
 
     BaseMemoryLib
     BaseMemoryLibMmx
     BaseMemoryLibSse2
     BaseMemoryLibRepStr
+    BaseMemoryLibOptDxe
+    BaseMemoryLibOptPei
     PeiMemoryLib
     DxeMemoryLib
 
@@ -146,7 +148,9 @@ InternalMemZeroMem (
   @param  Length            Length of DestinationBuffer and SourceBuffer memory
                             regions to compare. Must be non-zero.
 
-  @retval 0     if MemOne == MemTwo
+  @return 0                 All Length bytes of the two buffers are identical.
+  @retval Non-zero          The first mismatched byte in SourceBuffer subtracted from the first
+                            mismatched byte in DestinationBuffer.
 
 **/
 INTN

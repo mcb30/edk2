@@ -88,22 +88,16 @@ EFI_PXE_BASE_CODE_CALLBACK_STATUS
   IN EFI_PXE_BASE_CODE_PACKET             *Packet     OPTIONAL
   );
 
-/**  
-  @par Protocol Description:
-  Protocol that is invoked when the PXE Base Code Protocol is about 
-  to transmit, has received, or is waiting to receive a packet.
-
-  @param Revision
-  The revision of the EFI_PXE_BASE_CODE_PROTOCOL. All future revisions must 
-  be backwards compatible. If a future version is not backwards compatible 
-  it is not the same GUID.
-
-  @param Callback
-  Callback routine used by the PXE Base Code Dhcp(), Discover(), Mtftp(), 
-  UdpWrite(), and Arp() functions.
-
-**/
+///
+/// Protocol that is invoked when the PXE Base Code Protocol is about 
+/// to transmit, has received, or is waiting to receive a packet.
+///
 struct _EFI_PXE_BASE_CODE_CALLBACK_PROTOCOL {
+  ///
+  ///  The revision of the EFI_PXE_BASE_CODE_PROTOCOL. All future revisions must 
+  ///  be backwards compatible. If a future version is not backwards compatible 
+  ///  it is not the same GUID.
+  ///
   UINT64            Revision;
   EFI_PXE_CALLBACK  Callback;
 };

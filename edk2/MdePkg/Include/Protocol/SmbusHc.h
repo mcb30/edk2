@@ -274,29 +274,11 @@ EFI_STATUS
 );
 
 
-/**
-  @par Protocol Description:
-  The EFI_SMBUS_HC_PROTOCOL provides SMBus host controller management and basic data
-  transactions over SMBus. There is one EFI_SMBUS_HC_PROTOCOL instance for each SMBus
-  host controller.
-
-  @param Execute    Executes the SMBus operation to an SMBus slave
-                    device. See the Execute() function description.
-  
-  @param ArpDevice  Allows an SMBus 2.0 device(s) to be Address
-                    Resolution Protocol (ARP).
-  
-  @param GetArpMap  Allows a driver to retrieve the address that
-                    was allocated by the SMBus host controller
-                    during enumeration/ARP. See the GetArpMap()
-                    function description.
-  
-  @param  Notify    Allows a driver to register for a callback
-                    to the SMBus host controller driver when the
-                    bus issues a notification to the bus
-                    controller driver. See the Notify() function
-                    description.
-**/
+///
+/// The EFI_SMBUS_HC_PROTOCOL provides SMBus host controller management and basic data
+/// transactions over SMBus. There is one EFI_SMBUS_HC_PROTOCOL instance for each SMBus
+/// host controller.
+///
 struct _EFI_SMBUS_HC_PROTOCOL {
   EFI_SMBUS_HC_EXECUTE_OPERATION    Execute;
   EFI_SMBUS_HC_PROTOCOL_ARP_DEVICE  ArpDevice;

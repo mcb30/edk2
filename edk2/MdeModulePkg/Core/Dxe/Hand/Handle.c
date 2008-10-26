@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
 #include "DxeMain.h"
+#include "Handle.h"
 
 
 //
@@ -370,7 +371,7 @@ CoreInstallProtocolInterfaceNotify (
   Prot = NULL;
   Handle = NULL;
 
-  if (*UserHandle != NULL_HANDLE) {
+  if (*UserHandle != NULL) {
     Status = CoreHandleProtocol (*UserHandle, Protocol, (VOID **)&ExistingInterface);
     if (!EFI_ERROR (Status)) {
       return EFI_INVALID_PARAMETER;
@@ -564,7 +565,7 @@ CoreInstallMultipleProtocolInterfaces (
       DeviceHandle = NULL;
       DevicePath   = Interface;
       Status = CoreLocateDevicePath (&gEfiDevicePathProtocolGuid, &DevicePath, &DeviceHandle);
-      if (!EFI_ERROR (Status) && (DeviceHandle != NULL_HANDLE) && IsDevicePathEnd(DevicePath)) {
+      if (!EFI_ERROR (Status) && (DeviceHandle != NULL) && IsDevicePathEnd(DevicePath)) {
         Status = EFI_ALREADY_STARTED;
         continue;
       }
@@ -575,6 +576,7 @@ CoreInstallMultipleProtocolInterfaces (
     //
     Status = CoreInstallProtocolInterface (Handle, Protocol, EFI_NATIVE_INTERFACE, Interface);
   }
+  VA_END (Args);
 
   //
   // If there was an error, remove all the interfaces that were installed without any errors
@@ -589,6 +591,8 @@ CoreInstallMultipleProtocolInterfaces (
       Interface = VA_ARG (Args, VOID *);
       CoreUninstallProtocolInterface (*Handle, Protocol, Interface);
     }
+    VA_END (Args);
+    
     *Handle = OldHandle;
   }
 
@@ -636,7 +640,7 @@ CoreDisconnectControllersUsingProtocolInterface (
           (Link != &Prot->OpenList) && !ItemFound;
           Link = Link->ForwardLink ) {
       OpenData = CR (Link, OPEN_PROTOCOL_DATA, Link, OPEN_PROTOCOL_DATA_SIGNATURE);
-      if (OpenData->Attributes & EFI_OPEN_PROTOCOL_BY_DRIVER) {
+      if ((OpenData->Attributes & EFI_OPEN_PROTOCOL_BY_DRIVER) != 0) {
         ItemFound = TRUE;
         CoreReleaseProtocolLock ();
         Status = CoreDisconnectController (UserHandle, OpenData->AgentHandle, NULL);
@@ -659,8 +663,8 @@ CoreDisconnectControllersUsingProtocolInterface (
             (Link != &Prot->OpenList) && !ItemFound;
             Link = Link->ForwardLink ) {
         OpenData = CR (Link, OPEN_PROTOCOL_DATA, Link, OPEN_PROTOCOL_DATA_SIGNATURE);
-        if (OpenData->Attributes &
-            (EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL | EFI_OPEN_PROTOCOL_GET_PROTOCOL | EFI_OPEN_PROTOCOL_TEST_PROTOCOL)) {
+        if ((OpenData->Attributes &
+            (EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL | EFI_OPEN_PROTOCOL_GET_PROTOCOL | EFI_OPEN_PROTOCOL_TEST_PROTOCOL)) != 0) {
           ItemFound = TRUE;
           RemoveEntryList (&OpenData->Link);
           Prot->OpenListCount--;
@@ -844,6 +848,7 @@ CoreUninstallMultipleProtocolInterfaces (
     //
     Status = CoreUninstallProtocolInterface (Handle, Protocol, Interface);
   }
+  VA_END (Args);
 
   //
   // If there was an error, add all the interfaces that were
@@ -859,6 +864,7 @@ CoreUninstallMultipleProtocolInterfaces (
       Interface = VA_ARG(Args, VOID *);
       CoreInstallProtocolInterface (&Handle, Protocol, EFI_NATIVE_INTERFACE, Interface);
     }
+    VA_END (Args);
   }
 
   return Status;
@@ -916,7 +922,11 @@ CoreGetProtocolInterface (
   @param  Interface              Supplies the address where a pointer to the
                                  corresponding Protocol Interface is returned.
 
-  @return The requested protocol interface for the handle
+  @retval EFI_SUCCESS            The interface information for the specified protocol was returned.
+  @retval EFI_UNSUPPORTED        The device does not support the specified protocol.
+  @retval EFI_INVALID_PARAMETER  Handle is not a valid EFI_HANDLE..
+  @retval EFI_INVALID_PARAMETER  Protocol is NULL.
+  @retval EFI_INVALID_PARAMETER  Interface is NULL.
 
 **/
 EFI_STATUS
@@ -1076,14 +1086,14 @@ CoreOpenProtocol (
     ExactMatch =  (BOOLEAN)((OpenData->AgentHandle == ImageHandle) &&
                             (OpenData->Attributes == Attributes)  &&
                             (OpenData->ControllerHandle == ControllerHandle));
-    if (OpenData->Attributes & EFI_OPEN_PROTOCOL_BY_DRIVER) {
+    if ((OpenData->Attributes & EFI_OPEN_PROTOCOL_BY_DRIVER) != 0) {
       ByDriver = TRUE;
       if (ExactMatch) {
         Status = EFI_ALREADY_STARTED;
         goto Done;
       }
     }
-    if (OpenData->Attributes & EFI_OPEN_PROTOCOL_EXCLUSIVE) {
+    if ((OpenData->Attributes & EFI_OPEN_PROTOCOL_EXCLUSIVE) != 0) {
       Exclusive = TRUE;
     } else if (ExactMatch) {
       OpenData->OpenCount++;
@@ -1117,7 +1127,7 @@ CoreOpenProtocol (
         Disconnect = FALSE;
         for ( Link = Prot->OpenList.ForwardLink; (Link != &Prot->OpenList) && (!Disconnect); Link = Link->ForwardLink) {
           OpenData = CR (Link, OPEN_PROTOCOL_DATA, Link, OPEN_PROTOCOL_DATA_SIGNATURE);
-          if (OpenData->Attributes & EFI_OPEN_PROTOCOL_BY_DRIVER) {
+          if ((OpenData->Attributes & EFI_OPEN_PROTOCOL_BY_DRIVER) != 0) {
             Disconnect = TRUE;
             CoreReleaseProtocolLock ();
             Status = CoreDisconnectController (UserHandle, OpenData->AgentHandle, NULL);
@@ -1219,7 +1229,7 @@ CoreCloseProtocol (
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  if (ControllerHandle != NULL_HANDLE) {
+  if (ControllerHandle != NULL) {
     Status = CoreValidateHandle (ControllerHandle);
     if (EFI_ERROR (Status)) {
       return Status;
@@ -1274,10 +1284,14 @@ Done:
 
   @param  UserHandle             The handle to close the protocol interface on
   @param  Protocol               The ID of the protocol
-  @param  EntryBuffer            A pointer to a buffer of open protocol
-                                 information in the form of
-                                 EFI_OPEN_PROTOCOL_INFORMATION_ENTRY structures.
+  @param  EntryBuffer            A pointer to a buffer of open protocol information in the
+                                 form of EFI_OPEN_PROTOCOL_INFORMATION_ENTRY structures.
   @param  EntryCount             Number of EntryBuffer entries
+
+  @retval EFI_SUCCESS            The open protocol information was returned in EntryBuffer, 
+                                 and the number of entries was returned EntryCount.
+  @retval EFI_NOT_FOUND          Handle does not support the protocol specified by Protocol.
+  @retval EFI_OUT_OF_RESOURCES   There are not enough resources available to allocate EntryBuffer.
 
 **/
 EFI_STATUS

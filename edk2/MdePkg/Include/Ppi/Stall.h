@@ -46,19 +46,15 @@ EFI_STATUS
   IN UINTN                      Microseconds
   );
 
-/**
-  @par Ppi Description:
-  This service provides a simple, blocking stall with platform-specific resolution. 
-
-  @param Resolution
-  The resolution in microseconds of the stall services.
-
-  @param Stall
-  The actual stall procedure call. 
-
-**/
+///
+/// This service provides a simple, blocking stall with platform-specific resolution. 
+///
 struct _EFI_PEI_STALL_PPI {
+  ///
+  /// The resolution in microseconds of the stall services.
+  ///
   UINTN          Resolution;
+
   EFI_PEI_STALL  Stall;
 };
 

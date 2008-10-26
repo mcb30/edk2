@@ -113,25 +113,9 @@ EFI_STATUS
   IN EFI_DEBUGPORT_PROTOCOL               *This
   );
 
-//
-// DebugPort protocol definition
-//
-/**
-  @par Protocol Description:
-  This protocol provides the communication link between the debug agent and the remote host.
-
-  @param Reset
-  Resets the debugport hardware.
-  
-  @param Write
-  Send a buffer of characters to the debugport device.
-
-  @param Read 
-  Receive a buffer of characters from the debugport device.
-
-  @param Poll 
-  Determine if there is any data available to be read from the debugport device.
-**/ 
+///
+/// This protocol provides the communication link between the debug agent and the remote host.
+///
 struct _EFI_DEBUGPORT_PROTOCOL {
   EFI_DEBUGPORT_RESET Reset;
   EFI_DEBUGPORT_WRITE Write;

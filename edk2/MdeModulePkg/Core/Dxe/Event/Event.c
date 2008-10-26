@@ -14,50 +14,76 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 
 #include "DxeMain.h"
+#include "Event.h"
 
-//
-// Enumerate the valid types
-//
+///
+/// gEfiCurrentTpl - Current Task priority level
+///
+EFI_TPL  gEfiCurrentTpl = TPL_APPLICATION;
+
+///
+/// gEventQueueLock - Protects the event queus
+///
+EFI_LOCK gEventQueueLock = EFI_INITIALIZE_LOCK_VARIABLE (TPL_HIGH_LEVEL);
+
+///
+/// gEventQueue - A list of event's to notify for each priority level
+///
+LIST_ENTRY      gEventQueue[TPL_HIGH_LEVEL + 1];
+
+///
+/// gEventPending - A bitmask of the EventQueues that are pending
+///
+UINTN           gEventPending = 0;
+
+///
+/// gEventSignalQueue - A list of events to signal based on EventGroup type
+///
+LIST_ENTRY      gEventSignalQueue = INITIALIZE_LIST_HEAD_VARIABLE (gEventSignalQueue);
+
+///
+/// Enumerate the valid types
+///
 UINT32 mEventTable[] = {
-  //
-  // 0x80000200       Timer event with a notification function that is
-  // queue when the event is signaled with SignalEvent()
-  //
+  ///
+  /// 0x80000200       Timer event with a notification function that is
+  /// queue when the event is signaled with SignalEvent()
+  ///
   EVT_TIMER | EVT_NOTIFY_SIGNAL,
-  //
-  // 0x80000000       Timer event without a notification function. It can be
-  // signaled with SignalEvent() and checked with CheckEvent() or WaitForEvent().
-  //
+  ///
+  /// 0x80000000       Timer event without a notification function. It can be
+  /// signaled with SignalEvent() and checked with CheckEvent() or WaitForEvent().
+  ///
   EVT_TIMER,
-  //
-  // 0x00000100       Generic event with a notification function that
-  // can be waited on with CheckEvent() or WaitForEvent()
-  //
+  ///
+  /// 0x00000100       Generic event with a notification function that
+  /// can be waited on with CheckEvent() or WaitForEvent()
+  ///
   EVT_NOTIFY_WAIT,
-  //
-  // 0x00000200       Generic event with a notification function that
-  // is queue when the event is signaled with SignalEvent()
-  //
+  ///
+  /// 0x00000200       Generic event with a notification function that
+  /// is queue when the event is signaled with SignalEvent()
+  ///
   EVT_NOTIFY_SIGNAL,
-  //
-  // 0x00000201       ExitBootServicesEvent.
-  //
+  ///
+  /// 0x00000201       ExitBootServicesEvent.
+  ///
   EVT_SIGNAL_EXIT_BOOT_SERVICES,
-  //
-  // 0x60000202       SetVirtualAddressMapEvent.
-  //
+  ///
+  /// 0x60000202       SetVirtualAddressMapEvent.
+  ///
   EVT_SIGNAL_VIRTUAL_ADDRESS_CHANGE,
 
-  //
-  // 0x00000000       Generic event without a notification function.
-  // It can be signaled with SignalEvent() and checked with CheckEvent()
-  // or WaitForEvent().
-  //
+  ///
+  /// 0x00000000       Generic event without a notification function.
+  /// It can be signaled with SignalEvent() and checked with CheckEvent()
+  /// or WaitForEvent().
+  ///
   0x00000000,
-  //
-  // 0x80000100       Timer event with a notification function that can be
-  // waited on with CheckEvent() or WaitForEvent()
-  //
+  ///
+  /// 0x80000100       Timer event with a notification function that can be
+  /// waited on with CheckEvent() or WaitForEvent()
+  ///
   EVT_TIMER | EVT_NOTIFY_WAIT,
 };
 
@@ -90,7 +116,7 @@ CoreReleaseEventLock (
 
 
 /**
-  Initializes "event" support and populates parts of the System and Runtime Table.
+  Initializes "event" support.
 
   @retval EFI_SUCCESS            Always return success
 
@@ -146,7 +172,7 @@ CoreDispatchEventNotifies (
     // Only clear the SIGNAL status if it is a SIGNAL type event.
     // WAIT type events are only cleared in CheckEvent()
     //
-    if (Event->Type & EVT_NOTIFY_SIGNAL) {
+    if ((Event->Type & EVT_NOTIFY_SIGNAL) != 0) {
       Event->SignalCount = 0;
     }
 
@@ -470,7 +496,7 @@ CoreSignalEvent (
     //
     // If signalling type is a notify function, queue it
     //
-    if (Event->Type & EVT_NOTIFY_SIGNAL) {
+    if ((Event->Type & EVT_NOTIFY_SIGNAL) != 0) {
       if (Event->ExFlag) {
         //
         // The CreateEventEx() style requires all members of the Event Group
@@ -526,13 +552,13 @@ CoreCheckEvent (
 
   Status = EFI_NOT_READY;
 
-  if (!Event->SignalCount && (Event->Type & EVT_NOTIFY_WAIT)) {
+  if ((Event->SignalCount == 0) && ((Event->Type & EVT_NOTIFY_WAIT) != 0)) {
 
     //
     // Queue the wait notify function
     //
     CoreAcquireEventLock ();
-    if (!Event->SignalCount) {
+    if (Event->SignalCount == 0) {
       CoreNotifyEvent (Event);
     }
     CoreReleaseEventLock ();
@@ -542,10 +568,10 @@ CoreCheckEvent (
   // If the even looks signalled, get the lock and clear it
   //
 
-  if (Event->SignalCount) {
+  if (Event->SignalCount != 0) {
     CoreAcquireEventLock ();
 
-    if (Event->SignalCount) {
+    if (Event->SignalCount != 0) {
       Event->SignalCount = 0;
       Status = EFI_SUCCESS;
     }

@@ -1,6 +1,16 @@
 /** @file
   SetMem32() implementation.
 
+  The following BaseMemoryLib instances contain the same copy of this file:
+    BaseMemoryLib
+    BaseMemoryLibMmx
+    BaseMemoryLibSse2
+    BaseMemoryLibRepStr
+    BaseMemoryLibOptDxe
+    BaseMemoryLibOptPei
+    PeiMemoryLib
+    DxeMemoryLib
+
   Copyright (c) 2006, Intel Corporation<BR>
   All rights reserved. This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
@@ -9,17 +19,6 @@
 
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
-  Module Name:  SetMem32Wrapper.c
-
-  The following BaseMemoryLib instances share the same version of this file:
-
-    BaseMemoryLib
-    BaseMemoryLibMmx
-    BaseMemoryLibSse2
-    BaseMemoryLibRepStr
-    PeiMemoryLib
-    DxeMemoryLib
 
 **/
 
@@ -52,7 +51,7 @@ SetMem32 (
   IN UINT32  Value
   )
 {
-  if (0 == Length) {
+  if (Length == 0) {
     return Buffer;
   }
 

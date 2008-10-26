@@ -13,12 +13,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
 #include "DxeMain.h"
+#include "Image.h"
+
 //
 // Module Globals
 //
-
-SPIN_LOCK                  mUnloadImageLock;
-
 LOADED_IMAGE_PRIVATE_DATA  *mCurrentImage = NULL;
 
 LOAD_PE32_IMAGE_PRIVATE_DATA  mLoadPe32PrivateData = {
@@ -138,11 +137,6 @@ CoreInitializeImageServices (
   ASSERT_EFI_ERROR (Status);
 
   mCurrentImage = Image;
-
-  //
-  // Initialize spin lock
-  //
-  InitializeSpinLock (&mUnloadImageLock);
 
   //
   // Fill in DXE globals
@@ -321,9 +315,11 @@ CoreLoadPeImage (
   }
 
   Image->ImageBasePage = Image->ImageContext.ImageAddress;
-  Image->ImageContext.ImageAddress =
-      (Image->ImageContext.ImageAddress + Image->ImageContext.SectionAlignment - 1) &
-      ~((UINTN)Image->ImageContext.SectionAlignment - 1);
+  if (!Image->ImageContext.IsTeImage) {
+	  Image->ImageContext.ImageAddress =
+	      (Image->ImageContext.ImageAddress + Image->ImageContext.SectionAlignment - 1) &
+	      ~((UINTN)Image->ImageContext.SectionAlignment - 1);
+  }
 
   //
   // Load the image from the file into the allocated memory
@@ -563,6 +559,147 @@ CoreLoadedImageInfo (
   }
 
   return Image;
+}
+
+
+/**
+  Unloads EFI image from memory.
+
+  @param  Image                   EFI image
+  @param  FreePage                Free allocated pages
+
+**/
+VOID
+CoreUnloadAndCloseImage (
+  IN LOADED_IMAGE_PRIVATE_DATA  *Image,
+  IN BOOLEAN                    FreePage
+  )
+{
+  EFI_STATUS                          Status;
+  UINTN                               HandleCount;
+  EFI_HANDLE                          *HandleBuffer;
+  UINTN                               HandleIndex;
+  EFI_GUID                            **ProtocolGuidArray;
+  UINTN                               ArrayCount;
+  UINTN                               ProtocolIndex;
+  EFI_OPEN_PROTOCOL_INFORMATION_ENTRY *OpenInfo;
+  UINTN                               OpenInfoCount;
+  UINTN                               OpenInfoIndex;
+
+  if (Image->Ebc != NULL) {
+    //
+    // If EBC protocol exists we must perform cleanups for this image.
+    //
+    Image->Ebc->UnloadImage (Image->Ebc, Image->Handle);
+  }
+
+  //
+  // Unload image, free Image->ImageContext->ModHandle
+  //
+  PeCoffLoaderUnloadImage (&Image->ImageContext);
+
+  //
+  // Free our references to the image handle
+  //
+  if (Image->Handle != NULL) {
+
+    Status = CoreLocateHandleBuffer (
+               AllHandles,
+               NULL,
+               NULL,
+               &HandleCount,
+               &HandleBuffer
+               );
+    if (!EFI_ERROR (Status)) {
+      for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) {
+        Status = CoreProtocolsPerHandle (
+                   HandleBuffer[HandleIndex],
+                   &ProtocolGuidArray,
+                   &ArrayCount
+                   );
+        if (!EFI_ERROR (Status)) {
+          for (ProtocolIndex = 0; ProtocolIndex < ArrayCount; ProtocolIndex++) {
+            Status = CoreOpenProtocolInformation (
+                       HandleBuffer[HandleIndex],
+                       ProtocolGuidArray[ProtocolIndex],
+                       &OpenInfo,
+                       &OpenInfoCount
+                       );
+            if (!EFI_ERROR (Status)) {
+              for (OpenInfoIndex = 0; OpenInfoIndex < OpenInfoCount; OpenInfoIndex++) {
+                if (OpenInfo[OpenInfoIndex].AgentHandle == Image->Handle) {
+                  Status = CoreCloseProtocol (
+                             HandleBuffer[HandleIndex],
+                             ProtocolGuidArray[ProtocolIndex],
+                             Image->Handle,
+                             OpenInfo[OpenInfoIndex].ControllerHandle
+                             );
+                }
+              }
+              if (OpenInfo != NULL) {
+                CoreFreePool(OpenInfo);
+              }
+            }
+          }
+          if (ProtocolGuidArray != NULL) {
+            CoreFreePool(ProtocolGuidArray);
+          }
+        }
+      }
+      if (HandleBuffer != NULL) {
+        CoreFreePool (HandleBuffer);
+      }
+    }
+
+    CoreRemoveDebugImageInfoEntry (Image->Handle);
+
+    Status = CoreUninstallProtocolInterface (
+               Image->Handle,
+               &gEfiLoadedImageDevicePathProtocolGuid,
+               Image->LoadedImageDevicePath
+               );
+
+    Status = CoreUninstallProtocolInterface (
+               Image->Handle,
+               &gEfiLoadedImageProtocolGuid,
+               &Image->Info
+               );
+
+  }
+
+  if (Image->RuntimeData != NULL) {
+    if (Image->RuntimeData->Link.ForwardLink != NULL) {
+      //
+      // Remove the Image from the Runtime Image list as we are about to Free it!
+      //
+      RemoveEntryList (&Image->RuntimeData->Link);
+    }
+    CoreFreePool (Image->RuntimeData);
+  }
+
+  //
+  // Free the Image from memory
+  //
+  if ((Image->ImageBasePage != 0) && FreePage) {
+    CoreFreePages (Image->ImageBasePage, Image->NumberOfPages);
+  }
+
+  //
+  // Done with the Image structure
+  //
+  if (Image->Info.FilePath != NULL) {
+    CoreFreePool (Image->Info.FilePath);
+  }
+
+  if (Image->LoadedImageDevicePath != NULL) {
+    CoreFreePool (Image->LoadedImageDevicePath);
+  }
+
+  if (Image->FixupData != NULL) {
+    CoreFreePool (Image->FixupData);
+  }
+
+  CoreFreePool (Image);
 }
 
 
@@ -975,7 +1112,7 @@ CoreStartImage (
   UINTN                         SetJumpFlag;
 
   Image = CoreLoadedImageInfo (ImageHandle);
-  if (Image == NULL_HANDLE  ||  Image->Started) {
+  if (Image == NULL  ||  Image->Started) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -1102,151 +1239,6 @@ CoreStartImage (
   return Status;
 }
 
-
-
-/**
-  Unloads EFI image from memory.
-
-  @param  Image                   EFI image
-  @param  FreePage                Free allocated pages
-
-**/
-VOID
-CoreUnloadAndCloseImage (
-  IN LOADED_IMAGE_PRIVATE_DATA  *Image,
-  IN BOOLEAN                    FreePage
-  )
-{
-  EFI_STATUS                          Status;
-  UINTN                               HandleCount;
-  EFI_HANDLE                          *HandleBuffer;
-  UINTN                               HandleIndex;
-  EFI_GUID                            **ProtocolGuidArray;
-  UINTN                               ArrayCount;
-  UINTN                               ProtocolIndex;
-  EFI_OPEN_PROTOCOL_INFORMATION_ENTRY *OpenInfo;
-  UINTN                               OpenInfoCount;
-  UINTN                               OpenInfoIndex;
-
-  if (Image->Ebc != NULL) {
-    //
-    // If EBC protocol exists we must perform cleanups for this image.
-    //
-    Image->Ebc->UnloadImage (Image->Ebc, Image->Handle);
-  }
-
-  //
-  // Unload image, free Image->ImageContext->ModHandle
-  //
-  PeCoffLoaderUnloadImage (&Image->ImageContext);
-
-  //
-  // Free our references to the image handle
-  //
-  if (Image->Handle != NULL_HANDLE) {
-
-    Status = CoreLocateHandleBuffer (
-               AllHandles,
-               NULL,
-               NULL,
-               &HandleCount,
-               &HandleBuffer
-               );
-    if (!EFI_ERROR (Status)) {
-      for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) {
-        Status = CoreProtocolsPerHandle (
-                   HandleBuffer[HandleIndex],
-                   &ProtocolGuidArray,
-                   &ArrayCount
-                   );
-        if (!EFI_ERROR (Status)) {
-          for (ProtocolIndex = 0; ProtocolIndex < ArrayCount; ProtocolIndex++) {
-            Status = CoreOpenProtocolInformation (
-                       HandleBuffer[HandleIndex],
-                       ProtocolGuidArray[ProtocolIndex],
-                       &OpenInfo,
-                       &OpenInfoCount
-                       );
-            if (!EFI_ERROR (Status)) {
-              for (OpenInfoIndex = 0; OpenInfoIndex < OpenInfoCount; OpenInfoIndex++) {
-                if (OpenInfo[OpenInfoIndex].AgentHandle == Image->Handle) {
-                  Status = CoreCloseProtocol (
-                             HandleBuffer[HandleIndex],
-                             ProtocolGuidArray[ProtocolIndex],
-                             Image->Handle,
-                             OpenInfo[OpenInfoIndex].ControllerHandle
-                             );
-                }
-              }
-              if (OpenInfo != NULL) {
-                CoreFreePool(OpenInfo);
-              }
-            }
-          }
-          if (ProtocolGuidArray != NULL) {
-            CoreFreePool(ProtocolGuidArray);
-          }
-        }
-      }
-      if (HandleBuffer != NULL) {
-        CoreFreePool (HandleBuffer);
-      }
-    }
-
-    CoreRemoveDebugImageInfoEntry (Image->Handle);
-
-    Status = CoreUninstallProtocolInterface (
-               Image->Handle,
-               &gEfiLoadedImageDevicePathProtocolGuid,
-               Image->LoadedImageDevicePath
-               );
-
-    Status = CoreUninstallProtocolInterface (
-               Image->Handle,
-               &gEfiLoadedImageProtocolGuid,
-               &Image->Info
-               );
-
-  }
-
-  if (Image->RuntimeData != NULL) {
-    if (Image->RuntimeData->Link.ForwardLink != NULL) {
-      //
-      // Remove the Image from the Runtime Image list as we are about to Free it!
-      //
-      RemoveEntryList (&Image->RuntimeData->Link);
-    }
-    CoreFreePool (Image->RuntimeData);
-  }
-
-  //
-  // Free the Image from memory
-  //
-  if ((Image->ImageBasePage != 0) && FreePage) {
-    CoreFreePages (Image->ImageBasePage, Image->NumberOfPages);
-  }
-
-  //
-  // Done with the Image structure
-  //
-  if (Image->Info.FilePath != NULL) {
-    CoreFreePool (Image->Info.FilePath);
-  }
-
-  if (Image->LoadedImageDevicePath != NULL) {
-    CoreFreePool (Image->LoadedImageDevicePath);
-  }
-
-  if (Image->FixupData != NULL) {
-    CoreFreePool (Image->FixupData);
-  }
-
-  CoreFreePool (Image);
-}
-
-
-
-
 /**
   Terminates the currently loaded EFI image and returns control to boot services.
 
@@ -1289,7 +1281,7 @@ CoreExit (
   OldTpl = CoreRaiseTpl (TPL_NOTIFY);
 
   Image = CoreLoadedImageInfo (ImageHandle);
-  if (Image == NULL_HANDLE) {
+  if (Image == NULL) {
     Status = EFI_INVALID_PARAMETER;
     goto Done;
   }
@@ -1370,14 +1362,6 @@ CoreUnloadImage (
   EFI_STATUS                 Status;
   LOADED_IMAGE_PRIVATE_DATA  *Image;
 
-  //
-  // Prevent possible reentrance to this function
-  // for the same ImageHandle
-  //
-  if (!AcquireSpinLockOrFail (&mUnloadImageLock)) {
-    return EFI_UNSUPPORTED;
-  }
-
   Image = CoreLoadedImageInfo (ImageHandle);
   if (Image == NULL ) {
     //
@@ -1412,7 +1396,6 @@ CoreUnloadImage (
   }
 
 Done:
-  ReleaseSpinLock (&mUnloadImageLock);
   return Status;
 }
 

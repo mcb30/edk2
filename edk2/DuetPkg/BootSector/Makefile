@@ -38,7 +38,6 @@ LIBS =
 COMMON_DEPS = 
 
 all: $(TARGET_FILES)
-
           
 #=============                
 $(OUTPUT_DIR)\bootsect.obj:$(MODULE_DIR)\bootsect.asm
@@ -157,3 +156,5 @@ $(OUTPUT_DIR)\efi64.com2:$(OUTPUT_DIR)\efi64.com
 clean:
 	if exist $(DEBUG_DIR) rmdir /s /q $(DEBUG_DIR)
 	if exist $(OUTPUT_DIR) rmdir /s /q $(OUTPUT_DIR)
+
+

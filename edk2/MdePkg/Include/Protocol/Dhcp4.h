@@ -49,11 +49,11 @@ typedef struct {
     UINT32            Xid;
     UINT16            Seconds;
     UINT16            Reserved;
-    EFI_IPv4_ADDRESS  ClientAddr;       //Client IP address from client
-    EFI_IPv4_ADDRESS  YourAddr;         //Client IP address from server
-    EFI_IPv4_ADDRESS  ServerAddr;       //IP address of next server in bootstrap
-    EFI_IPv4_ADDRESS  GatewayAddr;      //Relay agent IP address
-    UINT8             ClientHwAddr[16]; //Client hardware address
+    EFI_IPv4_ADDRESS  ClientAddr;       ///< Client IP address from client
+    EFI_IPv4_ADDRESS  YourAddr;         ///< Client IP address from server
+    EFI_IPv4_ADDRESS  ServerAddr;       ///< IP address of next server in bootstrap
+    EFI_IPv4_ADDRESS  GatewayAddr;      ///< Relay agent IP address
+    UINT8             ClientHwAddr[16]; ///< Client hardware address
     CHAR8             ServerName[64];
     CHAR8             BootFileName[128];
 }EFI_DHCP4_HEADER;
@@ -331,7 +331,7 @@ EFI_STATUS
   Builds a DHCP packet, given the options to be appended or deleted or replaced.
 
   @param  This        Pointer to the EFI_DHCP4_PROTOCOL instance.
- @param  SeedPacket  Initial packet to be used as a base for building new packet.
+  @param  SeedPacket  Initial packet to be used as a base for building new packet.
   @param  DeleteCount Number of opcodes in the DeleteList.
   @param  DeleteList  List of opcodes to be deleted from the seed packet.
                       Ignored if DeleteCount is zero.
@@ -411,42 +411,10 @@ EFI_STATUS
   OUT EFI_DHCP4_PACKET_OPTION  *PacketOptionList[]  OPTIONAL
   );
 
-/**
-  @par Protocol Description:
-  This protocol is used to collect configuration information for the EFI IPv4 Protocol drivers
-  and to provide DHCPv4 server and PXE boot server discovery services.
-
-  @param GetModeData 
-  Gets the EFI DHCPv4 Protocol driver status and operational data.
-
-  @param Configure 
-  Initializes, changes, or resets operational settings for the EFI
-  DHCPv4 Protocol driver.
-  
-  @param Start
-  Starts the DHCP configuration process. 
-  
-  @param RenewRebind 
-  Tries to manually extend the lease time by sending a request packet.
-
-  @param Release 
-  Releases the current configuration and returns the EFI DHCPv4
-  Protocol driver to the initial state.
-  
-  @param Stop
-  Stops the DHCP configuration process no matter what state the
-  driver is in. After being stopped, this driver will not automatically
-  communicate with the DHCP server.
-  
-  @param Build 
-  Puts together a DHCP or PXE packet. 
-  
-  @param TransmitReceive 
-  Transmits a DHCP or PXE packet and waits for response packets.
-
-  @param Parse 
-  Parses the packed DHCP or PXE option data. 
-**/
+///
+/// This protocol is used to collect configuration information for the EFI IPv4 Protocol drivers
+/// and to provide DHCPv4 server and PXE boot server discovery services.
+///
 struct _EFI_DHCP4_PROTOCOL {
   EFI_DHCP4_GET_MODE_DATA      GetModeData;
   EFI_DHCP4_CONFIGURE          Configure;

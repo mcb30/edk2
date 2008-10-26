@@ -128,18 +128,10 @@ EFI_STATUS
   IN OUT EFI_HASH_OUTPUT          *Hash
   );    
 
-/**
-  @par Protocol Description:
-  This protocol allows creating a hash of an arbitrary message digest 
-  using one or more hash algorithms.
-
-  @param GetHashSize
-  Return the size of a specific type of resulting hash.
-  
-  @param Hash
-  Create a hash for the specified message.
-
-**/
+///
+/// This protocol allows creating a hash of an arbitrary message digest 
+/// using one or more hash algorithms.
+///
 struct _EFI_HASH_PROTOCOL {
   EFI_HASH_GET_HASH_SIZE          GetHashSize;
   EFI_HASH_HASH                   Hash;

@@ -15,13 +15,6 @@
 #ifndef __HII_LIB_H__
 #define __HII_LIB_H__
 
-///
-/// Limited buffer size recommended by RFC4646 (4.3.  Length Considerations)
-/// (42 characters plus a NULL terminator)
-///
-#define RFC_3066_ENTRY_SIZE             (42 + 1)
-
-#define ISO_639_2_ENTRY_SIZE            3
 
 /**
   Assemble EFI_HII_PACKAGE_LIST according to the passed in packages.
@@ -30,11 +23,10 @@
   If not enough resource to complete the operation, then ASSERT.
 
   @param  NumberOfPackages       Number of packages.
-  @param  GuidId                          Package GUID.
-  @param  ...                                Variable argument list for packages to be assembled.
+  @param  GuidId                 Package GUID.
+  @param  ...                    Variable argument list for packages to be assembled.
 
-  @return EFI_HII_PACKAGE_LIST_HEADER Pointer of EFI_HII_PACKAGE_LIST_HEADER. The function will ASSERT if system has
-                                                                not enough resource to complete the operation.
+  @return Pointer of EFI_HII_PACKAGE_LIST_HEADER.
 
 **/
 EFI_HII_PACKAGE_LIST_HEADER *
@@ -194,7 +186,6 @@ HiiLibGetString (
   @retval EFI_NOT_FOUND          String is not found.
   @retval EFI_SUCCESS            Operation is successful.
   @retval EFI_OUT_OF_RESOURCES   There is not enought memory in the system.
-  @retval EFI_INVALID_PARAMETER  The String is NULL.
 
 **/
 EFI_STATUS
@@ -289,27 +280,6 @@ HiiLibDevicePathToHiiHandle (
   IN EFI_DEVICE_PATH_PROTOCOL   *DevicePath
   );
 
-
-/**
-  Determine what is the current language setting. The space reserved for Lang
-  must be at least RFC_3066_ENTRY_SIZE bytes;
-
-  If Lang is NULL, then ASSERT.
-
-  @param  Lang                   Pointer of system language. Lang will always be filled with 
-                                         a valid RFC 3066 language string. If "PlatformLang" is not
-                                         set in the system, the default language specifed by PcdUefiVariableDefaultPlatformLang
-                                         is returned.
-
-  @return  EFI_SUCCESS     If the EFI Variable with "PlatformLang" is set and return in Lang.
-  @return  EFI_NOT_FOUND If the EFI Variable with "PlatformLang" is not set, but a valid default language is return in Lang.
-
-**/
-EFI_STATUS
-EFIAPI
-HiiLibGetCurrentLanguage (
-  OUT     CHAR8               *Lang
-  );
 
 /**
   Get next language from language code list (with separator ';').
@@ -412,6 +382,43 @@ HiiLibExportPackageLists (
   OUT UINTN                            *PackageListSize
   );
 
+/**
+  
+  This function returns a list of the package handles of the   
+  specified type that are currently active in the HII database. The   
+  pseudo-type EFI_HII_PACKAGE_TYPE_ALL will cause all package   
+  handles to be listed.
+
+  If HandleBufferLength is NULL, then ASSERT.
+  If HandleBuffer is NULL, the ASSERT.
+  If PackageType is EFI_HII_PACKAGE_TYPE_GUID and PackageGuid is
+  NULL, then ASSERT.
+  If PackageType is not EFI_HII_PACKAGE_TYPE_GUID and PackageGuid is not
+  NULL, then ASSERT.
+  
+  
+  @param PackageType          Specifies the package type of the packages
+                              to list or EFI_HII_PACKAGE_TYPE_ALL for
+                              all packages to be listed.
+  
+  @param PackageGuid          If PackageType is
+                              EFI_HII_PACKAGE_TYPE_GUID, then this is
+                              the pointer to the GUID which must match
+                              the Guid field of
+                              EFI_HII_PACKAGE_GUID_HEADER. Otherwise, it
+                              must be NULL.
+  
+  @param HandleBufferLength   On output, the length of the handle buffer
+                              that is required for the handles found.
+
+  @param HandleBuffer         On output, an array of EFI_HII_HANDLE  instances returned.
+                              The caller is responcible to free this pointer allocated.
+
+  @retval EFI_SUCCESS           The matching handles are outputed successfully.
+                                HandleBufferLength is updated with the actual length.
+  @retval EFI_OUT_OF_RESOURCES  Not enough resource to complete the operation.
+  @retval EFI_NOT_FOUND         No matching handle could not be found in database.
+**/
 EFI_STATUS
 EFIAPI
 HiiLibListPackageLists (

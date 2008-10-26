@@ -12,11 +12,6 @@
 
 **/
 
-//
-// Include common header file for this module.
-//
-
-
 #include "BaseLibInternals.h"
 
 #define SPIN_LOCK_RELEASED          ((UINTN) 1)

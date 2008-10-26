@@ -13,9 +13,7 @@
 
 **/
 
-//
-// Include common header file for this module.
-//
+
 #include "UefiLibInternal.h"
 
 /**
@@ -126,7 +124,6 @@ Print (
   @return The number of Unicode characters in the produced
           output buffer not including the Null-terminator.
 **/
-
 UINTN
 EFIAPI
 ErrorPrint (
@@ -212,7 +209,6 @@ AsciiInternalPrint (
   string is greater than PcdUefiLibMaxPrintBufferSize, then only the first
   PcdUefiLibMaxPrintBufferSize characters are sent to ConOut.
   If Format is NULL, then ASSERT().
-  If Format is not aligned on a 16-bit boundary, then ASSERT().
 
   @param Format   Null-terminated ASCII format string.
   @param ...      VARARG list consumed to process Format.
@@ -230,7 +226,8 @@ AsciiPrint (
 {
   VA_LIST Marker;
   UINTN   Return;
-
+  ASSERT (Format != NULL);
+  
   VA_START (Marker, Format);
 
   Return = AsciiInternalPrint( Format, gST->ConOut, Marker);
@@ -250,7 +247,6 @@ AsciiPrint (
   string is greater than PcdUefiLibMaxPrintBufferSize, then only the first
   PcdUefiLibMaxPrintBufferSize characters are sent to StdErr.
   If Format is NULL, then ASSERT().
-  If Format is not aligned on a 16-bit boundary, then ASSERT().
 
   @param Format   Null-terminated ASCII format string.
   @param ...      VARARG list consumed to process Format.
@@ -269,6 +265,8 @@ AsciiErrorPrint (
   VA_LIST Marker;
   UINTN   Return;
 
+  ASSERT (Format != NULL);
+  
   VA_START (Marker, Format);
 
   Return = AsciiInternalPrint( Format, gST->StdErr, Marker);

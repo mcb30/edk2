@@ -72,17 +72,9 @@ CHAR16*
   IN BOOLEAN                          AllowShortcuts
   );    
 
-/**
-  @par Protocol Description:
-  This protocol converts device paths and device nodes to text.
-
-  @param ConvertTextToDeviceNode
-  Convert the device node to text.
-  
-  @param ConvertTextToDevicePath
-  Convert the device path to text.
-  
-**/
+///
+/// This protocol converts device paths and device nodes to text.
+///
 typedef struct {
   EFI_DEVICE_PATH_TO_TEXT_NODE        ConvertDeviceNodeToText;
   EFI_DEVICE_PATH_TO_TEXT_PATH        ConvertDevicePathToText;

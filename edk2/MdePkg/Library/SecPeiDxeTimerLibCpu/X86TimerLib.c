@@ -16,9 +16,12 @@
 #include <Library/TimerLib.h>
 #include <Library/BaseLib.h>
 #include <Library/IoLib.h>
-#include <Library/DebugLib.h>
 #include <Library/PcdLib.h>
 
+#define APIC_LVTERR     0x370
+#define APIC_TMICT      0x380   
+#define APIC_TMCCT      0x390
+#define APIC_TDCR       0x3e0
 
 //
 // The following array is used in calculating the frequency of local APIC
@@ -33,8 +36,6 @@ CONST UINT8                           mTimerLibLocalApicDivisor[] = {
 };
 
 /**
-  Internal function to retrieve the base address of local APIC.
-
   Internal function to retrieve the base address of local APIC.
 
   @return The base address of local APIC
@@ -52,8 +53,6 @@ InternalX86GetApicBase (
 /**
   Internal function to return the frequency of the local APIC timer.
 
-  Internal function to return the frequency of the local APIC timer.
-
   @param  ApicBase  The base address of memory mapped registers of local APIC.
 
   @return The frequency of the timer in Hz.
@@ -67,12 +66,10 @@ InternalX86GetTimerFrequency (
 {
   return
     PcdGet32(PcdFSBClock) /
-    mTimerLibLocalApicDivisor[MmioBitFieldRead32 (ApicBase + 0x3e0, 0, 3)];
+    mTimerLibLocalApicDivisor[MmioBitFieldRead32 (ApicBase + APIC_TDCR, 0, 3)];
 }
 
 /**
-  Internal function to read the current tick counter of local APIC.
-
   Internal function to read the current tick counter of local APIC.
 
   @param  ApicBase  The base address of memory mapped registers of local APIC.
@@ -86,7 +83,7 @@ InternalX86GetTimerTick (
   IN      UINTN                     ApicBase
   )
 {
-  return MmioRead32 (ApicBase + 0x390);
+  return MmioRead32 (ApicBase + APIC_TMCCT);
 }
 
 /**
@@ -128,7 +125,7 @@ InternalX86Delay (
 
   @param  MicroSeconds  The minimum number of microseconds to delay.
 
-  @return MicroSeconds
+  @return The value of MicroSeconds inputted.
 
 **/
 UINTN
@@ -160,7 +157,7 @@ MicroSecondDelay (
 
   @param  NanoSeconds The minimum number of nanoseconds to delay.
 
-  @return NanoSeconds
+  @return The value of NanoSeconds inputted.
 
 **/
 UINTN
@@ -186,8 +183,6 @@ NanoSecondDelay (
 }
 
 /**
-  Retrieves the current value of a 64-bit free running performance counter.
-
   Retrieves the current value of a 64-bit free running performance counter. The
   counter can either count up by 1 or count down by 1. If the physical
   performance counter counts by a larger increment, then the counter values
@@ -241,12 +236,12 @@ GetPerformanceCounterProperties (
   ApicBase = InternalX86GetApicBase ();
 
   if (StartValue != NULL) {
-    *StartValue = MmioRead32 (ApicBase + 0x380);
+    *StartValue = MmioRead32 (ApicBase + APIC_TMICT);
   }
 
   if (EndValue != NULL) {
     *EndValue = 0;
   }
 
-  return (UINT64) InternalX86GetTimerFrequency (ApicBase);;
+  return (UINT64) InternalX86GetTimerFrequency (ApicBase);
 }

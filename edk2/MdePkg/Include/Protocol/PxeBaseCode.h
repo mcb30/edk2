@@ -182,6 +182,38 @@ typedef struct {
   UINT16                      TransmitTimeout;
 } EFI_PXE_BASE_CODE_MTFTP_INFO;
 
+///
+/// Packet definitions
+///
+typedef struct {
+  UINT8   BootpOpcode;
+  UINT8   BootpHwType;
+  UINT8   BootpHwAddrLen;
+  UINT8   BootpGateHops;
+  UINT32  BootpIdent;
+  UINT16  BootpSeconds;
+  UINT16  BootpFlags;
+  UINT8   BootpCiAddr[4];
+  UINT8   BootpYiAddr[4];
+  UINT8   BootpSiAddr[4];
+  UINT8   BootpGiAddr[4];
+  UINT8   BootpHwAddr[16];
+  UINT8   BootpSrvName[64];
+  UINT8   BootpBootFile[128];
+  UINT32  DhcpMagik;
+  UINT8   DhcpOptions[56];
+} EFI_PXE_BASE_CODE_DHCPV4_PACKET;
+
+typedef union {
+  UINT8                           Raw[1472];
+  EFI_PXE_BASE_CODE_DHCPV4_PACKET Dhcpv4;
+
+  ///
+  ///  EFI_PXE_BASE_CODE_DHCPV6_PACKET     Dhcpv6;
+  ///
+} EFI_PXE_BASE_CODE_PACKET;
+
+
 //
 // PXE Base Code Mode structure
 //
@@ -608,64 +640,20 @@ EFI_STATUS
 // 
 #define EFI_PXE_BASE_CODE_INTERFACE_REVISION  EFI_PXE_BASE_CODE_PROTOCOL_REVISION
 
-/**  
-  @par Protocol Description:
-  The EFI_PXE_BASE_CODE_PROTOCOL is used to control PXE-compatible devices.
-  An EFI_PXE_BASE_CODE_PROTOCOL will be layered on top of an
-  EFI_MANAGED_NETWORK_PROTOCOL protocol in order to perform packet level transactions.
-  The EFI_PXE_BASE_CODE_PROTOCOL handle also supports the
-  EFI_LOAD_FILE_PROTOCOL protocol. This provides a clean way to obtain control from the
-  boot manager if the boot path is from the remote device.
-
-  @param Revision
-  The revision of the EFI_PXE_BASE_CODE_PROTOCOL. All future revisions must 
-  be backwards compatible. If a future version is not backwards compatible 
-  it is not the same GUID.
-
-  @param Start
-  Starts the PXE Base Code Protocol. Mode structure information is not valid and 
-  no other Base Code Protocol functions will operate until the Base Code is started. 
-
-  @param Stop
-  Stops the PXE Base Code Protocol. Mode structure information is unchanged by this function. 
-  No Base Code Protocol functions will operate until the Base Code is restarted. 
-
-  @param Dhcp
-  Attempts to complete a DHCPv4 D.O.R.A. (discover / offer / request / acknowledge) 
-  or DHCPv6 S.A.R.R (solicit / advertise / request / reply) sequence. 
-
-  @param Discover
-  Attempts to complete the PXE Boot Server and/or boot image discovery sequence. 
-
-  @param Mtftp
-  Performs TFTP and MTFTP services. 
-
-  @param UdpWrite
-  Writes a UDP packet to the network interface. 
-
-  @param UdpRead
-  Reads a UDP packet from the network interface. 
-
-  @param SetIpFilter
-  Updates the IP receive filters of the network device. 
-
-  @param Arp
-  Uses the ARP protocol to resolve a MAC address. 
-
-  @param SetParameters
-  Updates the parameters that affect the operation of the PXE Base Code Protocol. 
-
-  @param SetStationIp
-  Updates the station IP address and subnet mask values. 
-
-  @param SetPackets
-  Updates the contents of the cached DHCP and Discover packets. 
-
-  @param Mode
-  Pointer to the EFI_PXE_BASE_CODE_MODE data for this device. 
-
-**/
+///
+/// The EFI_PXE_BASE_CODE_PROTOCOL is used to control PXE-compatible devices.
+/// An EFI_PXE_BASE_CODE_PROTOCOL will be layered on top of an
+/// EFI_MANAGED_NETWORK_PROTOCOL protocol in order to perform packet level transactions.
+/// The EFI_PXE_BASE_CODE_PROTOCOL handle also supports the
+/// EFI_LOAD_FILE_PROTOCOL protocol. This provides a clean way to obtain control from the
+/// boot manager if the boot path is from the remote device.
+///
 struct _EFI_PXE_BASE_CODE_PROTOCOL {
+  ///
+  ///  The revision of the EFI_PXE_BASE_CODE_PROTOCOL. All future revisions must 
+  ///  be backwards compatible. If a future version is not backwards compatible 
+  ///  it is not the same GUID.
+  ///
   UINT64                            Revision;
   EFI_PXE_BASE_CODE_START           Start;
   EFI_PXE_BASE_CODE_STOP            Stop;
@@ -679,6 +667,9 @@ struct _EFI_PXE_BASE_CODE_PROTOCOL {
   EFI_PXE_BASE_CODE_SET_PARAMETERS  SetParameters;
   EFI_PXE_BASE_CODE_SET_STATION_IP  SetStationIp;
   EFI_PXE_BASE_CODE_SET_PACKETS     SetPackets;
+  ///
+  /// Pointer to the EFI_PXE_BASE_CODE_MODE data for this device.
+  ///
   EFI_PXE_BASE_CODE_MODE            *Mode;
 };
 

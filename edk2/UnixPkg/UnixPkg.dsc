@@ -182,8 +182,8 @@
   OemHookStatusCodeLib|UnixPkg/Library/DxeUnixOemHookStatusCodeLib/DxeUnixOemHookStatusCodeLib.inf
   DebugLib|IntelFrameworkModulePkg/Library/PeiDxeDebugLibReportStatusCode/PeiDxeDebugLibReportStatusCode.inf
   NetLib|MdeModulePkg/Library/DxeNetLib/DxeNetLib.inf
-  IpIoLib|MdeModulePkg/Library/DxeIpIoLib/DxeIpIoLib.inf
   UdpIoLib|MdeModulePkg/Library/DxeUdpIoLib/DxeUdpIoLib.inf
+  IpIoLib|MdeModulePkg/Library/DxeIpIoLib/DxeIpIoLib.inf
   DpcLib|MdeModulePkg/Library/DxeDpcLib/DxeDpcLib.inf
 
 [LibraryClasses.common.DXE_DRIVER]
@@ -383,7 +383,7 @@
   gEfiGenericPlatformTokenSpaceGuid.PcdFlashNvStorageFtwWorkingSize|0x0|UINT32|4
   gEfiUnixPkgTokenSpaceGuid.PcdUnixConsole|L"Bus Driver Console Window"|VOID*|50
   gEfiUnixPkgTokenSpaceGuid.PcdUnixUga|L"UGA Window"|VOID*|50
-  gEfiUnixPkgTokenSpaceGuid.PcdUnixFileSystem|L".!../../../../EdkShellBinPkg/bin/ia32/Apps"|VOID*|106
+  gEfiUnixPkgTokenSpaceGuid.PcdUnixFileSystem|L".!../../../../EdkShellBinPkg/Bin/Ia32/Apps"|VOID*|106
   gEfiUnixPkgTokenSpaceGuid.PcdUnixVirtualDisk|L"disk1.img:FW"|VOID*|24
   gEfiUnixPkgTokenSpaceGuid.PcdUnixPhysicalDisk|L"E:RW;245760;512"|VOID*|30
   gEfiUnixPkgTokenSpaceGuid.PcdUnixCpuModel|L"Intel(R) Processor Model"|VOID*|48

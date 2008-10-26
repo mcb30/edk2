@@ -121,32 +121,17 @@ EFI_STATUS
   );
 
 
-/**
-  Interface stucture for the Watchdog Timer Architectural Protocol.
-
-  @par Protocol Description:
-  This protocol provides the services required to implement the Boot Service 
-  SetWatchdogTimer().  It provides a service to set the amount of time to wait 
-  before firing the watchdog timer, and it also provides a service to register 
-  a handler that is invoked when the watchdog timer fires.  This protocol can 
-  implement the watchdog timer by using the event and timer Boot Services, or 
-  it can make use of custom hardware.  When the watchdog timer fires, control 
-  will be passed to a handler if one has been registered.  If no handler has 
-  been registered, or the registered handler returns, then the system will be 
-  reset by calling the Runtime Service ResetSystem().
-
-  @param  RegisterHandler  Registers a handler that is invoked when the watchdog
-                           timer fires.
-
-  @param  SetTimerPeriod   Sets the amount of time in 100 ns units to wait before the
-                           watchdog timer is fired. If this function is supported,
-                           then the watchdog timer period will be rounded up to the
-                           nearest supported watchdog timer period.
-
-  @param  GetTimerPeriod   Retrieves the amount of time in 100 ns units that the
-                           system will wait before the watchdog timer is fired.
-
-**/
+///
+/// This protocol provides the services required to implement the Boot Service 
+/// SetWatchdogTimer().  It provides a service to set the amount of time to wait 
+/// before firing the watchdog timer, and it also provides a service to register 
+/// a handler that is invoked when the watchdog timer fires.  This protocol can 
+/// implement the watchdog timer by using the event and timer Boot Services, or 
+/// it can make use of custom hardware.  When the watchdog timer fires, control 
+/// will be passed to a handler if one has been registered.  If no handler has 
+/// been registered, or the registered handler returns, then the system will be 
+/// reset by calling the Runtime Service ResetSystem().
+///
 struct _EFI_WATCHDOG_TIMER_ARCH_PROTOCOL {
   EFI_WATCHDOG_TIMER_REGISTER_HANDLER  RegisterHandler;
   EFI_WATCHDOG_TIMER_SET_TIMER_PERIOD  SetTimerPeriod;
