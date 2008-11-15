@@ -77,7 +77,6 @@ InternalReportStatusCode (
   @return  The size, in bytes, of DevicePath.
 
 **/
-STATIC
 UINTN
 InternalReportStatusCodeDevicePathSize (
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
@@ -89,8 +88,8 @@ InternalReportStatusCodeDevicePathSize (
   // Search for the end of the device path structure
   //
   Start = DevicePath;
-  while (!EfiIsDevicePathEnd (DevicePath)) {
-    DevicePath = EfiNextDevicePathNode (DevicePath);
+  while (!IsDevicePathEnd (DevicePath)) {
+    DevicePath = NextDevicePathNode (DevicePath);
   }
 
   //

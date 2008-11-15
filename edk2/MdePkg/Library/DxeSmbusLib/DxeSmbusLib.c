@@ -1,5 +1,5 @@
 /** @file
-Implementation of SmBusLib class library for PEI phase.
+Implementation of SmBusLib class library for DXE phase.
 
 Copyright (c) 2006, Intel Corporation<BR>
 All rights reserved. This program and the accompanying materials
@@ -20,7 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Globle varible to cache pointer to Smbus protocol.
 //
-STATIC EFI_SMBUS_HC_PROTOCOL      *mSmbus = NULL;
+EFI_SMBUS_HC_PROTOCOL      *mSmbus = NULL;
 
 /**
   The constructor function caches the pointer to Smbus protocol.

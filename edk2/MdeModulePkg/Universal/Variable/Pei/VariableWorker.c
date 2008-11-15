@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <Variable.h>
+#include "Variable.h"
 
 /**
   Get one variable by the index count.
@@ -40,8 +40,6 @@ GetVariableByIndex (
 
   @param  IndexTable  The pointer to variable index table.
   @param  Variable    The pointer to the variable that will be recorded.
-
-  @retval VOID
 
 **/
 VOID

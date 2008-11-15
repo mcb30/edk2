@@ -31,7 +31,7 @@ typedef struct _EFI_TIMER_ARCH_PROTOCOL   EFI_TIMER_ARCH_PROTOCOL;
 /**
   This function of this type is called when a timer interrupt fires.  This 
   function executes at TPL_HIGH_LEVEL.  The DXE Core will register a funtion
-  of tyis type to be called for the timer interrupt, so it can know how much 
+  of this type to be called for the timer interrupt, so it can know how much 
   time has passed.  This information is used to signal timer based events.  
 
   @param  Time   Time since the last timer interrupt in 100 ns units. This will
@@ -160,40 +160,14 @@ EFI_STATUS
   );
 
 
-/**
-  Interface stucture for the Timer Architectural Protocol.
-
-  @par Protocol Description:
-  This protocol provides the services to initialize a periodic timer 
-  interrupt, and to register a handler that is called each time the timer
-  interrupt fires.  It may also provide a service to adjust the rate of the
-  periodic timer interrupt.  When a timer interrupt occurs, the handler is 
-  passed the amount of time that has passed since the previous timer 
-  interrupt.
-
-  @param RegisterHandler
-  Registers a handler that will be called each time the 
-  timer interrupt fires.  TimerPeriod defines the minimum 
-  time between timer interrupts, so TimerPeriod will also 
-  be the minimum time between calls to the registered 
-  handler.
-
-  @param SetTimerPeriod
-  Sets the period of the timer interrupt in 100 nS units.  
-  This function is optional, and may return EFI_UNSUPPORTED.  
-  If this function is supported, then the timer period will 
-  be rounded up to the nearest supported timer period.
-
-  @param GetTimerPeriod
-  Retrieves the period of the timer interrupt in 100 nS units.
-
-  @param GenerateSoftInterrupt
-  Generates a soft timer interrupt that simulates the firing of 
-  the timer interrupt. This service can be used to invoke the 
-  registered handler if the timer interrupt has been masked for 
-  a period of time.
-
-**/
+///
+/// This protocol provides the services to initialize a periodic timer 
+/// interrupt, and to register a handler that is called each time the timer
+/// interrupt fires.  It may also provide a service to adjust the rate of the
+/// periodic timer interrupt.  When a timer interrupt occurs, the handler is 
+/// passed the amount of time that has passed since the previous timer 
+/// interrupt.
+///
 struct _EFI_TIMER_ARCH_PROTOCOL {
   EFI_TIMER_REGISTER_HANDLER          RegisterHandler;
   EFI_TIMER_SET_TIMER_PERIOD          SetTimerPeriod;

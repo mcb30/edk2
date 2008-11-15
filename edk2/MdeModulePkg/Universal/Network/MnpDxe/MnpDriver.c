@@ -166,18 +166,8 @@ ErrorExit:
       //
       // Flush the Mnp Service Data.
       //
-      MnpFlushServiceData (MnpServiceData);
+      MnpFlushServiceData (MnpServiceData, This->DriverBindingHandle);
     }
-
-    //
-    // Close the Simple Network Protocol.
-    //
-    gBS->CloseProtocol (
-          ControllerHandle,
-          &gEfiSimpleNetworkProtocolGuid,
-          This->DriverBindingHandle,
-          ControllerHandle
-          );
 
     gBS->FreePool (MnpServiceData);
   }
@@ -248,19 +238,9 @@ MnpDriverBindingStop (
            );
 
     //
-    // Close the openned Snp protocol.
-    //
-    gBS->CloseProtocol (
-           ControllerHandle,
-           &gEfiSimpleNetworkProtocolGuid,
-           This->DriverBindingHandle,
-           ControllerHandle
-           );
-
-    //
     // Flush the Mnp service data.
     //
-    MnpFlushServiceData (MnpServiceData);
+    MnpFlushServiceData (MnpServiceData, This->DriverBindingHandle);
 
     gBS->FreePool (MnpServiceData);
   } else {

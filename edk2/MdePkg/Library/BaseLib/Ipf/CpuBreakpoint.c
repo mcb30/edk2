@@ -12,10 +12,8 @@
 
 **/
 
-//
-// Include common header file for this module.
-//
-#include <BaseLibInternals.h>
+
+#include "BaseLibInternals.h"
 
 /**
   Generates a breakpoint on the CPU.

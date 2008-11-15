@@ -1,14 +1,21 @@
 /** @file
-  MDE UEFI library functions and macros
+  Provides library functions for common UEFI operations. Only available to DXE
+  and UEFI module types.
 
-  Copyright (c) 2006 - 2007, Intel Corporation                                                         
-  All rights reserved. This program and the accompanying materials                          
-  are licensed and made available under the terms and conditions of the BSD License         
-  which accompanies this distribution.  The full text of the license may be found at        
-  http://opensource.org/licenses/bsd-license.php                                            
+  The UEFI Library provides functions and macros that simplify the development of 
+  UEFI Drivers and UEFI Applications.  These functions and macros help manage EFI 
+  events, build simple locks utilizing EFI Task Priority Levels (TPLs), install 
+  EFI Driver Model related protocols, manage Unicode string tables for UEFI Drivers, 
+  and print messages on the console output and standard error devices.
 
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+Copyright (c) 2006 - 2008, Intel Corporation
+All rights reserved. This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
@@ -612,14 +619,15 @@ EfiSignalEventLegacyBoot (
   );
 
 /**
-  Create a Legacy Boot Event.  
+  Creates an EFI event in the Legacy Boot Event Group.  Prior to UEFI 2.0 this 
+  was done via a non blessed UEFI extensions and this library abstracts the 
+  implementation mechanism of this event from the caller.
   
-  Tiano extended the CreateEvent Type enum to add a legacy boot event type. 
-  This was bad as Tiano did not own the enum. In UEFI 2.0 CreateEventEx was
-  added and now it's possible to not voilate the UEFI specification by 
-  declaring a GUID for the legacy boot event class. This library supports
-  the EDK/EFI 1.10 form and EDK II/UEFI 2.0 form and allows common code to 
-  work both ways.
+  This function abstracts the creation of the Legacy Boot Event.  The Framework 
+  moved from a proprietary to UEFI 2.0 based mechanism.  This library abstracts 
+  the caller from how this event is created to prevent to code form having to 
+  change with the version of the specification supported.
+  If LegacyBootEvent is NULL, then ASSERT().
 
   @param  LegacyBootEvent   Returns the EFI event returned from gBS->CreateEvent(Ex).
 
@@ -662,14 +670,15 @@ EfiCreateEventLegacyBootEx (
   );
 
 /**
-  Create a Read to Boot Event.  
+  Create an EFI event in the Ready To Boot Event Group.  Prior to UEFI 2.0 this 
+  was done via a non-standard UEFI extension, and this library abstracts the 
+  implementation mechanism of this event from the caller. 
   
-  Tiano extended the CreateEvent Type enum to add a ready to boot event type. 
-  This was bad as Tiano did not own the enum. In UEFI 2.0 CreateEventEx was
-  added and now it's possible to not voilate the UEFI specification and use 
-  the ready to boot event class defined in UEFI 2.0. This library supports
-  the EDK/EFI 1.10 form and EDKII/UEFI 2.0 form and allows common code to 
-  work both ways.
+  This function abstracts the creation of the Ready to Boot Event.  The Framework 
+  moved from a proprietary to UEFI 2.0-based mechanism.  This library abstracts 
+  the caller from how this event is created to prevent the code form having to 
+  change with the version of the specification supported.
+  If ReadyToBootEvent is NULL, then ASSERT().
 
   @param  ReadyToBootEvent   Returns the EFI event returned from gBS->CreateEvent(Ex).
 
@@ -714,13 +723,17 @@ EfiCreateEventReadyToBootEx (
 /**
   Initialize a Firmware Volume (FV) Media Device Path node.
   
-  Tiano extended the EFI 1.10 device path nodes. Tiano does not own this enum
-  so as we move to UEFI 2.0 support we must use a mechanism that conforms with
-  the UEFI 2.0 specification to define the FV device path. An UEFI GUIDed 
-  device path is defined for Tiano extensions of device path. If the code 
-  is compiled to conform with the UEFI 2.0 specification use the new device path
-  else use the old form for backwards compatability.
-
+  The Framework FwVol Device Path changed to conform to the UEFI 2.0 specification.  
+  This library function abstracts initializing a device path node.
+  
+  Initialize the MEDIA_FW_VOL_FILEPATH_DEVICE_PATH data structure.  This device 
+  path changed in the DXE CIS version 0.92 in a non back ward compatible way to 
+  not conflict with the UEFI 2.0 specification.  This function abstracts the 
+  differences from the caller.
+  
+  If FvDevicePathNode is NULL, then ASSERT().
+  If NameGuid is NULL, then ASSERT().
+  
   @param  FvDevicePathNode  Pointer to a FV device path node to initialize
   @param  NameGuid          FV file name to use in FvDevicePathNode
 
@@ -735,14 +748,15 @@ EfiInitializeFwVolDevicepathNode (
 /**
   Check to see if the Firmware Volume (FV) Media Device Path is valid 
   
-  Tiano extended the EFI 1.10 device path nodes. Tiano does not own this enum
-  so as we move to UEFI 2.0 support we must use a mechanism that conforms with
-  the UEFI 2.0 specification to define the FV device path. An UEFI GUIDed 
-  device path is defined for Tiano extensions of device path. If the code 
-  is compiled to conform with the UEFI 2.0 specification use the new device path
-  else use the old form for backwards compatability. The return value to this
-  function points to a location in FvDevicePathNode and it does not allocate
-  new memory for the GUID pointer that is returned.
+  The Framework FwVol Device Path changed to conform to the UEFI 2.0 specification.  
+  This library function abstracts validating a device path node.
+  
+  Check the MEDIA_FW_VOL_FILEPATH_DEVICE_PATH data structure to see if it's valid.  
+  If it is valid, then return the GUID file name from the device path node.  Otherwise, 
+  return NULL.  This device path changed in the DXE CIS version 0.92 in a non back ward 
+  compatible way to not conflict with the UEFI 2.0 specification.  This function abstracts 
+  the differences from the caller.
+  If FvDevicePathNode is NULL, then ASSERT().
 
   @param  FvDevicePathNode  Pointer to FV device path to check.
 
@@ -950,21 +964,22 @@ EfiLibInstallDriverBindingComponentName2 (
 
 
 /**
-  Initializes a driver by installing the Driver Binding Protocol together with the optional Component Name,
+  Intialize a driver by installing the Driver Binding Protocol together with the optional Component Name,
   Component Name 2, Driver Configure, Driver Diagnostic and Driver Diagnostic 2 Protocols onto the driver's
   DriverBindingHandle.  This is typically the same as the driver's ImageHandle, but it can be different if
   the driver produces multiple DriverBinding Protocols. 
-  If the Driver Binding Protocol interface is NULL, then ASSERT (). 
+  If the Drvier Binding Protocol interface is NULL, then ASSERT (). 
   If the installation fails, then ASSERT ().
 
   @param  ImageHandle                 The image handle of the driver.
   @param  SystemTable                 The EFI System Table that was passed to the driver's entry point.
   @param  DriverBinding               A Driver Binding Protocol instance that this driver is producing.
-  @param  DriverBindingHandle         The handle that DriverBinding is to be installed onto.  If this
+  @param  DriverBindingHandle         The handle that DriverBinding is to be installe onto.  If this
                                       parameter is NULL, then a new handle is created.
   @param  ComponentName               A Component Name Protocol instance that this driver is producing.
   @param  ComponentName2              A Component Name 2 Protocol instance that this driver is producing.
   @param  DriverConfiguration         A Driver Configuration Protocol instance that this driver is producing.
+  @param  DriverConfiguration2        A Driver Configuration Protocol 2 instance that this driver is producing.
   @param  DriverDiagnostics           A Driver Diagnostics Protocol instance that this driver is producing.
   @param  DriverDiagnostics2          A Driver Diagnostics Protocol 2 instance that this driver is producing.
 
@@ -979,11 +994,34 @@ EfiLibInstallAllDriverProtocols2 (
   IN CONST EFI_SYSTEM_TABLE                   *SystemTable,
   IN EFI_DRIVER_BINDING_PROTOCOL              *DriverBinding,
   IN EFI_HANDLE                               DriverBindingHandle,
-  IN CONST EFI_COMPONENT_NAME_PROTOCOL        *ComponentName,       OPTIONAL
-  IN CONST EFI_COMPONENT_NAME2_PROTOCOL       *ComponentName2,      OPTIONAL
-  IN CONST EFI_DRIVER_CONFIGURATION_PROTOCOL  *DriverConfiguration, OPTIONAL
-  IN CONST EFI_DRIVER_DIAGNOSTICS_PROTOCOL    *DriverDiagnostics,   OPTIONAL
-  IN CONST EFI_DRIVER_DIAGNOSTICS2_PROTOCOL   *DriverDiagnostics2   OPTIONAL
+  IN CONST EFI_COMPONENT_NAME_PROTOCOL        *ComponentName,        OPTIONAL
+  IN CONST EFI_COMPONENT_NAME2_PROTOCOL       *ComponentName2,       OPTIONAL
+  IN CONST EFI_DRIVER_CONFIGURATION_PROTOCOL  *DriverConfiguration,  OPTIONAL
+  IN CONST EFI_DRIVER_CONFIGURATION_PROTOCOL  *DriverConfiguration2, OPTIONAL
+  IN CONST EFI_DRIVER_DIAGNOSTICS_PROTOCOL    *DriverDiagnostics,    OPTIONAL
+  IN CONST EFI_DRIVER_DIAGNOSTICS2_PROTOCOL   *DriverDiagnostics2    OPTIONAL
   );
+
+/**
+  Determine what is the current language setting. The space reserved for Lang
+  must be at least RFC_3066_ENTRY_SIZE bytes;
+
+  If Lang is NULL, then ASSERT.
+
+  @param  Lang                   Pointer of system language. Lang will always be filled with 
+                                         a valid RFC 3066 language string. If "PlatformLang" is not
+                                         set in the system, the default language specifed by PcdUefiVariableDefaultPlatformLang
+                                         is returned.
+
+  @return  EFI_SUCCESS     If the EFI Variable with "PlatformLang" is set and return in Lang.
+  @return  EFI_NOT_FOUND If the EFI Variable with "PlatformLang" is not set, but a valid default language is return in Lang.
+
+**/
+EFI_STATUS
+EFIAPI
+GetCurrentLanguage (
+  OUT     CHAR8               *Lang
+  );
+
 
 #endif

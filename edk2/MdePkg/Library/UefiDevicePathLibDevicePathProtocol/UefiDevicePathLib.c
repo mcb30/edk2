@@ -1,5 +1,6 @@
 /** @file
-  UEFI Device Path Library.
+  Library instance that implement UEFI Device Path Library class based on protocol
+  gEfiDevicePathUtilitiesProtocolGuid.
 
   Copyright (c) 2006, Intel Corporation<BR>
   All rights reserved. This program and the accompanying materials
@@ -25,9 +26,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include "UefiDevicePathLibInternal.h"
-
-STATIC EFI_DEVICE_PATH_UTILITIES_PROTOCOL          *mDevicePathUtilities = NULL;
+EFI_DEVICE_PATH_UTILITIES_PROTOCOL          *mDevicePathUtilities = NULL;
 
 /**
   The constructor function caches the pointer to DevicePathUtilites protocol.
@@ -245,7 +244,7 @@ GetNextDevicePathInstance (
   @param  NodeSubType                The device node sub-type for the new device node.
   @param  NodeLength                 The length of the new device node.
 
-  @return The new device path.
+  @return A pointer to the new created file device path 
 
 **/
 EFI_DEVICE_PATH_PROTOCOL *
@@ -325,7 +324,7 @@ DevicePathFromHandle (
                                      may be NULL.
   @param  FileName                   A pointer to a Null-terminated Unicode string.
 
-  @return The allocated device path.
+  @return A pointer to the new created file device path 
 
 **/
 EFI_DEVICE_PATH_PROTOCOL *
@@ -343,7 +342,7 @@ FileDevicePath (
   DevicePath = NULL;
 
   Size = StrSize (FileName);
-  FileDevicePath = AllocatePool (Size + SIZE_OF_FILEPATH_DEVICE_PATH + EFI_END_DEVICE_PATH_LENGTH);
+  FileDevicePath = AllocatePool (Size + SIZE_OF_FILEPATH_DEVICE_PATH + END_DEVICE_PATH_LENGTH);
   if (FileDevicePath != NULL) {
     FilePath = (FILEPATH_DEVICE_PATH *) FileDevicePath;
     FilePath->Header.Type    = MEDIA_DEVICE_PATH;
@@ -362,4 +361,3 @@ FileDevicePath (
 
   return DevicePath;
 }
-

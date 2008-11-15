@@ -47,7 +47,6 @@
   @retval  EFI_UNSUPPORTED       Status Code Protocol is not available.
 
 **/
-STATIC
 EFI_STATUS
 InternalReportStatusCode (
   IN EFI_STATUS_CODE_TYPE     Type,
@@ -58,37 +57,6 @@ InternalReportStatusCode (
   )
 {
   return EFI_SUCCESS;
-}
-
-
-/**
-  Computes and returns the size, in bytes, of a device path.
-
-  @param  DevicePath  A pointer to a device path.
-
-  @return  The size, in bytes, of DevicePath.
-
-**/
-STATIC
-UINTN
-InternalReportStatusCodeDevicePathSize (
-  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
-  )
-{
-  CONST EFI_DEVICE_PATH_PROTOCOL  *Start;
-
-  //
-  // Search for the end of the device path structure
-  //
-  Start = DevicePath;
-  while (!EfiIsDevicePathEnd (DevicePath)) {
-    DevicePath = EfiNextDevicePathNode (DevicePath);
-  }
-
-  //
-  // Subtract the start node from the end node and add in the size of the end node
-  //
-  return ((UINTN) DevicePath - (UINTN) Start) + DevicePathNodeLength (DevicePath);
 }
 
 
@@ -342,12 +310,12 @@ ReportStatusCodeWithDevicePath (
   )
 {
   ASSERT (DevicePath != NULL);
-  return ReportStatusCodeWithExtendedData (
-           Type,
-           Value,
-           (VOID *)DevicePath,
-           InternalReportStatusCodeDevicePathSize (DevicePath)
-           );
+  
+  //
+  // this function can *not* be implemented for BASE library.
+  //
+  ASSERT (FALSE);
+  return EFI_UNSUPPORTED;
 }
 
 

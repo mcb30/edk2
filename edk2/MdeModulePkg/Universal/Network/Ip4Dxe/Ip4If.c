@@ -27,16 +27,14 @@ Abstract:
 // Mac address with all zero, used to determine whethter the ARP
 // resolve succeeded. Failed ARP requests zero the MAC address buffer.
 //
-STATIC EFI_MAC_ADDRESS  mZeroMacAddress;
+EFI_MAC_ADDRESS  mZeroMacAddress;
 
-STATIC
 VOID
 EFIAPI
 Ip4OnFrameSentDpc (
   IN VOID                   *Context
   );
 
-STATIC
 VOID
 EFIAPI
 Ip4OnFrameSent (
@@ -44,14 +42,12 @@ Ip4OnFrameSent (
   IN VOID                   *Context
   );
 
-STATIC
 VOID
 EFIAPI
 Ip4OnArpResolvedDpc (
   IN VOID                   *Context
   );
 
-STATIC
 VOID
 EFIAPI
 Ip4OnArpResolved (
@@ -59,14 +55,12 @@ Ip4OnArpResolved (
   IN VOID                   *Context
   );
 
-STATIC
 VOID
 EFIAPI
 Ip4OnFrameReceivedDpc (
   IN VOID                   *Context
   );
 
-STATIC
 VOID
 EFIAPI
 Ip4OnFrameReceived (
@@ -74,7 +68,6 @@ Ip4OnFrameReceived (
   IN VOID                   *Context
   );
 
-STATIC
 VOID
 Ip4CancelFrameArp (
   IN IP4_ARP_QUE            *ArpQue,
@@ -87,7 +80,7 @@ Ip4CancelFrameArp (
 /**
   Wrap a transmit request into a newly allocated IP4_LINK_TX_TOKEN.
 
-  @param  Interface             The interface to send out from
+  @param  Interface             The interface to send out to.
   @param  IpInstance            The IpInstance that transmit the packet.  NULL if
                                 the packet is sent by the IP4 driver itself.
   @param  Packet                The packet to transmit
@@ -98,7 +91,6 @@ Ip4CancelFrameArp (
   @return The wrapped token if succeed or NULL
 
 **/
-STATIC
 IP4_LINK_TX_TOKEN *
 Ip4WrapLinkTxToken (
   IN IP4_INTERFACE          *Interface,
@@ -175,7 +167,6 @@ Ip4WrapLinkTxToken (
   @return NONE
 
 **/
-STATIC
 VOID
 Ip4FreeLinkTxToken (
   IN IP4_LINK_TX_TOKEN      *Token
@@ -198,7 +189,6 @@ Ip4FreeLinkTxToken (
   @return Point to newly created IP4_ARP_QUE if succeed, otherwise NULL.
 
 **/
-STATIC
 IP4_ARP_QUE *
 Ip4CreateArpQue (
   IN IP4_INTERFACE          *Interface,
@@ -250,7 +240,6 @@ Ip4CreateArpQue (
   @return NONE
 
 **/
-STATIC
 VOID
 Ip4FreeArpQue (
   IN IP4_ARP_QUE            *ArpQue,
@@ -281,7 +270,6 @@ Ip4FreeArpQue (
   @return Point to created IP4_LINK_RX_TOKEN if succeed, otherwise NULL.
 
 **/
-STATIC
 IP4_LINK_RX_TOKEN *
 Ip4CreateLinkRxToken (
   IN IP4_INTERFACE          *Interface,
@@ -335,7 +323,6 @@ Ip4CreateLinkRxToken (
   @return NONE
 
 **/
-STATIC
 VOID
 Ip4FreeFrameRxToken (
   IN IP4_LINK_RX_TOKEN      *Token
@@ -362,7 +349,6 @@ Ip4FreeFrameRxToken (
   @return NONE
 
 **/
-STATIC
 VOID
 Ip4CancelFrameArp (
   IN IP4_ARP_QUE            *ArpQue,
@@ -525,9 +511,9 @@ Ip4CreateInterface (
 **/
 EFI_STATUS
 Ip4SetAddress (
-  IN  IP4_INTERFACE         *Interface,
-  IN  IP4_ADDR              IpAddr,
-  IN  IP4_ADDR              SubnetMask
+  IN OUT IP4_INTERFACE      *Interface,
+  IN     IP4_ADDR           IpAddr,
+  IN     IP4_ADDR           SubnetMask
   )
 {
   EFI_ARP_CONFIG_DATA       ArpConfig;
@@ -627,7 +613,7 @@ ON_ERROR:
 
 
 /**
-  Fileter function to cancel all the frame related to an IP instance.
+  Filter function to cancel all the frame related to an IP instance.
 
   @param  Frame                 The transmit request to test whether to cancel
   @param  Context               The context which is the Ip instance that issued
@@ -638,7 +624,6 @@ ON_ERROR:
   @retval FALSE                 The frame doesn't belong to this instance.
 
 **/
-STATIC
 BOOLEAN
 Ip4CancelInstanceFrame (
   IN IP4_LINK_TX_TOKEN *Frame,
@@ -696,7 +681,7 @@ Ip4CancelReceive (
 
   @param  Interface             The interface used by the IpInstance
   @param  IpInstance            The Ip instance that free the interface. NULL if
-                                the  Ip driver is releasing the default interface.
+                                the Ip driver is releasing the default interface.
 
   @retval EFI_SUCCESS           The interface use IpInstance is freed.
 
@@ -766,7 +751,6 @@ Ip4FreeInterface (
   @return None
 
 **/
-STATIC
 VOID
 EFIAPI
 Ip4OnArpResolvedDpc (
@@ -831,29 +815,22 @@ Ip4OnArpResolvedDpc (
   Ip4FreeArpQue (ArpQue, EFI_SUCCESS);
 }
 
-STATIC
+/**
+  Request Ip4OnArpResolvedDpc as a DPC at TPL_CALLBACK.
+
+  @param  Event                 The Arp request event.
+  @param  Context               The context of the callback, a point to the ARP
+                                queue.
+
+  @return None
+
+**/
 VOID
 EFIAPI
 Ip4OnArpResolved (
   IN EFI_EVENT              Event,
   IN VOID                   *Context
   )
-/*++
-
-Routine Description:
-
-  Request Ip4OnArpResolvedDpc as a DPC at TPL_CALLBACK
-
-Arguments:
-
-  Event   - The Arp request event
-  Context - The context of the callback, a point to the ARP queue
-
-Returns:
-
-  None
-
---*/
 {
   //
   // Request Ip4OnArpResolvedDpc as a DPC at TPL_CALLBACK
@@ -872,7 +849,6 @@ Returns:
   @return None.
 
 **/
-STATIC
 VOID
 EFIAPI
 Ip4OnFrameSentDpc (
@@ -897,29 +873,21 @@ Ip4OnFrameSentDpc (
   Ip4FreeLinkTxToken (Token);
 }
 
-STATIC
+/**
+  Request Ip4OnFrameSentDpc as a DPC at TPL_CALLBACK.
+
+  @param  Event                 The transmit token's event.
+  @param  Context               Context which is point to the token.
+
+  @return None
+
+**/
 VOID
 EFIAPI
 Ip4OnFrameSent (
   IN EFI_EVENT               Event,
   IN VOID                    *Context
   )
-/*++
-
-Routine Description:
-
-  Request Ip4OnFrameSentDpc as a DPC at TPL_CALLBACK
-
-Arguments:
-
-  Event   - The transmit token's event
-  Context - Context which is point to the token.
-
-Returns:
-
-  None.
-
---*/
 {
   //
   // Request Ip4OnFrameSentDpc as a DPC at TPL_CALLBACK
@@ -948,6 +916,7 @@ Returns:
   @retval EFI_OUT_OF_RESOURCES  Failed to allocate resource to send the frame
   @retval EFI_NO_MAPPING        Can't resolve the MAC for the nexthop
   @retval EFI_SUCCESS           The packet is successfully transmitted.
+  @retval other                 Other error occurs.
 
 **/
 EFI_STATUS
@@ -1088,7 +1057,6 @@ ON_ERROR:
   @return None.
 
 **/
-STATIC
 VOID
 Ip4RecycleFrame (
   IN VOID                   *Context
@@ -1117,7 +1085,6 @@ Ip4RecycleFrame (
   @return None.
 
 **/
-STATIC
 VOID
 EFIAPI
 Ip4OnFrameReceivedDpc (
@@ -1175,7 +1142,6 @@ Ip4OnFrameReceivedDpc (
   Token->CallBack (Token->IpInstance, Packet, EFI_SUCCESS, Flag, Token->Context);
 }
 
-STATIC
 VOID
 EFIAPI
 Ip4OnFrameReceived (
@@ -1218,6 +1184,7 @@ Returns:
   @retval EFI_ALREADY_STARTED   There is already a pending receive request.
   @retval EFI_OUT_OF_RESOURCES  Failed to allocate resource to receive
   @retval EFI_SUCCESS           The recieve request has been started.
+  @retval other                 Other error occurs.
 
 **/
 EFI_STATUS

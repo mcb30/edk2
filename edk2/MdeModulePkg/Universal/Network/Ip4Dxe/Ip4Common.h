@@ -29,7 +29,7 @@ typedef struct _IP4_PROTOCOL   IP4_PROTOCOL;
 typedef struct _IP4_SERVICE    IP4_SERVICE;
 
 
-enum {
+typedef enum {
   IP4_ETHER_PROTO      = 0x0800,
 
   IP4_PROTO_ICMP       = 0x01,
@@ -59,16 +59,16 @@ enum {
   IP4_HEAD_DF_MASK     = 0x4000,
   IP4_HEAD_MF_MASK     = 0x2000,
   IP4_HEAD_OFFSET_MASK = 0x1fff
-};
+} IP_ENUM_TYPES;
 
 #define IP4_ALLZERO_ADDRESS   0x00000000u
 #define IP4_ALLONE_ADDRESS    0xFFFFFFFFu
 #define IP4_ALLSYSTEM_ADDRESS 0xE0000001u
 #define IP4_ALLROUTER_ADDRESS 0xE0000002u
 
-//
-// Compose the fragment field to be used in the IP4 header.
-//
+///
+/// Compose the fragment field to be used in the IP4 header.
+///
 #define IP4_HEAD_FRAGMENT_FIELD(Df, Mf, Offset) \
     ((UINT16)(((Df) ? 0x4000 : 0) | ((Mf) ? 0x2000 : 0) | (((Offset) >> 3) & 0x1fff)))
 
@@ -80,10 +80,10 @@ enum {
 
 #define IP4_IS_BROADCAST(CastType) ((CastType) >= IP4_LOCAL_BROADCAST)
 
-//
-// Conver the Microsecond to second. IP transmit/receive time is
-// in the unit of microsecond. IP ticks once per second.
-//
+///
+/// Conver the Microsecond to second. IP transmit/receive time is
+/// in the unit of microsecond. IP ticks once per second.
+///
 #define IP4_US_TO_SEC(Us) (((Us) + 999999) / 1000000)
 
 INTN

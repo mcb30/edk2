@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
 #include "DxeMain.h"
+#include "Handle.h"
 
 
 //
@@ -73,6 +74,10 @@ CoreConnectController (
   AlignedRemainingDevicePath = NULL;
   if (RemainingDevicePath != NULL) {
     AlignedRemainingDevicePath = DuplicateDevicePath (RemainingDevicePath);
+
+    if (AlignedRemainingDevicePath == NULL) {
+      return EFI_OUT_OF_RESOURCES;
+    }
   }
 
   //
@@ -138,6 +143,10 @@ CoreConnectController (
     // Allocate a handle buffer for ControllerHandle's children
     //
     ChildHandleBuffer = AllocatePool (ChildHandleCount * sizeof(EFI_HANDLE));
+    if (ChildHandleBuffer == NULL) {
+      CoreReleaseProtocolLock ();
+      return EFI_OUT_OF_RESOURCES;
+    }
 
     //
     // Fill in a handle buffer with ControllerHandle's children
@@ -532,11 +541,13 @@ CoreConnectSingleController (
     for (Index = 0; (Index < NumberOfSortedDriverBindingProtocols) && !DriverFound; Index++) {
       if (SortedDriverBindingProtocols[Index] != NULL) {
         DriverBinding = SortedDriverBindingProtocols[Index];
+        PERF_START (DriverBinding->DriverBindingHandle, DRIVERBINDING_SUPPORT_TOK, NULL, 0);
         Status = DriverBinding->Supported(
                                   DriverBinding,
                                   ControllerHandle,
                                   RemainingDevicePath
                                   );
+        PERF_END (DriverBinding->DriverBindingHandle, DRIVERBINDING_SUPPORT_TOK, NULL, 0);
         if (!EFI_ERROR (Status)) {
           SortedDriverBindingProtocols[Index] = NULL;
           DriverFound = TRUE;

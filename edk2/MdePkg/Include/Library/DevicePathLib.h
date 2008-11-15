@@ -1,19 +1,37 @@
 /** @file
-  Device Path services.
+  Provides library functions to construct and parse UEFI Device Paths.
 
-  Copyright (c) 2006, Intel Corporation                                                         
-  All rights reserved. This program and the accompanying materials                          
-  are licensed and made available under the terms and conditions of the BSD License         
-  which accompanies this distribution.  The full text of the license may be found at        
-  http://opensource.org/licenses/bsd-license.php                                            
+Copyright (c) 2006 - 2008, Intel Corporation
+All rights reserved. This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
 
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
 #ifndef __DEVICE_PATH_LIB_H__
 #define __DEVICE_PATH_LIB_H__
+
+#include <Library/BaseLib.h>
+
+#define END_DEVICE_PATH_LENGTH               (sizeof (EFI_DEVICE_PATH_PROTOCOL))
+#define DevicePathNodeLength(Node)           ReadUnaligned16 ((UINT16 *)&((EFI_DEVICE_PATH_PROTOCOL *)(Node))->Length[0])
+#define NextDevicePathNode(Node)             ((EFI_DEVICE_PATH_PROTOCOL *)((UINT8 *)(Node) + DevicePathNodeLength(Node)))
+#define DevicePathType(Node)                 (((EFI_DEVICE_PATH_PROTOCOL *)(Node))->Type) 
+#define DevicePathSubType(Node)              (((EFI_DEVICE_PATH_PROTOCOL *)(Node))->SubType)
+#define IsDevicePathEndType(Node)            (DevicePathType (Node) == END_DEVICE_PATH_TYPE)
+#define IsDevicePathEnd(Node)                (IsDevicePathEndType (Node) && DevicePathSubType(Node) == END_ENTIRE_DEVICE_PATH_SUBTYPE)
+#define IsDevicePathEndInstance(Node)        (IsDevicePathEndType (Node) && DevicePathSubType(Node) == END_INSTANCE_DEVICE_PATH_SUBTYPE)
+
+#define SetDevicePathNodeLength(Node,NodeLength)  WriteUnaligned16 ((UINT16 *)&((EFI_DEVICE_PATH_PROTOCOL *)(Node))->Length[0], (UINT16)(NodeLength))
+#define SetDevicePathEndNode(Node)  {                                   \
+          DevicePathType (Node)    = END_DEVICE_PATH_TYPE;              \
+          DevicePathSubType (Node) = END_ENTIRE_DEVICE_PATH_SUBTYPE;    \
+          SetDevicePathNodeLength ((Node), END_DEVICE_PATH_LENGTH);       \
+          }
 
 /**
   Returns the size of a device path in bytes.

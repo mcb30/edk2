@@ -12,9 +12,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-//
-// Include common header file for this module.
-//
 #include "IfrSupportLibInternal.h"
 
 /**
@@ -394,7 +391,6 @@ AddOpCode (
   
   @return the statue of locating HII protocol
 **/
-STATIC
 EFI_STATUS
 GetHiiInterface (
   OUT     EFI_HII_PROTOCOL    **Hii

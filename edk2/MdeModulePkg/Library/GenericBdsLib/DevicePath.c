@@ -45,7 +45,7 @@ ReallocatePool (
       CopyMem (NewPool, OldPool, OldSize < NewSize ? OldSize : NewSize);
     }
 
-    SafeFreePool (OldPool);
+    FreePool (OldPool);
   }
 
   return NewPool;
@@ -108,77 +108,8 @@ CatPrint (
     Str->len = StringSize - sizeof (UINT16);
   }
 
-  SafeFreePool (AppendStr);
+  FreePool (AppendStr);
   return Str->str;
-}
-
-
-/**
-  Function unpacks a device path data structure so that all the nodes
-  of a device path are naturally aligned.
-
-  @param  DevPath  A pointer to a device path data structure
-
-  @return A ponter to new device If the memory for the device path is successfully allocated, then a
-          pointer to the new device path is returned.  Otherwise, NULL is returned.
-
-**/
-EFI_DEVICE_PATH_PROTOCOL *
-EFIAPI
-BdsLibUnpackDevicePath (
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevPath
-  )
-{
-  EFI_DEVICE_PATH_PROTOCOL  *Src;
-  EFI_DEVICE_PATH_PROTOCOL  *Dest;
-  EFI_DEVICE_PATH_PROTOCOL  *NewPath;
-  UINTN                     Size;
-
-  //
-  // Walk device path and round sizes to valid boundries
-  //
-  Src   = DevPath;
-  Size  = 0;
-  for (;;) {
-    Size += DevicePathNodeLength (Src);
-    Size += ALIGN_SIZE (Size);
-
-    if (IsDevicePathEnd (Src)) {
-      break;
-    }
-
-    Src = NextDevicePathNode (Src);
-  }
-  //
-  // Allocate space for the unpacked path
-  //
-  NewPath = AllocateZeroPool (Size);
-  if (NewPath != NULL) {
-
-    ASSERT (((UINTN) NewPath) % MIN_ALIGNMENT_SIZE == 0);
-
-    //
-    // Copy each node
-    //
-    Src   = DevPath;
-    Dest  = NewPath;
-    for (;;) {
-      Size = DevicePathNodeLength (Src);
-      CopyMem (Dest, Src, Size);
-      Size += ALIGN_SIZE (Size);
-      SetDevicePathNodeLength (Dest, Size);
-      Dest->Type |= EFI_DP_TYPE_UNPACKED;
-      Dest = (EFI_DEVICE_PATH_PROTOCOL *) (((UINT8 *) Dest) + Size);
-
-      if (IsDevicePathEnd (Src)) {
-        break;
-      }
-
-      Src = NextDevicePathNode (Src);
-    }
-  }
-
-  return NewPath;
 }
 
 /**
@@ -1546,12 +1477,6 @@ DevicePathToStr (
   }
 
   //
-  // Unpacked the device path
-  //
-  DevPath = BdsLibUnpackDevicePath (DevPath);
-  ASSERT (DevPath);
-
-  //
   // Process each device path node
   //
   DevPathNode = DevPath;
@@ -1594,7 +1519,7 @@ DevicePathToStr (
   //
   // Shrink pool used for string allocation
   //
-  SafeFreePool (DevPath);
+  FreePool (DevPath);
 
 Done:
   NewSize = (Str.len + 1) * sizeof (CHAR16);

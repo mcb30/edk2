@@ -21,7 +21,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Use a shor form Usb class Device Path, which could match any usb device, in WantedUsbIoDPList to indicate all Usb devices
 // are wanted Usb devices
 //
-STATIC USB_CLASS_FORMAT_DEVICE_PATH mAllUsbClassDevicePath = {
+USB_CLASS_FORMAT_DEVICE_PATH mAllUsbClassDevicePath = {
   {
     {
       MESSAGING_DEVICE_PATH,
@@ -759,7 +759,7 @@ GetUsbDPFromFullDP (
   // Get the Usb part first Begin node in full device path
   //
   UsbDevicePathBeginPtr = DevicePath;
-  while ( (!EfiIsDevicePathEnd (UsbDevicePathBeginPtr))&&
+  while ( (!IsDevicePathEnd (UsbDevicePathBeginPtr))&&
          ((UsbDevicePathBeginPtr->Type != MESSAGING_DEVICE_PATH) ||
          (UsbDevicePathBeginPtr->SubType != MSG_USB_DP &&
           UsbDevicePathBeginPtr->SubType != MSG_USB_CLASS_DP
@@ -773,7 +773,7 @@ GetUsbDPFromFullDP (
   // Get the Usb part first End node in full device path
   //
   UsbDevicePathEndPtr = UsbDevicePathBeginPtr;
-  while ((!EfiIsDevicePathEnd (UsbDevicePathEndPtr))&&
+  while ((!IsDevicePathEnd (UsbDevicePathEndPtr))&&
          (UsbDevicePathEndPtr->Type == MESSAGING_DEVICE_PATH) &&
          (UsbDevicePathEndPtr->SubType == MSG_USB_DP ||
           UsbDevicePathEndPtr->SubType == MSG_USB_CLASS_DP

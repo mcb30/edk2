@@ -300,34 +300,18 @@ EFI_STATUS
 );
 
 
-/**
-  The EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL is used on the ConsoleIn
-  device. It is an extension to the Simple Text Input protocol
-  which allows a variety of extended shift state information to be
-  returned.
-
-  @param Reset            
-  Reset the ConsoleIn device. See Reset().
-
-  @param ReadKeyStrokeEx  
-  Returns the next input character.
-
-  @param WaitForKeyEx   
-  Event to use with WaitForEvent() to wait for a key to be available.
-
-  @param SetState   
-  Set the EFI_KEY_TOGGLE_STATE state settings for the input device.
-
-  @param RegisterKeyNotify  
-  Register a notification function to be called when a given key sequence is hit.
-
-  @param UnregisterKeyNotifyRemoves   
-  A specific notification function.
-
-**/
+///
+/// The EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL is used on the ConsoleIn
+/// device. It is an extension to the Simple Text Input protocol
+/// which allows a variety of extended shift state information to be
+/// returned.
+///
 struct _EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL{
   EFI_INPUT_RESET_EX              Reset;
   EFI_INPUT_READ_KEY_EX           ReadKeyStrokeEx;
+  ///
+  /// Event to use with WaitForEvent() to wait for a key to be available.
+  ///
   EFI_EVENT                       WaitForKeyEx;
   EFI_SET_STATE                   SetState;
   EFI_REGISTER_KEYSTROKE_NOTIFY   RegisterKeyNotify;

@@ -1,7 +1,7 @@
 /** @file
   Unicode and ASCII string primatives.
 
-  Copyright (c) 2006 - 2007, Intel Corporation<BR>
+  Copyright (c) 2006 - 2008, Intel Corporation<BR>
   All rights reserved. This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -12,12 +12,19 @@
 
 **/
 
-//
-// Include common header file for this module.
-//
-
-
 #include "BaseLibInternals.h"
+
+#define QUOTIENT_MAX_UINTN_DIVIDED_BY_10      ((UINTN) -1 / 10)
+#define REMAINDER_MAX_UINTN_DIVIDED_BY_10    ((UINTN) -1 % 10)
+
+#define QUOTIENT_MAX_UINTN_DIVIDED_BY_16      ((UINTN) -1 / 16)
+#define REMAINDER_MAX_UINTN_DIVIDED_BY_16    ((UINTN) -1 % 16)
+
+#define QUOTIENT_MAX_UINT64_DIVIDED_BY_10      ((UINT64) -1 / 10)
+#define REMAINDER_MAX_UINT64_DIVIDED_BY_10    ((UINT64) -1 % 10)
+
+#define QUOTIENT_MAX_UINT64_DIVIDED_BY_16      ((UINT64) -1 / 16)
+#define REMAINDER_MAX_UINT64_DIVIDED_BY_16    ((UINT64) -1 % 16)
 
 /**
   Copies one Null-terminated Unicode string to another Null-terminated Unicode
@@ -39,7 +46,7 @@
   @param  Destination Pointer to a Null-terminated Unicode string.
   @param  Source      Pointer to a Null-terminated Unicode string.
 
-  @return Destiantion
+  @return Destination pointing to the copied string.
 
 **/
 CHAR16 *
@@ -55,7 +62,7 @@ StrCpy (
   // Destination cannot be NULL
   //
   ASSERT (Destination != NULL);
-  ASSERT (((UINTN) Destination & 0x01) == 0);
+  ASSERT (((UINTN) Destination & BIT0) == 0);
 
   //
   // Destination and source cannot overlap
@@ -97,7 +104,7 @@ StrCpy (
   @param  Source      Pointer to a Null-terminated Unicode string.
   @param  Length      Maximum number of Unicode characters to copy.
 
-  @return Destination
+  @return Destination pointing to the copied string.
 
 **/
 CHAR16 *
@@ -118,11 +125,10 @@ StrnCpy (
   // Destination cannot be NULL if Length is not zero
   //
   ASSERT (Destination != NULL);
-  ASSERT (((UINTN) Destination & 0x01) == 0);
+  ASSERT (((UINTN) Destination & BIT0) == 0);
 
   //
   // Destination and source cannot overlap
-  // Q: Does Source have to be NULL-terminated?
   //
   ASSERT ((UINTN)(Destination - Source) > StrLen (Source));
   ASSERT ((UINTN)(Source - Destination) >= Length);
@@ -164,7 +170,7 @@ StrLen (
   UINTN                             Length;
 
   ASSERT (String != NULL);
-  ASSERT (((UINTN) String & 0x01) == 0);
+  ASSERT (((UINTN) String & BIT0) == 0);
 
   for (Length = 0; *String != L'\0'; String++, Length++) {
     //
@@ -229,8 +235,9 @@ StrSize (
   @param  FirstString   Pointer to a Null-terminated Unicode string.
   @param  SecondString  Pointer to a Null-terminated Unicode string.
 
-  @retval 0   FirstString is identical to SecondString.
-  @retval !=0 FirstString is not identical to SecondString.
+  @retval 0      FirstString is identical to SecondString.
+  @return The first mismatched Unicode character in SecondString subtracted
+          from the first mismatched Unicode character in FirstString.
 
 **/
 INTN
@@ -279,8 +286,9 @@ StrCmp (
   @param  SecondString  Pointer to a Null-terminated Unicode string.
   @param  Length        Maximum number of Unicode characters to compare.
 
-  @retval 0   FirstString is identical to SecondString.
-  @retval !=0 FirstString is not identical to SecondString.
+  @retval 0      FirstString is identical to SecondString.
+  @return The value returned is the first mismatched Unicode character in SecondString
+          subtracted from the first mismatched Unicode character in FirstString.
 
 **/
 INTN
@@ -291,7 +299,7 @@ StrnCmp (
   IN      UINTN                     Length
   )
 {
-  if (0 == Length) {
+  if (Length == 0) {
     return 0;
   }
 
@@ -340,7 +348,7 @@ StrnCmp (
   @param  Destination Pointer to a Null-terminated Unicode string.
   @param  Source      Pointer to a Null-terminated Unicode string.
 
-  @return Destination
+  @return Destination pointing to the concatenated Unicode string.
 
 **/
 CHAR16 *
@@ -394,7 +402,7 @@ StrCat (
   @param  Length      Maximum number of Unicode characters to concatenate from
                       Source.
 
-  @return Destination
+  @return Destination pointing to the concatenated Unicode string.
 
 **/
 CHAR16 *
@@ -434,11 +442,11 @@ StrnCat (
   or String contains more than PcdMaximumUnicodeStringLength Unicode 
   characters not including the Null-terminator, then ASSERT().
 
-  @param  String                  Pointer to a Null-terminated Unicode string.
+  @param  String        Pointer to a Null-terminated Unicode string.
   @param  SearchString  Pointer to a Null-terminated Unicode string to search for.
 
-  @retval NULL            If the SearchString does not appear in String.
-  @retval !NULL           If there is a match.
+  @retval NULL          If the SearchString does not appear in String.
+  @return Pointer to the matching sub-string.
 
 **/
 CHAR16 *
@@ -469,7 +477,7 @@ StrStr (
       SearchStringTmp++;
     } 
     
-    if ('\0' == *SearchStringTmp) {
+    if (*SearchStringTmp == '\0') {
       return (CHAR16 *) FirstMatch;
     }
 
@@ -493,11 +501,10 @@ StrStr (
   decimal character. The valid decimal character is from
   L'0' to L'9'.
 
-
   @param  Char  The character to check against.
 
   @retval TRUE  If the Char is a decmial character.
-  @retval FALSE Otherwise.
+  @retval FALSE If the Char is not a decmial character.
 
 **/
 BOOLEAN
@@ -514,10 +521,9 @@ InternalIsDecimalDigitCharacter (
   it maps to a valid small-case ASCII character.
 
   This internal function only deal with Unicode character
-  which maps to a valid small-case ASII character, i.e.
+  which maps to a valid small-case ASCII character, i.e.
   L'a' to L'z'. For other Unicode character, the input character
   is returned directly.
-
 
   @param  Char  The character to convert.
 
@@ -548,7 +554,7 @@ InternalCharToUpper (
 
   @param  Char  The character to convert.
 
-  @retval UINTN   The numerical value converted.
+  @return The numerical value converted.
 
 **/
 UINTN
@@ -575,7 +581,7 @@ InternalHexCharToUintn (
   @param  Char  The character to check against.
 
   @retval TRUE  If the Char is a hexadecmial character.
-  @retval FALSE Otherwise.
+  @retval FALSE If the Char is not a hexadecmial character.
 
 **/
 BOOLEAN
@@ -621,7 +627,7 @@ InternalIsHexaDecimalDigitCharacter (
 
   @param  String                Pointer to a Null-terminated Unicode string.
 
-  @retval UINTN           
+  @return The value of type UINTN converted.
 
 **/
 UINTN
@@ -641,14 +647,14 @@ StrDecimalToUintn (
   //
   // Ignore the pad spaces (space or tab)
   //
-  while ((L' ' ==*String) || (L'\t' == *String)) {
+  while ((*String == L' ') || (*String == L'\t')) {
     String++;
   }
 
   //
   // Ignore leading Zeros after the spaces
   //
-  while (L'0' == *String) {
+  while (*String == L'0') {
     String++;
   }
 
@@ -659,9 +665,9 @@ StrDecimalToUintn (
     // If the number represented by String overflows according 
     // to the range defined by UINTN, then ASSERT().
     //
-    ASSERT ((Result < QUIENT_MAX_UINTN_DIVIDED_BY_10) ||
-      ((QUIENT_MAX_UINTN_DIVIDED_BY_10 == Result) &&
-      (*String - L'0') <= REMINDER_MAX_UINTN_DIVIDED_BY_10)
+    ASSERT ((Result < QUOTIENT_MAX_UINTN_DIVIDED_BY_10) ||
+      ((Result == QUOTIENT_MAX_UINTN_DIVIDED_BY_10) &&
+      (*String - L'0') <= REMAINDER_MAX_UINTN_DIVIDED_BY_10)
       );
 
     Result = Result * 10 + (*String - L'0');
@@ -703,7 +709,7 @@ StrDecimalToUintn (
 
   @param  String                Pointer to a Null-terminated Unicode string.
 
-  @retval UINT64           
+  @return The value of type UINT64 converted.
 
 **/
 UINT64
@@ -723,14 +729,14 @@ StrDecimalToUint64 (
   //
   // Ignore the pad spaces (space or tab)
   //
-  while ((L' ' == *String) || (L'\t' == *String)) {
+  while ((*String == L' ') || (*String == L'\t')) {
     String++;
   }
 
   //
   // Ignore leading Zeros after the spaces
   //
-  while (L'0' == *String) {
+  while (*String == L'0') {
     String++;
   }
 
@@ -741,9 +747,9 @@ StrDecimalToUint64 (
     // If the number represented by String overflows according 
     // to the range defined by UINTN, then ASSERT().
     //
-    ASSERT ((Result < QUIENT_MAX_UINT64_DIVIDED_BY_10) || 
-      ((QUIENT_MAX_UINT64_DIVIDED_BY_10 == Result) && 
-      (*String - L'0') <= REMINDER_MAX_UINT64_DIVIDED_BY_10)
+    ASSERT ((Result < QUOTIENT_MAX_UINT64_DIVIDED_BY_10) || 
+      ((Result == QUOTIENT_MAX_UINT64_DIVIDED_BY_10) && 
+      (*String - L'0') <= REMAINDER_MAX_UINT64_DIVIDED_BY_10)
       );
 
     Result = MultU64x32 (Result, 10) + (*String - L'0');
@@ -785,7 +791,7 @@ StrDecimalToUint64 (
 
   @param  String                Pointer to a Null-terminated Unicode string.
 
-  @retval UINTN
+  @return The value of type UINTN converted.
 
 **/
 UINTN
@@ -805,20 +811,20 @@ StrHexToUintn (
   //
   // Ignore the pad spaces (space or tab) 
   //
-  while ((L' ' == *String) || (L'\t' == *String)) {
+  while ((*String == L' ') || (*String == L'\t')) {
     String++;
   }
 
   //
   // Ignore leading Zeros after the spaces
   //
-  while (L'0' == *String) {
+  while (*String == L'0') {
     String++;
   }
 
   if (InternalCharToUpper (*String) == L'X') {
-    ASSERT (L'0' == *(String - 1));
-    if (*(String - 1)  != L'0') {
+    ASSERT (*(String - 1) == L'0');
+    if (*(String - 1) != L'0') {
       return 0;
     }
     //
@@ -834,9 +840,9 @@ StrHexToUintn (
     // If the Hex Number represented by String overflows according 
     // to the range defined by UINTN, then ASSERT().
     //
-    ASSERT ((Result < QUIENT_MAX_UINTN_DIVIDED_BY_16) ||
-      ((QUIENT_MAX_UINTN_DIVIDED_BY_16 == Result) && 
-      (InternalHexCharToUintn (*String) <= REMINDER_MAX_UINTN_DIVIDED_BY_16))
+    ASSERT ((Result < QUOTIENT_MAX_UINTN_DIVIDED_BY_16) ||
+      ((Result == QUOTIENT_MAX_UINTN_DIVIDED_BY_16) && 
+      (InternalHexCharToUintn (*String) <= REMAINDER_MAX_UINTN_DIVIDED_BY_16))
       );
 
     Result = (Result << 4) + InternalHexCharToUintn (*String);
@@ -879,7 +885,7 @@ StrHexToUintn (
 
   @param  String                Pointer to a Null-terminated Unicode string.
 
-  @retval UINT64
+  @return The value of type UINT64 converted.
 
 **/
 UINT64
@@ -899,20 +905,20 @@ StrHexToUint64 (
   //
   // Ignore the pad spaces (space or tab) 
   //
-  while ((L' ' == *String) || (L'\t' == *String)) {
+  while ((*String == L' ') || (*String == L'\t')) {
     String++;
   }
 
   //
   // Ignore leading Zeros after the spaces
   //
-  while (L'0' == *String) {
+  while (*String == L'0') {
     String++;
   }
 
   if (InternalCharToUpper (*String) == L'X') {
-    ASSERT (L'0' == *(String - 1));
-    if (*(String - 1)  != L'0') {
+    ASSERT (*(String - 1) == L'0');
+    if (*(String - 1) != L'0') {
       return 0;
     }
     //
@@ -928,9 +934,9 @@ StrHexToUint64 (
     // If the Hex Number represented by String overflows according 
     // to the range defined by UINTN, then ASSERT().
     //
-    ASSERT ((Result < QUIENT_MAX_UINT64_DIVIDED_BY_16)|| 
-      ((QUIENT_MAX_UINT64_DIVIDED_BY_16 == Result) && 
-      (InternalHexCharToUintn (*String) <= REMINDER_MAX_UINT64_DIVIDED_BY_16))
+    ASSERT ((Result < QUOTIENT_MAX_UINT64_DIVIDED_BY_16)|| 
+      ((Result == QUOTIENT_MAX_UINT64_DIVIDED_BY_16) && 
+      (InternalHexCharToUintn (*String) <= REMAINDER_MAX_UINT64_DIVIDED_BY_16))
       );
 
     Result = LShiftU64 (Result, 4);
@@ -951,7 +957,7 @@ StrHexToUint64 (
   @param  Char  The character to check against.
 
   @retval TRUE  If the Char is a decmial character.
-  @retval FALSE Otherwise.
+  @retval FALSE If the Char is not a decmial character.
 
 **/
 BOOLEAN
@@ -974,7 +980,7 @@ InternalAsciiIsDecimalDigitCharacter (
   @param  Char  The character to check against.
 
   @retval TRUE  If the Char is a hexadecmial character.
-  @retval FALSE Otherwise.
+  @retval FALSE If the Char is not a hexadecmial character.
 
 **/
 BOOLEAN
@@ -1019,7 +1025,7 @@ InternalAsciiIsHexaDecimalDigitCharacter (
   @param  Source        Pointer to a Null-terminated Unicode string.
   @param  Destination   Pointer to a Null-terminated ASCII string.
 
-  @return Destination
+  @return Destination pointing to the converted ASCII string.
 
 **/
 CHAR8 *
@@ -1086,7 +1092,7 @@ UnicodeStrToAsciiStr (
   @param  Destination Pointer to a Null-terminated ASCII string.
   @param  Source      Pointer to a Null-terminated ASCII string.
 
-  @return Destination
+  @return Destination pointing to the copied string.
 
 **/
 CHAR8 *
@@ -1140,7 +1146,7 @@ AsciiStrCpy (
   @param  Source      Pointer to a Null-terminated ASCII string.
   @param  Length      Maximum number of ASCII characters to copy.
 
-  @return Destination
+  @return Destination pointing to the copied string.
 
 **/
 CHAR8 *
@@ -1153,7 +1159,7 @@ AsciiStrnCpy (
 {
   CHAR8                             *ReturnValue;
 
-  if (0 == Length) {
+  if (Length == 0) {
     return Destination;
   }
 
@@ -1265,8 +1271,9 @@ AsciiStrSize (
   @param  FirstString   Pointer to a Null-terminated ASCII string.
   @param  SecondString  Pointer to a Null-terminated ASCII string.
 
-  @retval 0   FirstString is identical to SecondString.
-  @retval !=0 FirstString is not identical to SecondString.
+  @retval 0      FirstString is identical to SecondString.
+  @return The first mismatched ASCII character in SecondString subtracted
+          from the first mismatched ASCII character in FirstString.
 
 **/
 INTN
@@ -1291,7 +1298,7 @@ AsciiStrCmp (
 }
 
 /**
-  Converts a lowercase Ascii character to upper one
+  Converts a lowercase Ascii character to upper one.
 
   If Chr is lowercase Ascii character, then converts it to upper one.
 
@@ -1322,7 +1329,7 @@ AsciiToUpper (
 
   @param  Char  The character to convert.
 
-  @retval UINTN   The numerical value converted.
+  @return The numerical value converted.
 
 **/
 UINTN
@@ -1362,10 +1369,10 @@ InternalAsciiHexCharToUintn (
   @param  FirstString   Pointer to a Null-terminated ASCII string.
   @param  SecondString  Pointer to a Null-terminated ASCII string.
 
-  @retval 0   FirstString is identical to SecondString using case insensitive
-              comparisons.
-  @retval !=0 FirstString is not identical to SecondString using case
-              insensitive comparisons.
+  @retval 0      FirstString is identical to SecondString using case insensitive
+                 comparisons.
+  @return The first mismatched lower case ASCII character in SecondString subtracted
+          from the first mismatched lower case ASCII character in FirstString.
 
 **/
 INTN
@@ -1420,8 +1427,9 @@ AsciiStriCmp (
   @param  SecondString  Pointer to a Null-terminated ASCII string.
   @param  Length        Maximum number of ASCII characters to compare.
                         
-  @retval 0   FirstString is identical to SecondString.
-  @retval !=0 FirstString is not identical to SecondString.
+  @retval 0      FirstString is identical to SecondString.
+  @return The first mismatched ASCII character in SecondString subtracted from the
+          first mismatched ASCII character in FirstString.
 
 **/
 INTN
@@ -1432,7 +1440,7 @@ AsciiStrnCmp (
   IN      UINTN                     Length
   )
 {
-  if (0 == Length) {
+  if (Length == 0) {
     return 0;
   }
 
@@ -1476,7 +1484,7 @@ AsciiStrnCmp (
   @param  Destination Pointer to a Null-terminated ASCII string.
   @param  Source      Pointer to a Null-terminated ASCII string.
 
-  @return Destination
+  @return Destination pointing to the concatenated ASCII string.
 
 **/
 CHAR8 *
@@ -1527,7 +1535,7 @@ AsciiStrCat (
   @param  Length      Maximum number of ASCII characters to concatenate from
                       Source.
 
-  @return Destination
+  @return Destination pointing to the concatenated ASCII string.
 
 **/
 CHAR8 *
@@ -1568,7 +1576,7 @@ AsciiStrnCat (
   @param  SearchString    Pointer to a Null-terminated ASCII string to search for.
 
   @retval NULL            If the SearchString does not appear in String.
-  @retval !NULL           If there is a match.
+  @return Pointer to the matching sub-string.
 
 **/
 CHAR8 *
@@ -1643,7 +1651,7 @@ AsciiStrStr (
 
   @param  String                Pointer to a Null-terminated ASCII string.
 
-  @retval UINTN           
+  @return The value of type UINTN converted.
 
 **/
 UINTN
@@ -1662,14 +1670,14 @@ AsciiStrDecimalToUintn (
   //
   // Ignore the pad spaces (space or tab)
   //
-  while ((' ' == *String) || ('\t' == *String)) {
+  while ((*String == ' ') || (*String == '\t' )) {
     String++;
   }
 
   //
   // Ignore leading Zeros after the spaces
   //
-  while ('0' == *String) {
+  while (*String == '0') {
     String++;
   }
 
@@ -1680,9 +1688,9 @@ AsciiStrDecimalToUintn (
     // If the number represented by String overflows according 
     // to the range defined by UINTN, then ASSERT().
     //
-    ASSERT ((Result < QUIENT_MAX_UINTN_DIVIDED_BY_10) ||
-      ((QUIENT_MAX_UINTN_DIVIDED_BY_10 == Result) && 
-      (*String - '0') <= REMINDER_MAX_UINTN_DIVIDED_BY_10)
+    ASSERT ((Result < QUOTIENT_MAX_UINTN_DIVIDED_BY_10) ||
+      ((Result == QUOTIENT_MAX_UINTN_DIVIDED_BY_10) && 
+      (*String - '0') <= REMAINDER_MAX_UINTN_DIVIDED_BY_10)
       );
 
     Result = Result * 10 + (*String - '0');
@@ -1720,7 +1728,7 @@ AsciiStrDecimalToUintn (
 
   @param  String                Pointer to a Null-terminated ASCII string.
 
-  @retval UINT64           
+  @return The value of type UINT64 converted.
 
 **/
 UINT64
@@ -1739,14 +1747,14 @@ AsciiStrDecimalToUint64 (
   //
   // Ignore the pad spaces (space or tab)
   //
-  while ((' ' == *String) || ('\t' == *String)) {
+  while ((*String == ' ') || (*String == '\t' )) {
     String++;
   }
 
   //
   // Ignore leading Zeros after the spaces
   //
-  while ('0' == *String) {
+  while (*String == '0') {
     String++;
   }
 
@@ -1757,9 +1765,9 @@ AsciiStrDecimalToUint64 (
     // If the number represented by String overflows according 
     // to the range defined by UINTN, then ASSERT().
     //
-    ASSERT ((Result < QUIENT_MAX_UINT64_DIVIDED_BY_10) || 
-      ((QUIENT_MAX_UINT64_DIVIDED_BY_10 == Result) && 
-      (*String - '0') <= REMINDER_MAX_UINT64_DIVIDED_BY_10)
+    ASSERT ((Result < QUOTIENT_MAX_UINT64_DIVIDED_BY_10) || 
+      ((Result == QUOTIENT_MAX_UINT64_DIVIDED_BY_10) && 
+      (*String - '0') <= REMAINDER_MAX_UINT64_DIVIDED_BY_10)
       );
 
     Result = MultU64x32 (Result, 10) + (*String - '0');
@@ -1800,7 +1808,7 @@ AsciiStrDecimalToUint64 (
 
   @param  String                Pointer to a Null-terminated ASCII string.
 
-  @retval UINTN
+  @return The value of type UINTN converted.
 
 **/
 UINTN
@@ -1819,20 +1827,20 @@ AsciiStrHexToUintn (
   //
   // Ignore the pad spaces (space or tab) 
   //
-  while ((' ' == *String) || ('\t' == *String)) {
+  while ((*String == ' ') || (*String == '\t' )) {
     String++;
   }
 
   //
   // Ignore leading Zeros after the spaces
   //
-  while ('0' == *String) {
+  while (*String == '0') {
     String++;
   }
 
   if (AsciiToUpper (*String) == 'X') {
-    ASSERT ('0' == *(String - 1));
-    if (*(String - 1)  != '0') {
+    ASSERT (*(String - 1) == '0');
+    if (*(String - 1) != '0') {
       return 0;
     }
     //
@@ -1848,9 +1856,9 @@ AsciiStrHexToUintn (
     // If the Hex Number represented by String overflows according 
     // to the range defined by UINTN, then ASSERT().
     //
-     ASSERT ((Result < QUIENT_MAX_UINTN_DIVIDED_BY_16) ||
-       ((QUIENT_MAX_UINTN_DIVIDED_BY_16 == Result) && 
-       (InternalAsciiHexCharToUintn (*String) <= REMINDER_MAX_UINTN_DIVIDED_BY_16))
+     ASSERT ((Result < QUOTIENT_MAX_UINTN_DIVIDED_BY_16) ||
+       ((Result == QUOTIENT_MAX_UINTN_DIVIDED_BY_16) && 
+       (InternalAsciiHexCharToUintn (*String) <= REMAINDER_MAX_UINTN_DIVIDED_BY_16))
        );
 
     Result = (Result << 4) + InternalAsciiHexCharToUintn (*String);
@@ -1892,7 +1900,7 @@ AsciiStrHexToUintn (
 
   @param  String                Pointer to a Null-terminated ASCII string.
 
-  @retval UINT64
+  @return The value of type UINT64 converted.
 
 **/
 UINT64
@@ -1914,20 +1922,20 @@ AsciiStrHexToUint64 (
   //
   // Ignore the pad spaces (space or tab) 
   //
-  while ((' ' == *String) || ('\t' == *String)) {
+  while ((*String == ' ') || (*String == '\t' )) {
     String++;
   }
 
   //
   // Ignore leading Zeros after the spaces
   //
-  while ('0' == *String) {
+  while (*String == '0') {
     String++;
   }
 
   if (AsciiToUpper (*String) == 'X') {
-    ASSERT ('0' == *(String - 1));
-    if (*(String - 1)  != '0') {
+    ASSERT (*(String - 1) == '0');
+    if (*(String - 1) != '0') {
       return 0;
     }
     //
@@ -1943,9 +1951,9 @@ AsciiStrHexToUint64 (
     // If the Hex Number represented by String overflows according 
     // to the range defined by UINTN, then ASSERT().
     //
-    ASSERT ((Result < QUIENT_MAX_UINT64_DIVIDED_BY_16) ||
-      ((QUIENT_MAX_UINT64_DIVIDED_BY_16 == Result) && 
-      (InternalAsciiHexCharToUintn (*String) <= REMINDER_MAX_UINT64_DIVIDED_BY_16))
+    ASSERT ((Result < QUOTIENT_MAX_UINT64_DIVIDED_BY_16) ||
+      ((Result == QUOTIENT_MAX_UINT64_DIVIDED_BY_16) && 
+      (InternalAsciiHexCharToUintn (*String) <= REMAINDER_MAX_UINT64_DIVIDED_BY_16))
       );
 
     Result = LShiftU64 (Result, 4);
@@ -1981,7 +1989,7 @@ AsciiStrHexToUint64 (
   @param  Source        Pointer to a Null-terminated ASCII string.
   @param  Destination   Pointer to a Null-terminated Unicode string.
 
-  @return Destination
+  @return Destination pointing to the converted Unicode string.
 
 **/
 CHAR16 *
@@ -2034,7 +2042,7 @@ AsciiStrToUnicodeStr (
 
   @param  Value The 8-bit value to convert to BCD. Range 0..99.
 
-  @return The BCD value
+  @return The BCD value converted.
 
 **/
 UINT8
@@ -2058,7 +2066,7 @@ DecimalToBcd8 (
 
   @param  Value The 8-bit BCD value to convert to an 8-bit value.
 
-  @return The 8-bit value is returned.
+  @return The 8-bit decimal value converted.
 
 **/
 UINT8
@@ -2084,10 +2092,11 @@ BcdToDecimal8 (
 
   @param Nibble     The nibble which is in the low 4 bits of the input byte.
 
-  @retval  CHAR16   The Unicode hexadecimal character.
+  @return   The Unicode hexadecimal character.
   
 **/
 CHAR16
+EFIAPI
 NibbleToHexChar (
   IN UINT8      Nibble
   )
@@ -2103,7 +2112,7 @@ NibbleToHexChar (
 /** 
   Convert binary buffer to a Unicode String in a specified sequence. 
 
-  This function converts bytes in the binary Buffer Buf to a Unicode String Str. 
+  This function converts bytes in the memory block pointed by Buffer to a Unicode String Str. 
   Each byte will be represented by two Unicode characters. For example, byte 0xA1 will 
   be converted into two Unicode character L'A' and L'1'. In the output String, the Unicode Character 
   for the Most Significant Nibble will be put before the Unicode Character for the Least Significant
@@ -2115,18 +2124,17 @@ NibbleToHexChar (
   the input buffer for a 64-bits unsigned integrer 0x12345678abcdef1234 will be converted to
   a Unicode string equal to L"12345678abcdef1234".
 
-  @param String                        On input, String is pointed to the buffer allocated for the convertion.
-  @param StringLen                     The Length of String buffer to hold the output String. The length must include the tailing '\0' character.
-                                       The StringLen required to convert a N bytes Buffer will be a least equal to or greater 
-                                       than 2*N + 1.
-  @param Buffer                        The pointer to a input buffer.
-  @param BufferSizeInBytes             Lenth in bytes of the input buffer.
+  @param String                 Pointer to the buffer allocated for the convertion.
+  @param StringLen              On input: Pointer to length in bytes of buffer to hold the Unicode string.
+                                On output:If return EFI_SUCCESS, pointer to length of Unicode string converted.
+                                          If return EFI_BUFFER_TOO_SMALL, pointer to length of string buffer desired.
+  @param Buffer                 The pointer to a input buffer.
+  @param BufferSizeInBytes      Lenth in bytes of the input buffer.
   
-
-  @retval  EFI_SUCCESS                 The convertion is successfull. All bytes in Buffer has been convert to the corresponding
-                                       Unicode character and placed into the right place in String.
-  @retval  EFI_BUFFER_TOO_SMALL        StringSizeInBytes is smaller than 2 * N + 1the number of bytes required to
-                                       complete the convertion. 
+  @retval EFI_SUCCESS           The convertion is successfull. All bytes in Buffer has been convert to the corresponding
+                                Unicode character and placed into the right place in String.
+  @retval EFI_BUFFER_TOO_SMALL  StringSizeInBytes is smaller than 2 * N + 1the number of bytes required to
+                                complete the convertion. 
 **/
 RETURN_STATUS
 EFIAPI
@@ -2277,7 +2285,10 @@ HexStringToBuf (
   Unicode character is converted to a byte. For example, Unicode character
   L'A' will be converted to 0x0A. 
 
-  If Digit is NULL, then ASSERT.
+  If Digit is NULL, then ASSERT().
+  
+  @param  Digit       The output hexadecimal digit.
+  @param  Char        The input Unicode character.
 
   @retval TRUE        Char is in the range of Hexadecimal number. Digit is updated
                       to the byte value of the number.
@@ -2286,6 +2297,7 @@ HexStringToBuf (
   
 **/
 BOOLEAN
+EFIAPI
 IsHexDigit (
   OUT UINT8      *Digit,
   IN  CHAR16      Char

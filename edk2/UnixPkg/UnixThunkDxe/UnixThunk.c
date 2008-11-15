@@ -36,11 +36,12 @@ Abstract:
 #include <Library/UnixLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/DevicePathLib.h>
 
 //
 // WinNtThunk Device Path Protocol Instance
 //
-static UNIX_THUNK_DEVICE_PATH mUnixThunkDevicePath = {
+UNIX_THUNK_DEVICE_PATH mUnixThunkDevicePath = {
   {
     {
       HARDWARE_DEVICE_PATH,

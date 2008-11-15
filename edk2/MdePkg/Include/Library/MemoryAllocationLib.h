@@ -1,14 +1,14 @@
 /** @file
-  Memory Allocation Library Services
+  Provides services to allocate and free memory buffers of various memory types and alignments.
 
-  Copyright (c) 2006, Intel Corporation                                                         
-  All rights reserved. This program and the accompanying materials                          
-  are licensed and made available under the terms and conditions of the BSD License         
-  which accompanies this distribution.  The full text of the license may be found at        
-  http://opensource.org/licenses/bsd-license.php                                            
+Copyright (c) 2006 - 2008, Intel Corporation
+All rights reserved. This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
 
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
@@ -304,7 +304,7 @@ AllocateReservedZeroPool (
   allocated buffer.  If AllocationSize is 0, then a valid buffer of 0 size is returned.  If there
   is not enough memory remaining to satisfy the request, then NULL is returned.
   If Buffer is NULL, then ASSERT().
-  If AllocationSize is greater than (MAX_ADDRESS ? Buffer + 1), then ASSERT(). 
+  If AllocationSize is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT(). 
 
   @param  AllocationSize        The number of bytes to allocate and zero.
   @param  Buffer                The buffer to copy to the allocated buffer.
@@ -327,7 +327,7 @@ AllocateCopyPool (
   allocated buffer.  If AllocationSize is 0, then a valid buffer of 0 size is returned.  If there
   is not enough memory remaining to satisfy the request, then NULL is returned.
   If Buffer is NULL, then ASSERT().
-  If AllocationSize is greater than (MAX_ADDRESS ? Buffer + 1), then ASSERT(). 
+  If AllocationSize is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT(). 
 
   @param  AllocationSize        The number of bytes to allocate and zero.
   @param  Buffer                The buffer to copy to the allocated buffer.
@@ -350,7 +350,7 @@ AllocateRuntimeCopyPool (
   allocated buffer.  If AllocationSize is 0, then a valid buffer of 0 size is returned.  If there
   is not enough memory remaining to satisfy the request, then NULL is returned.
   If Buffer is NULL, then ASSERT().
-  If AllocationSize is greater than (MAX_ADDRESS ? Buffer + 1), then ASSERT(). 
+  If AllocationSize is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT(). 
 
   @param  AllocationSize        The number of bytes to allocate and zero.
   @param  Buffer                The buffer to copy to the allocated buffer.
@@ -380,20 +380,6 @@ AllocateReservedCopyPool (
 VOID
 EFIAPI
 FreePool (
-  IN VOID   *Buffer
-  );
-
-/**
-  Frees buffer that were previously allocated with one of the
-  memory allocation functions in the Memory Allocation Library.
-
-  @param  Buffer                Pointer to the buffer of pages
-                                to free.
-
-**/
-VOID
-EFIAPI
-SafeFreePool (
   IN VOID   *Buffer
   );
 

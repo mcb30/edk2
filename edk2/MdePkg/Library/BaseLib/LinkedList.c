@@ -1,7 +1,7 @@
 /** @file
   Linked List Library Functions.
 
-  Copyright (c) 2006, Intel Corporation<BR>
+  Copyright (c) 2006 - 2008, Intel Corporation<BR>
   All rights reserved. This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -11,11 +11,6 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
-
-//
-// Include common header file for this module.
-//
-
 
 #include "BaseLibInternals.h"
 
@@ -27,7 +22,7 @@
 
   If List is NULL, then ASSERT().
   If List->ForwardLink is NULL, then ASSERT().
-  If List->backLink is NULL, then ASSERT().
+  If List->BackLink is NULL, then ASSERT().
   If Node is NULL, then ASSERT();
   If PcdMaximumLinkedListLenth is not zero, and prior to insertion the number
   of nodes in ListHead, including the ListHead node, is greater than or
@@ -291,11 +286,13 @@ IsListEmpty (
 }
 
 /**
-  Determines if a node in a doubly linked list is null.
+  Determines if a node in a doubly linked list is the head node of a the same
+  doubly linked list.  This function is typically used to terminate a loop that
+  traverses all the nodes in a doubly linked list starting with the head node.
 
-  Returns FALSE if Node is one of the nodes in the doubly linked list specified
-  by List. Otherwise, TRUE is returned. List must have been initialized with
-  InitializeListHead().
+  Returns TRUE if Node is equal to List.  Returns FALSE if Node is one of the
+  nodes in the doubly linked list specified by List.  List must have been
+  initialized with InitializeListHead().
 
   If List is NULL, then ASSERT().
   If Node is NULL, then ASSERT().
@@ -386,7 +383,7 @@ IsNodeAtEnd (
   @param  FirstEntry  A pointer to a node in a linked list.
   @param  SecondEntry A pointer to another node in the same linked list.
   
-  @return SecondEntry
+  @return SecondEntry after the nodes are swapped
 
 **/
 LIST_ENTRY *
@@ -413,7 +410,7 @@ SwapListEntries (
   Ptr = RemoveEntryList (FirstEntry);
 
   //
-  // If FirstEntry immediately follows SecondEntry, FirstEntry willl be placed
+  // If FirstEntry immediately follows SecondEntry, FirstEntry will be placed
   // immediately in front of SecondEntry
   //
   if (Ptr->BackLink == SecondEntry) {
@@ -454,7 +451,9 @@ SwapListEntries (
 
   @param  Entry A pointer to a node in a linked list
 
-  @return Entry
+  @return The node following Entry in the doubly linked list.
+          If Entry is the only node in the linked list, then
+          the head node of the linked list is returned.
 
 **/
 LIST_ENTRY *

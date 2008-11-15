@@ -18,8 +18,6 @@
 #ifndef __EDID_OVERRIDE_H__
 #define __EDID_OVERRIDE_H__
 
-#include <PiDxe.h>
-
 #define EFI_EDID_OVERRIDE_PROTOCOL_GUID \
   { \
     0x48ecb431, 0xfb72, 0x45c0, {0xa9, 0x22, 0xf4, 0x58, 0xfe, 0x4, 0xb, 0xd5 } \
@@ -56,15 +54,10 @@ EFI_STATUS
   IN OUT UINT8                            **Edid
   );
 
-/**
-  @par Protocol Description:
-  This protocol is produced by the platform to allow the platform to provide 
-  EDID information to the producer of the Graphics Output protocol.
-
-  @param GetEdid 
-  Returns EDID values and attributes that the Video BIOS must use. 
-
-**/
+///
+/// This protocol is produced by the platform to allow the platform to provide 
+/// EDID information to the producer of the Graphics Output protocol.
+///
 struct _EFI_EDID_OVERRIDE_PROTOCOL {
   EFI_EDID_OVERRIDE_PROTOCOL_GET_EDID   GetEdid;
 };

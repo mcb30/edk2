@@ -12,12 +12,7 @@
 
 **/
 
-//
-// Include common header file for this module.
-//
-#include <BaseLibInternals.h>
-
-#if _MSC_EXTENSIONS
+#include "BaseLibInternals.h"
 
 /**
   Disables the 32-bit paging mode on the CPU.
@@ -80,5 +75,3 @@ InternalX86DisablePaging32 (
     jmp     $                           // EntryPoint() should not return
   }
 }
-
-#endif

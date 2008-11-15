@@ -13,10 +13,9 @@
 **/
 
 #include <Uefi.h>
-#include <Library/DebugLib.h>
+#include <Library/PcdLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
-#include <Library/UefiBootServicesTableLib.h>
 
 
 /**
@@ -37,10 +36,19 @@ UefiMain (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
-
 {
+	UINT32 Index;
+	
+	Index = 0;
   
-  Print ((CHAR16 *)L"UEFI Hello World!\n");
+  //
+  // Three PCD type (FeatureFlag, UINT32 and String) are used as the sample.
+  //
+  if (FeaturePcdGet (PcdHelloWorldPrintEnable)) {
+  	for (Index = 0; Index < PcdGet32 (PcdHelloWorldPrintTimes); Index ++) {
+    	Print ((CHAR16*)PcdGetPtr (PcdHelloWorldPrintString));
+    }
+  }
 
   return EFI_SUCCESS;
 }

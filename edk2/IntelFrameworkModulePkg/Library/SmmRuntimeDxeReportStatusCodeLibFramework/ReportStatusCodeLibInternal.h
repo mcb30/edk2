@@ -23,6 +23,8 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/PcdLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/DevicePathLib.h>
 
 #include <Guid/StatusCodeDataTypeId.h>
 #include <Protocol/StatusCode.h>

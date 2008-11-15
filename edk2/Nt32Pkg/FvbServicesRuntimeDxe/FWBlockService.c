@@ -45,6 +45,7 @@ Revision History
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/DevicePathLib.h>
 
 #include "FWBlockService.h"
 
@@ -1080,10 +1081,10 @@ EFI_STATUS
 EFIAPI
 FvbProtocolWrite (
   IN CONST EFI_FIRMWARE_VOLUME_BLOCK_PROTOCOL           *This,
-  IN CONST EFI_LBA                                      Lba,
-  IN CONST UINTN                                        Offset,
-  IN OUT UINTN                                    *NumBytes,
-  IN CONST UINT8                                        *Buffer
+  IN       EFI_LBA                                      Lba,
+  IN       UINTN                                        Offset,
+  IN OUT   UINTN                                    *NumBytes,
+  IN       UINT8                                        *Buffer
   )
 /*++
 
@@ -1221,7 +1222,6 @@ Returns:
           );
 }
 
-STATIC
 EFI_STATUS
 ValidateFvHeader (
   EFI_FIRMWARE_VOLUME_HEADER            *FwVolHeader
@@ -1263,7 +1263,7 @@ Returns:
   Ptr           = (UINT16 *) FwVolHeader;
   Checksum      = 0;
   while (HeaderLength > 0) {
-    Checksum = Checksum + (*Ptr);
+    Checksum = (UINT16)(Checksum + (*Ptr));
     HeaderLength--;
     Ptr++;
   }
@@ -1485,14 +1485,14 @@ Returns:
                       NULL
                       );
       ASSERT_EFI_ERROR (Status);
-    } else if (EfiIsDevicePathEnd (TempFwbDevicePath)) {
+    } else if (IsDevicePathEnd (TempFwbDevicePath)) {
       //
       // Device allready exists, so reinstall the FVB protocol
       //
       Status = gBS->HandleProtocol (
                       FwbHandle,
                       &gEfiFirmwareVolumeBlockProtocolGuid,
-                      &OldFwbInterface
+                      (VOID**)&OldFwbInterface
                       );
       ASSERT_EFI_ERROR (Status);
 

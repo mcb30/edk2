@@ -1,8 +1,5 @@
 #/** @file
-#  
-#    Component description file for DxeMain module.
-#  
-#   This module provide an DXE CIS compliant implementation of DXE Core.
+#  This module provides an implementation of DXE Core that is compliant with DXE CIS.
 #  
 #  Copyright (c) 2006 - 2008, Intel Corporation. <BR>
 #  All rights reserved. This program and the accompanying materials
@@ -17,31 +14,27 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = DxeMain
+  BASE_NAME                      = DxeCore
   FILE_GUID                      = D6A2CB7F-6A18-4e2f-B43B-9920A733700A
   MODULE_TYPE                    = DXE_CORE
   VERSION_STRING                 = 1.0
   EDK_RELEASE_VERSION            = 0x00020000
-  EFI_SPECIFICATION_VERSION      = 0x00020000
+  PI_SPECIFICATION_VERSION       = 0x00010000
 
   ENTRY_POINT                    = DxeMain
 
-#  VALID_ARCHITECTURES           = IA32 X64 IPF
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC (EBC is for build only)
+#
 
 [Sources.common]
-  Library.h
-  Imem.h
-  Image.h
-  Hand.h
-  Gcd.h
-  FwVolDriver.h
-  FwVolBlock.h
-  Exec.h
   DxeMain.h
-  DebugImageInfo.h
   SectionExtraction/CoreSectionExtraction.c
   Image/ImageFile.c
   Image/Image.c
+  Image/Image.h
   Misc/DebugImageInfo.c
   Misc/Stall.c
   Misc/SetWatchdogTimer.c
@@ -51,20 +44,25 @@
   Hand/Notify.c
   Hand/Locate.c
   Hand/Handle.c
+  Hand/Handle.h
   Gcd/Gcd.c
+  Gcd/Gcd.h
   Mem/Pool.c
   Mem/Page.c
   Mem/MemData.c
+  Mem/Imem.h
   FwVolBlock/FwVolBlock.c
+  FwVolBlock/FwVolBlock.h
   FwVol/FwVolWrite.c
   FwVol/FwVolRead.c
   FwVol/FwVolAttrib.c
   FwVol/Ffs.c
   FwVol/FwVol.c
+  FwVol/FwVolDriver.h
   Event/Tpl.c
   Event/Timer.c
   Event/Event.c
-  Event/ExecData.c
+  Event/Event.h
   Dispatcher/Dependency.c
   Dispatcher/Dispatcher.c
   DxeMain/DxeProtocolNotify.c
@@ -90,9 +88,9 @@
   UefiBootServicesTableLib
   DevicePathLib
   ReportStatusCodeLib
+  TimerLib
 
 [Guids]
-  gEfiEventLegacyBootGuid                       # ALWAYS_CONSUMED
   gEfiEventReadyToBootGuid                      # ALWAYS_CONSUMED
   gEfiEventMemoryMapChangeGuid                  # ALWAYS_CONSUMED
   gEfiEventVirtualAddressChangeGuid             # ALWAYS_CONSUMED

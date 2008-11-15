@@ -17,7 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #ifndef _VARIABLE_H
 #define _VARIABLE_H
 
-#include <Uefi.h>
+#include <PiDxe.h>
 #include <Protocol/VariableWrite.h>
 #include <Protocol/FaultTolerantWriteLite.h>
 #include <Protocol/FirmwareVolumeBlock.h>
@@ -33,7 +33,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiLib.h>
 #include <Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/HobLib.h>
 #include <Guid/VariableInfo.h>
 #include <Guid/GlobalVariable.h>
 #include <VariableFormat.h>

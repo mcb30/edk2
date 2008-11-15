@@ -11,10 +11,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
-//
-// Include common header file for this module.
-//
-#include <BaseLibInternals.h>
+
+#include "BaseLibInternals.h"
 
 /**
   Transfers control to a function starting with a new stack.

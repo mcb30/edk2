@@ -14,8 +14,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
 
   @par Revision Reference:
-  This PPI is defined in PI.
-  Version 1.0.
+  This PPI is introduced in PI Version 1.0.
 
 **/
 
@@ -29,14 +28,15 @@
     0xef398d58, 0x9dfd, 0x4103, {0xbf, 0x94, 0x78, 0xc6, 0xf4, 0xfe, 0x71, 0x2f } \
   }
 
-/**
-  @par Ppi Description:
-  This PPI provides provide a simple reset service. 
+//
+// EFI_PEI_RESET_PPI.ResetSystem() is equivalent to the
+// PEI Service ResetSystem().
+// It is introduced in PIPeiCis.h. 
+//
 
-  @param ResetSystem
-  A service to reset the entire platform.
-
-**/
+///
+/// This PPI provides provide a simple reset service. 
+///
 typedef struct {
   EFI_PEI_RESET_SYSTEM  ResetSystem;
 } EFI_PEI_RESET_PPI;

@@ -34,7 +34,7 @@
 //
 // Template for an end-of-device path node.
 //
-STATIC EFI_DEVICE_PATH_PROTOCOL  mEndDevicePath = {
+GLOBAL_REMOVE_IF_UNREFERENCED CONST EFI_DEVICE_PATH_PROTOCOL  mUefiDevicePathLibEndDevicePath = {
   END_DEVICE_PATH_TYPE,
   END_ENTIRE_DEVICE_PATH_SUBTYPE,
   {
@@ -70,14 +70,14 @@ GetDevicePathSize (
   // Search for the end of the device path structure
   //
   Start = DevicePath;
-  while (!EfiIsDevicePathEnd (DevicePath)) {
-    DevicePath = EfiNextDevicePathNode (DevicePath);
+  while (!IsDevicePathEnd (DevicePath)) {
+    DevicePath = NextDevicePathNode (DevicePath);
   }
 
   //
   // Compute the size and add back in the size of the end device path structure
   //
-  return ((UINTN) DevicePath - (UINTN) Start) + sizeof (EFI_DEVICE_PATH_PROTOCOL);
+  return ((UINTN) DevicePath - (UINTN) Start) + DevicePathNodeLength (DevicePath);
 }
 
 /**
@@ -99,7 +99,6 @@ DuplicateDevicePath (
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
-  EFI_DEVICE_PATH_PROTOCOL  *NewDevicePath;
   UINTN                     Size;
 
   //
@@ -113,9 +112,8 @@ DuplicateDevicePath (
   //
   // Allocate space for duplicate device path
   //
-  NewDevicePath = AllocateCopyPool (Size, DevicePath);
 
-  return NewDevicePath;
+  return AllocateCopyPool (Size, DevicePath);
 }
 
 /**
@@ -155,7 +153,7 @@ AppendDevicePath (
   // If there's only 1 path, just duplicate it.
   //
   if (FirstDevicePath == NULL) {
-    return DuplicateDevicePath ((SecondDevicePath != NULL) ? SecondDevicePath : &mEndDevicePath);
+    return DuplicateDevicePath ((SecondDevicePath != NULL) ? SecondDevicePath : &mUefiDevicePathLibEndDevicePath);
   }
 
   if (SecondDevicePath == NULL) {
@@ -168,7 +166,7 @@ AppendDevicePath (
   //
   Size1         = GetDevicePathSize (FirstDevicePath);
   Size2         = GetDevicePathSize (SecondDevicePath);
-  Size          = Size1 + Size2 - sizeof (EFI_DEVICE_PATH_PROTOCOL);
+  Size          = Size1 + Size2 - END_DEVICE_PATH_LENGTH;
 
   NewDevicePath = AllocatePool (Size);
 
@@ -178,7 +176,7 @@ AppendDevicePath (
     // Over write FirstDevicePath EndNode and do the copy
     //
     DevicePath2 = (EFI_DEVICE_PATH_PROTOCOL *) ((CHAR8 *) NewDevicePath +
-                  (Size1 - sizeof (EFI_DEVICE_PATH_PROTOCOL)));
+                  (Size1 - END_DEVICE_PATH_LENGTH));
     CopyMem (DevicePath2, SecondDevicePath, Size2);
   }
 
@@ -219,14 +217,14 @@ AppendDevicePathNode (
   UINTN                     NodeLength;
 
   if (DevicePathNode == NULL) {
-    return DuplicateDevicePath ((DevicePath != NULL) ? DevicePath : &mEndDevicePath);
+    return DuplicateDevicePath ((DevicePath != NULL) ? DevicePath : &mUefiDevicePathLibEndDevicePath);
   }
   //
   // Build a Node that has a terminator on it
   //
   NodeLength = DevicePathNodeLength (DevicePathNode);
 
-  TempDevicePath = AllocatePool (NodeLength + sizeof (EFI_DEVICE_PATH_PROTOCOL));
+  TempDevicePath = AllocatePool (NodeLength + END_DEVICE_PATH_LENGTH);
   if (TempDevicePath == NULL) {
     return NULL;
   }
@@ -398,7 +396,7 @@ GetNextDevicePathInstance (
   @param  NodeSubType                The device node sub-type for the new device node.
   @param  NodeLength                 The length of the new device node.
 
-  @return The new device path.
+  @return A pointer to the new create device path.
 
 **/
 EFI_DEVICE_PATH_PROTOCOL *
@@ -453,12 +451,12 @@ IsDevicePathMultiInstance (
   }
 
   Node = DevicePath;
-  while (!EfiIsDevicePathEnd (Node)) {
-    if (EfiIsDevicePathEndInstance (Node)) {
+  while (!IsDevicePathEnd (Node)) {
+    if (IsDevicePathEndInstance (Node)) {
       return TRUE;
     }
 
-    Node = EfiNextDevicePathNode (Node);
+    Node = NextDevicePathNode (Node);
   }
 
   return FALSE;
@@ -510,7 +508,7 @@ DevicePathFromHandle (
                                      may be NULL.
   @param  FileName                   A pointer to a Null-terminated Unicode string.
 
-  @return The allocated device path.
+  @return A pointer to the new created file device path.
 
 **/
 EFI_DEVICE_PATH_PROTOCOL *
@@ -520,15 +518,16 @@ FileDevicePath (
   IN CONST CHAR16                    *FileName
   )
 {
-  UINTN                     Size;
+  UINT16                    Size;
   FILEPATH_DEVICE_PATH      *FilePath;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *FileDevicePath;
 
   DevicePath = NULL;
 
-  Size = StrSize (FileName);
-  FileDevicePath = AllocatePool (Size + SIZE_OF_FILEPATH_DEVICE_PATH + EFI_END_DEVICE_PATH_LENGTH);
+  Size = (UINT16) StrSize (FileName);
+  
+  FileDevicePath = AllocatePool (Size + SIZE_OF_FILEPATH_DEVICE_PATH + END_DEVICE_PATH_LENGTH);
   if (FileDevicePath != NULL) {
     FilePath = (FILEPATH_DEVICE_PATH *) FileDevicePath;
     FilePath->Header.Type    = MEDIA_DEVICE_PATH;

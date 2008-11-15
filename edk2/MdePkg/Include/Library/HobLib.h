@@ -1,14 +1,15 @@
 /** @file
-  Public include file for the HOB Library
+  Provides services to create and parse HOBs. Only available for PEI
+  and DXE module types.
 
-  Copyright (c) 2006 - 2007, Intel Corporation                                                         
-  All rights reserved. This program and the accompanying materials                          
-  are licensed and made available under the terms and conditions of the BSD License         
-  which accompanies this distribution.  The full text of the license may be found at        
-  http://opensource.org/licenses/bsd-license.php                                            
+Copyright (c) 2006 - 2008, Intel Corporation
+All rights reserved. This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
 
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
@@ -17,9 +18,10 @@
 
 /**
   Returns the pointer to the HOB list.
+  ASSERT() if the HOB list returned by GetHobList() is NULL.
 
   This function returns the pointer to first HOB in the list.
-
+  
   @return The pointer to the HOB list.
 
 **/
@@ -373,15 +375,34 @@ BuildMemoryAllocationHob (
   IN EFI_MEMORY_TYPE             MemoryType
   );
 
+///
+/// Get a HOB's type from HOB header
+///
 #define GET_HOB_TYPE(Hob)     ((Hob).Header->HobType)
+
+///
+/// Get a HOB's length from HOB header
+///
 #define GET_HOB_LENGTH(Hob)   ((Hob).Header->HobLength)
+
+///
+/// Get the pointer to next HOB in HOB List
+///
 #define GET_NEXT_HOB(Hob)     ((Hob).Raw + GET_HOB_LENGTH (Hob))
+
+///
+/// Judge if the HOB is the end of HOB List
+///
 #define END_OF_HOB_LIST(Hob)  (GET_HOB_TYPE (Hob) == (UINT16)EFI_HOB_TYPE_END_OF_HOB_LIST)
 
-//
-// Get the data and data size field of GUID 
-//
+///
+/// Get the pointer to data field of GUID HOB 
+///
 #define GET_GUID_HOB_DATA(GuidHob)      ((VOID *) (((UINT8 *) &((GuidHob)->Name)) + sizeof (EFI_GUID)))
+
+///
+/// Get the data size of GUID HOB
+///
 #define GET_GUID_HOB_DATA_SIZE(GuidHob) (((GuidHob)->Header).HobLength - sizeof (EFI_HOB_GUID_TYPE))
 
 #endif

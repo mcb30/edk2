@@ -32,7 +32,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Template for Text In Splitter
 //
-STATIC TEXT_IN_SPLITTER_PRIVATE_DATA  mConIn = {
+TEXT_IN_SPLITTER_PRIVATE_DATA  mConIn = {
   TEXT_IN_SPLITTER_PRIVATE_DATA_SIGNATURE,
   (EFI_HANDLE) NULL,
   {
@@ -139,7 +139,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED EFI_GRAPHICS_OUTPUT_PROTOCOL mGraphicsOutputProtoc
 //
 // Template for Text Out Splitter
 //
-STATIC TEXT_OUT_SPLITTER_PRIVATE_DATA mConOut = {
+TEXT_OUT_SPLITTER_PRIVATE_DATA mConOut = {
   TEXT_OUT_SPLITTER_PRIVATE_DATA_SIGNATURE,
   (EFI_HANDLE) NULL,
   {
@@ -206,7 +206,7 @@ STATIC TEXT_OUT_SPLITTER_PRIVATE_DATA mConOut = {
 //
 // Template for Standard Error Text Out Splitter
 //
-STATIC TEXT_OUT_SPLITTER_PRIVATE_DATA mStdErr = {
+TEXT_OUT_SPLITTER_PRIVATE_DATA mStdErr = {
   TEXT_OUT_SPLITTER_PRIVATE_DATA_SIGNATURE,
   (EFI_HANDLE) NULL,
   {
@@ -1094,14 +1094,13 @@ ConSplitterConInDriverBindingStart (
                   mConIn.VirtualHandle,
                   EFI_OPEN_PROTOCOL_GET_PROTOCOL
                   );
-  if (EFI_ERROR (Status)) {
-    return Status;
+  if (!EFI_ERROR (Status)) {
+    //
+    // If Simple Text Input Ex protocol exists,
+    // add this device into Text In Ex devices list.
+    //
+    Status = ConSplitterTextInExAddDevice (&mConIn, TextInEx);
   }
-
-  //
-  // Add this device into Text In Ex devices list.
-  //
-  Status = ConSplitterTextInExAddDevice (&mConIn, TextInEx);
 
   return Status;
 }
@@ -1455,10 +1454,10 @@ ConSplitterConInDriverBindingStop (
   IN  EFI_HANDLE                      *ChildHandleBuffer
   )
 {
-  EFI_STATUS                     Status;
-  EFI_SIMPLE_TEXT_INPUT_PROTOCOL *TextIn;
-
+  EFI_STATUS                        Status;
+  EFI_SIMPLE_TEXT_INPUT_PROTOCOL    *TextIn;
   EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *TextInEx;
+
   if (NumberOfChildren == 0) {
     return EFI_SUCCESS;
   }
@@ -1471,18 +1470,16 @@ ConSplitterConInDriverBindingStop (
                   ControllerHandle,
                   EFI_OPEN_PROTOCOL_GET_PROTOCOL
                   );
-  if (EFI_ERROR (Status)) {
-    return Status;
+  if (!EFI_ERROR (Status)) {
+    //
+    // If Simple Text Input Ex protocol exists,
+    // remove device from Text Input Ex devices list.
+    //  
+    Status = ConSplitterTextInExDeleteDevice (&mConIn, TextInEx);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
   }
-
-  //
-  // Remove device from Text Input Ex devices list.
-  //  
-  Status = ConSplitterTextInExDeleteDevice (&mConIn, TextInEx);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
 
   //
   // Close Simple Text In protocol on controller handle and virtual handle.
@@ -2245,7 +2242,7 @@ ConSplitterAddOutputMode (
 }
 
 /**
-  Reconstruct TextOutModeMap to get intersection of modes
+  Reconstruct TextOutModeMap to get intersection of modes.
 
   This routine reconstruct TextOutModeMap to get the intersection
   of modes for all console out devices. Because EFI/UEFI spec require
@@ -2258,8 +2255,6 @@ ConSplitterAddOutputMode (
   @param NewMapStepSize  Mode step size for one console device
   @param MaxMode         Current max text mode
   @param CurrentMode     Current text mode
-
-  @retval None
 
 **/
 VOID

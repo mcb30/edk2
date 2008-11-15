@@ -21,19 +21,20 @@
 #include <Protocol/DriverConfiguration.h>
 #include <Protocol/DriverDiagnostics.h>
 #include <Protocol/DriverDiagnostics2.h>
-#include <Protocol/FirmwareVolume2.h>
 #include <Protocol/LoadedImage.h>
 
 #include <Guid/EventGroup.h>
 #include <Guid/EventLegacyBios.h>
+#include <Guid/GlobalVariable.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
 #include <Library/PrintLib.h>
-
+#include <Library/DevicePathLib.h>
 
 #endif

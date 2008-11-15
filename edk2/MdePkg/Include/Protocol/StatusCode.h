@@ -1,7 +1,7 @@
 /** @file
   Status code Runtime Protocol as defined in PI Specification VOLUME 2 DXE
 
-  The StatusCode () Tiano service is added to the EFI system table and the 
+  The StatusCode () service is added to the EFI system table and the 
   EFI_STATUS_CODE_ARCH_PROTOCOL_GUID protocol is registered with a NULL 
   pointer.
 
@@ -24,7 +24,6 @@
 #define __STATUS_CODE_RUNTIME_PROTOCOL_H__
 
 #include <Pi/PiMultiPhase.h>
-#include <Uefi/UefiBaseType.h>
 
 #define EFI_STATUS_CODE_RUNTIME_PROTOCOL_GUID  \
 { 0xd2b2b828, 0x826, 0x48a7,  { 0xb3, 0xdf, 0x98, 0x3c, 0x0, 0x60, 0x24, 0xf0 } }
@@ -57,15 +56,11 @@ EFI_STATUS
   IN EFI_STATUS_CODE_DATA     *Data      OPTIONAL
   );
 
-/**
-  @par Protocol Description:
-  Provides the service required to report a status code to the platform firmware.
-  This protocol must be produced by a runtime DXE driver and may be consumed 
-  only by the DXE Foundation.
-
-  @param  ReportStatusCode Emit a status code.
-
-**/
+///
+/// Provides the service required to report a status code to the platform firmware.
+/// This protocol must be produced by a runtime DXE driver and may be consumed 
+/// only by the DXE Foundation.
+///
 typedef struct _EFI_STATUS_CODE_PROTOCOL {
   EFI_REPORT_STATUS_CODE         ReportStatusCode;
 } EFI_STATUS_CODE_PROTOCOL;

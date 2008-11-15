@@ -57,6 +57,7 @@
 
 [Packages]
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
   IntelFrameworkPkg/IntelFrameworkPkg.dec
   IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
   Nt32Pkg/Nt32Pkg.dec
@@ -65,7 +66,6 @@
 [LibraryClasses]
   DevicePathLib
   UefiBootServicesTableLib
-  MemoryAllocationLib
   BaseMemoryLib
   UefiDriverEntryPoint
   UefiLib

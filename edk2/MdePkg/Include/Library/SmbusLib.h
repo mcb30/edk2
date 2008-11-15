@@ -1,24 +1,20 @@
 /** @file
-  SMBUS Functions
+  Provides library functions to access SMBUS devices. Libraries of this class
+  must be ported to a specific SMBUS controller.
 
-  Copyright (c) 2006, Intel Corporation
-  All rights reserved. This program and the accompanying materials
-  are licensed and made available under the terms and conditions of the BSD License
-  which accompanies this distribution.  The full text of the license may be found at
-  http://opensource.org/licenses/bsd-license.php
+Copyright (c) 2006 - 2008, Intel Corporation
+All rights reserved. This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
 
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
 #ifndef __SMBUS_LIB__
 #define __SMBUS_LIB__
-
-///
-/// PEC BIT is bit 22 in SMBUS address
-///
-#define SMBUS_LIB_PEC_BIT   (1 << 22)
 
 /**
   Macro that converts SMBUS slave address, SMBUS command, SMBUS data length,
@@ -35,11 +31,46 @@
 
 **/
 #define SMBUS_LIB_ADDRESS(SlaveAddress,Command,Length,Pec)  \
-  ( ((Pec) ? SMBUS_LIB_PEC_BIT: 0)      | \
+  ( ((Pec) ? BIT22: 0)                  | \
     (((SlaveAddress) & 0x7f) << 1)      | \
     (((Command)      & 0xff) << 8)      | \
     (((Length)       & 0x3f) << 16)       \
   )
+
+/**
+  Macro that returns the SMBUS Slave Address value from an SmBusAddress Parameter value.
+  
+  @param SmBusAddress   Address that encodes the SMBUS Slave Address, SMBUS Command, SMBUS Data Length, and PEC 
+**/
+#define SMBUS_LIB_SLAVE_ADDRESS(SmBusAddress)      (((SmBusAddress) >> 1)  & 0x7f)
+
+/**
+  Macro that returns the SMBUS Command value from an SmBusAddress Parameter value.
+  
+  @param SmBusAddress   Address that encodes the SMBUS Slave Address, SMBUS Command, SMBUS Data Length, and PEC
+**/
+#define SMBUS_LIB_COMMAND(SmBusAddress)            (((SmBusAddress) >> 8)  & 0xff)
+
+/**
+  Macro that returns the SMBUS Data Length value from an SmBusAddress Parameter value.
+  
+  @param SmBusAddress Address that encodes the SMBUS Slave Address, SMBUS Command, SMBUS Data Length, and PEC 
+**/
+#define SMBUS_LIB_LENGTH(SmBusAddress)             (((SmBusAddress) >> 16) & 0x3f)
+
+/**
+  Macro that returns the SMBUS PEC value from an SmBusAddress Parameter value.
+  
+  @param SmBusAddress Address that encodes the SMBUS Slave Address, SMBUS Command, SMBUS Data Length, and PEC   
+**/
+#define SMBUS_LIB_PEC(SmBusAddress)                ((BOOLEAN) (((SmBusAddress) & BIT22) != 0))
+
+/**
+  Macro that returns the set of reserved bits from an SmBusAddress Parameter value.
+  
+  @param SmBusAddress Address that encodes the SMBUS Slave Address, SMBUS Command, SMBUS Data Length, and PEC   
+**/
+#define SMBUS_LIB_RESERVED(SmBusAddress)           ((SmBusAddress) & ~(((1 << 22) - 2) | BIT22))
 
 /**
   Executes an SMBUS quick read command.

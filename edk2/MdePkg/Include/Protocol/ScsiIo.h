@@ -20,7 +20,7 @@
 
 #define EFI_SCSI_IO_PROTOCOL_GUID \
   { \
-    0x932f4736, 0x2362, 0x4002, {0x80, 0x3e, 0x3c, 0xd5, 0x4b, 0x13, 0x8f, 0x85 } \
+    0x932f47e6, 0x2362, 0x4002, {0x80, 0x3e, 0x3c, 0xd5, 0x4b, 0x13, 0x8f, 0x85 } \
   }
 
 ///
@@ -215,40 +215,22 @@ EFI_STATUS
   IN EFI_EVENT                              Event  OPTIONAL
   );
 
-/**  
-  @par Protocol Description:
-  Provides services to manage and communicate with SCSI devices.
-
-  @param GetDeviceType
-  Retrieves the information of the device type which the SCSI device belongs to. 
-
-  @param GetDeviceLocation
-  Retrieves the device location information in the SCSI bus. 
-
-  @param ResetBus
-  Resets the entire SCSI bus the SCSI device attaches to. 
-
-  @param ResetDevice
-  Resets the SCSI Device that is specified by the device handle the SCSI I/O 
-  protocol attaches. 
-
-  @param ExecuteScsiCommand
-  Sends a SCSI command to the SCSI device and waits for the execution completion 
-  until an exit condition is met, or a timeout occurs. 
-
-  @param IoAlign
-  Supplies the alignment requirement for any buffer used in a data transfer. 
-  IoAlign values of 0 and 1 mean that the buffer can be placed anywhere in memory. 
-  Otherwise, IoAlign must be a power of 2, and the requirement is that the 
-  start address of a buffer must be evenly divisible by IoAlign with no remainder.
-
-**/
+///
+/// Provides services to manage and communicate with SCSI devices.
+///
 struct _EFI_SCSI_IO_PROTOCOL {
   EFI_SCSI_IO_PROTOCOL_GET_DEVICE_TYPE      GetDeviceType;
   EFI_SCSI_IO_PROTOCOL_GET_DEVICE_LOCATION  GetDeviceLocation;
   EFI_SCSI_IO_PROTOCOL_RESET_BUS            ResetBus;
   EFI_SCSI_IO_PROTOCOL_RESET_DEVICE         ResetDevice;
   EFI_SCSI_IO_PROTOCOL_EXEC_SCSI_COMMAND    ExecuteScsiCommand;    
+
+  ///
+  /// Supplies the alignment requirement for any buffer used in a data transfer. 
+  /// IoAlign values of 0 and 1 mean that the buffer can be placed anywhere in memory. 
+  /// Otherwise, IoAlign must be a power of 2, and the requirement is that the 
+  /// start address of a buffer must be evenly divisible by IoAlign with no remainder.
+  ///
   UINT32                                    IoAlign;
 };
 

@@ -1,15 +1,15 @@
 /** @file
-  Library to abstract runtime services
+  Provides library functions for each of the UEFI Runtime Services.
+  Only available to DXE and UEFI module types.
 
-  Copyright (c) 2006, Intel Corporation
-  All rights reserved. This program and the accompanying materials
-  are licensed and made available under the terms and conditions of the BSD License
-  which accompanies this distribution.  The full text of the license may be found at
-  http://opensource.org/licenses/bsd-license.php
+Copyright (c) 2006 - 2008, Intel Corporation
+All rights reserved. This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
 
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
 #ifndef __UEFI_RUNTIME_LIB__
@@ -229,7 +229,7 @@ EfiResetSystem (
   );
 
 /**
-  Determines the new virtual address that is to be used on subsequent memory accesses.
+  This service converts a function pointer from physical to virtual addressing. 
 
   @param  DebugDisposition   Supplies type information for the pointer being converted.
   @param  Address            The pointer to a pointer that is to be fixed to be the
@@ -237,7 +237,7 @@ EfiResetSystem (
                              applied.
 
   @retval  EFI_SUCCESS  Success to execute the function.
-  @retval  !EFI_SUCCESS Failed to e3xecute the function.
+  @retval  !EFI_SUCCESS Failed to execute the function.
 
 **/
 EFI_STATUS
@@ -247,6 +247,35 @@ EfiConvertPointer (
   IN OUT VOID               **Address
   );
 
+/**
+  Determines the new virtual address that is to be used on subsequent memory accesses.
+
+  For IA32, X64, and EBC, this service is a wrapper for the UEFI Runtime Service
+  ConvertPointer().  See the UEFI Specification for details. 
+  For IPF, this function interprets Address as a pointer to an EFI_PLABEL structure
+  and both the EntryPoint and GP fields of an EFI_PLABEL are converted from physical
+  to virtiual addressing.  Since IPF allows the GP to point to an address outside
+  a PE/COFF image, the physical to virtual offset for the EntryPoint field is used
+  to adjust the GP field.  The UEFI Runtime Service ConvertPointer() is used to convert
+  EntryPoint and the status code for this conversion is always returned.   If the convertion
+  of EntryPoint fails, then neither EntryPoint nor GP are modified.  See the UEFI
+  Specification for details on the UEFI Runtime Service ConvertPointer().
+
+  @param  DebugDisposition   Supplies type information for the pointer being converted.
+  @param  Address            The pointer to a pointer that is to be fixed to be the
+                             value needed for the new virtual address mapping being
+                             applied.
+
+  @retval  EFI_SUCCESS  Success to execute the function.
+  @retval  !EFI_SUCCESS Failed to execute the function.
+
+**/
+EFI_STATUS
+EFIAPI
+EfiConvertFunctionPointer (
+  IN UINTN                DebugDisposition,
+  IN OUT VOID             **Address
+  );
 
 /**
   Change the runtime addressing mode of EFI firmware from physical to virtual.
@@ -333,7 +362,7 @@ EFIAPI
 EfiUpdateCapsule (
   IN EFI_CAPSULE_HEADER       **CapsuleHeaderArray,
   IN UINTN                    CapsuleCount,
-  IN EFI_PHYSICAL_ADDRESS     ScatterGatherList
+  IN EFI_PHYSICAL_ADDRESS     ScatterGatherList OPTIONAL
   );
 
 

@@ -1,6 +1,16 @@
 /** @file
   ScanMem64() implementation.
 
+  The following BaseMemoryLib instances contain the same copy of this file:
+    BaseMemoryLib
+    BaseMemoryLibMmx
+    BaseMemoryLibSse2
+    BaseMemoryLibRepStr
+    BaseMemoryLibOptDxe
+    BaseMemoryLibOptPei
+    PeiMemoryLib
+    DxeMemoryLib
+
   Copyright (c) 2006, Intel Corporation<BR>
   All rights reserved. This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
@@ -10,20 +20,9 @@
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
-  The following BaseMemoryLib instances share the same version of this file:
-
-    BaseMemoryLib
-    BaseMemoryLibMmx
-    BaseMemoryLibSse2
-    BaseMemoryLibRepStr
-    PeiMemoryLib
-    DxeMemoryLib
-
 **/
 
-//
-// Include common header file for this module.
-//
+
 
 
 #include "MemLibInternals.h"
@@ -39,7 +38,7 @@
   If Length > 0 and Buffer is NULL, then ASSERT().
   If Buffer is not aligned on a 64-bit boundary, then ASSERT().
   If Length is not aligned on a 64-bit boundary, then ASSERT().
-  If Length is greater than (MAX_ADDRESS ? Buffer + 1), then ASSERT(). 
+  If Length is greater than (MAX_ADDRESS - Buffer + 1), then ASSERT(). 
 
   @param  Buffer      Pointer to the target buffer to scan.
   @param  Length      Number of bytes in Buffer to scan.
@@ -56,14 +55,14 @@ ScanMem64 (
   IN UINT64      Value
   )
 {
-  if (0 == Length) {
+  if (Length == 0) {
     return NULL;
   }
 
   ASSERT (Buffer != NULL);
-  ASSERT (0 == ((UINTN)Buffer & (sizeof (Value) - 1)));
+  ASSERT (((UINTN)Buffer & (sizeof (Value) - 1)) == 0);
   ASSERT ((Length - 1) <= (MAX_ADDRESS - (UINTN)Buffer));
-  ASSERT (0 == (Length & (sizeof (Value) - 1)));
+  ASSERT ((Length & (sizeof (Value) - 1)) == 0);
 
   return (VOID*)InternalMemScanMem64 (Buffer, Length / sizeof (Value), Value);
 }

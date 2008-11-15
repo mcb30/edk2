@@ -24,44 +24,52 @@ Abstract:
 #ifndef __EFI_IP4_IF_H__
 #define __EFI_IP4_IF_H__
 
-enum {
+typedef enum {
   IP4_FRAME_RX_SIGNATURE  = EFI_SIGNATURE_32 ('I', 'P', 'F', 'R'),
   IP4_FRAME_TX_SIGNATURE  = EFI_SIGNATURE_32 ('I', 'P', 'F', 'T'),
   IP4_FRAME_ARP_SIGNATURE = EFI_SIGNATURE_32 ('I', 'P', 'F', 'A'),
   IP4_INTERFACE_SIGNATURE = EFI_SIGNATURE_32 ('I', 'P', 'I', 'F')
-};
+} IP4_IF_ENUM_TYPES;
 
-//
-// This prototype is used by both receive and transmission.
-// When receiving Netbuf is allocated by IP4_INTERFACE, and
-// released by IP4. Flag shows whether the frame is received
-// as link broadcast/multicast...
-//
-// When transmitting, the Netbuf is from IP4, and provided
-// to the callback as a reference. Flag isn't used.
-//
-// IpInstance can be NULL which means that it is the IP4 driver
-// itself sending the packets. IP4 driver may send packets that
-// don't belong to any instance, such as ICMP errors, ICMP echo
-// responses, or IGMP packets. IpInstance is used as a tag in
-// this module.
-//
+/**
+  This prototype is used by both receive and transmission.
+  When receiving Netbuf is allocated by IP4_INTERFACE, and
+  released by IP4. Flag shows whether the frame is received
+  as link broadcast/multicast...
+
+  When transmitting, the Netbuf is from IP4, and provided
+  to the callback as a reference. Flag isn't used.
+
+  @param IpInstance The instance that sent or received the packet.
+                    IpInstance can be NULL which means that it is the IP4 driver
+                    itself sending the packets. IP4 driver may send packets that
+                    don't belong to any instance, such as ICMP errors, ICMP echo
+                    responses, or IGMP packets. IpInstance is used as a tag in
+                    this module.
+  @param Packet     The sent or received packet.
+  @param IoStatus   Status of sending or receiving.
+  @param LinkFlag   Indicate if the frame is received as link broadcast/multicast.
+                    When transmitting, it is not used.
+  @param Context    Additional data for callback.
+
+  @return None.
+**/
 typedef
 VOID
-(*IP4_FRAME_CALLBACK) (
-  IP4_PROTOCOL              *IpInstance,       OPTIONAL
-  NET_BUF                   *Packet,
-  EFI_STATUS                IoStatus,
-  UINT32                    LinkFlag,
-  VOID                      *Context
+(*IP4_FRAME_CALLBACK)(
+  IN IP4_PROTOCOL              *IpInstance,       OPTIONAL
+  IN NET_BUF                   *Packet,
+  IN EFI_STATUS                IoStatus,
+  IN UINT32                    LinkFlag,
+  IN VOID                      *Context
   );
 
-//
-// Each receive request is wrapped in an IP4_LINK_RX_TOKEN.
-// Upon completion, the Callback will be called. Only one
-// receive request is send to MNP. IpInstance is always NULL.
-// Reference MNP's spec for information.
-//
+///
+/// Each receive request is wrapped in an IP4_LINK_RX_TOKEN.
+/// Upon completion, the Callback will be called. Only one
+/// receive request is send to MNP. IpInstance is always NULL.
+/// Reference MNP's spec for information.
+///
 typedef struct {
   UINT32                                Signature;
   IP4_INTERFACE                         *Interface;
@@ -73,10 +81,10 @@ typedef struct {
   EFI_MANAGED_NETWORK_COMPLETION_TOKEN  MnpToken;
 } IP4_LINK_RX_TOKEN;
 
-//
-// Each transmit request is wrapped in an IP4_LINK_TX_TOKEN.
-// Upon completion, the Callback will be called.
-//
+///
+/// Each transmit request is wrapped in an IP4_LINK_TX_TOKEN.
+/// Upon completion, the Callback will be called.
+///
 typedef struct {
   UINT32                                Signature;
   LIST_ENTRY                            Link;
@@ -95,12 +103,12 @@ typedef struct {
   EFI_MANAGED_NETWORK_TRANSMIT_DATA     MnpTxData;
 } IP4_LINK_TX_TOKEN;
 
-//
-// Only one ARP request is requested for all the frames in
-// a time. It is started for the first frames to the Ip. Any
-// subsequent transmission frame will be linked to Frames, and
-// be sent all at once the ARP requests succeed.
-//
+///
+/// Only one ARP request is requested for all the frames in
+/// a time. It is started for the first frames to the Ip. Any
+/// subsequent transmission frame will be linked to Frames, and
+/// be sent all at once the ARP requests succeed.
+///
 typedef struct {
   UINT32                  Signature;
   LIST_ENTRY              Link;
@@ -116,13 +124,19 @@ typedef struct {
   EFI_MAC_ADDRESS         Mac;
 } IP4_ARP_QUE;
 
-//
-// Callback to select which frame to cancel. Caller can cancel a
-// single frame, or all the frame from an IP instance.
-//
+/**
+  Callback to select which frame to cancel. Caller can cancel a
+  single frame, or all the frame from an IP instance.
+
+  @param Frame      The sending frame to check for cancellation.
+  @param Context    Additional data for callback.
+
+  @retval TRUE      The sending of the frame should be cancelled.
+  @retval FALSE     Do not cancel the frame sending.
+**/
 typedef
 BOOLEAN
-(*IP4_FRAME_TO_CANCEL) (
+(*IP4_FRAME_TO_CANCEL)(
   IP4_LINK_TX_TOKEN       *Frame,
   VOID                    *Context
   );

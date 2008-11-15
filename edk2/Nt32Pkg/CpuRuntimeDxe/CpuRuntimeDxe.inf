@@ -39,6 +39,7 @@
 
 [Packages]
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
   Nt32Pkg/Nt32Pkg.dec
   IntelFrameworkPkg/IntelFrameworkPkg.dec
   IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
@@ -48,9 +49,9 @@
   MemoryAllocationLib
   BaseMemoryLib
   UefiDriverEntryPoint
-  HiiLib
   DebugLib
-
+  HiiLib
+  
 [Guids]
   gEfiProcessorSubClassGuid                     # SOMETIMES_CONSUMED
   gEfiProcessorProducerGuid                     # SOMETIMES_CONSUMED

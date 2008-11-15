@@ -1,5 +1,7 @@
 #/** @file
-# Graphics Library for UEFI drivers.
+#   Library supports diplaying graphical splash screen,
+#   locking of keyboard input and printing character on
+#   screen.
 #
 # This library provides supports for basic graphic functions.
 # Copyright (c) 2006 - 2007, Intel Corporation.
@@ -44,7 +46,7 @@
   BaseLib
   PrintLib
   DebugLib
-  DxePiLib
+  DxeServicesLib
   BaseMemoryLib
   PcdLib
 
@@ -53,7 +55,6 @@
   gEfiGraphicsOutputProtocolGuid                # PROTOCOL ALWAYS_CONSUMED
   gEfiUgaDrawProtocolGuid                       # PROTOCOL ALWAYS_CONSUMED
   gEfiConsoleControlProtocolGuid                # PROTOCOL ALWAYS_CONSUMED
-  gEfiFirmwareVolume2ProtocolGuid               # PROTOCOL ALWAYS_CONSUMED
   gEfiOEMBadgingProtocolGuid                    # PROTOCOL ALWAYS_CONSUMED
   gEfiHiiFontProtocolGuid                       # PROTOCOL ALWAYS_CONSUMED
 

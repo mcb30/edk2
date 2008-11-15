@@ -31,25 +31,25 @@ Abstract:
 
 #include "PlatOverMngr.h"
 
-STATIC  EFI_GUID      mPlatformOverridesManagerGuid = PLAT_OVER_MNGR_GUID;
+EFI_GUID      mPlatformOverridesManagerGuid = PLAT_OVER_MNGR_GUID;
 
-STATIC  LIST_ENTRY    mMappingDataBase = INITIALIZE_LIST_HEAD_VARIABLE (mMappingDataBase);
+LIST_ENTRY    mMappingDataBase = INITIALIZE_LIST_HEAD_VARIABLE (mMappingDataBase);
 
-STATIC  EFI_HANDLE    *mDevicePathHandleBuffer;
-STATIC  EFI_HANDLE    *mDriverImageHandleBuffer;
+EFI_HANDLE    *mDevicePathHandleBuffer;
+EFI_HANDLE    *mDriverImageHandleBuffer;
 
-STATIC UINTN         mSelectedCtrIndex;
-STATIC EFI_STRING_ID mControllerToken[MAX_CHOICE_NUM];
+UINTN         mSelectedCtrIndex;
+EFI_STRING_ID mControllerToken[MAX_CHOICE_NUM];
 
-STATIC UINTN                        mDriverImageHandleCount;
-STATIC EFI_STRING_ID                mDriverImageToken[MAX_CHOICE_NUM];
-STATIC EFI_STRING_ID                mDriverImageFilePathToken[MAX_CHOICE_NUM];
-STATIC EFI_LOADED_IMAGE_PROTOCOL    *mDriverImageProtocol[MAX_CHOICE_NUM];
-STATIC EFI_DEVICE_PATH_PROTOCOL     *mControllerDevicePathProtocol[MAX_CHOICE_NUM];
-STATIC UINTN                        mSelectedDriverImageNum;
-STATIC UINTN                        mLastSavedDriverImageNum;
-STATIC CHAR8                        mLanguage[RFC_3066_ENTRY_SIZE];
-STATIC UINT16                       mCurrentPage;
+UINTN                        mDriverImageHandleCount;
+EFI_STRING_ID                mDriverImageToken[MAX_CHOICE_NUM];
+EFI_STRING_ID                mDriverImageFilePathToken[MAX_CHOICE_NUM];
+EFI_LOADED_IMAGE_PROTOCOL    *mDriverImageProtocol[MAX_CHOICE_NUM];
+EFI_DEVICE_PATH_PROTOCOL     *mControllerDevicePathProtocol[MAX_CHOICE_NUM];
+UINTN                        mSelectedDriverImageNum;
+UINTN                        mLastSavedDriverImageNum;
+CHAR8                        mLanguage[RFC_3066_ENTRY_SIZE];
+UINT16                       mCurrentPage;
 
 /**
   The driver Entry Point. The funciton will export a disk device class formset and
@@ -340,8 +340,8 @@ GetImageName (
   )
 {
   EFI_STATUS                        Status;
-  EFI_DEVICE_PATH_PROTOCOL          *DevPath;
   EFI_DEVICE_PATH_PROTOCOL          *DevPathNode;
+  EFI_DEVICE_PATH_PROTOCOL          *AlignedDevPathNode;
   MEDIA_FW_VOL_FILEPATH_DEVICE_PATH *FvFilePath;
   VOID                              *Buffer;
   UINTN                             BufferSize;
@@ -357,21 +357,24 @@ GetImageName (
     return NULL;
   }
 
-  DevPath     = UnpackDevicePath (Image->FilePath);
+  DevPathNode  = Image->FilePath;
 
-  if (DevPath == NULL) {
+  if (DevPathNode == NULL) {
     return NULL;
   }
 
-  DevPathNode = DevPath;
-
   while (!IsDevicePathEnd (DevPathNode)) {
+    //
+    // Make sure device path node is aligned when accessing it's FV Name Guid field.
+    //
+    AlignedDevPathNode = AllocateCopyPool (DevicePathNodeLength(DevPathNode), DevPathNode);
+    
     //
     // Find the Fv File path
     //
-    NameGuid = EfiGetNameGuidFromFwVolDevicePathNode ((MEDIA_FW_VOL_FILEPATH_DEVICE_PATH *)DevPathNode);
+    NameGuid = EfiGetNameGuidFromFwVolDevicePathNode ((MEDIA_FW_VOL_FILEPATH_DEVICE_PATH *)AlignedDevPathNode);
     if (NameGuid != NULL) {
-      FvFilePath = (MEDIA_FW_VOL_FILEPATH_DEVICE_PATH *) DevPathNode;
+      FvFilePath = (MEDIA_FW_VOL_FILEPATH_DEVICE_PATH *) AlignedDevPathNode;
       Status = gBS->HandleProtocol (
                     Image->DeviceHandle,
                     &gEfiFirmwareVolume2ProtocolGuid,
@@ -388,18 +391,21 @@ GetImageName (
                         &AuthenticationStatus
                         );
         if (!EFI_ERROR (Status)) {
+          FreePool (AlignedDevPathNode);
           break;
         }
         Buffer = NULL;
       }
     }
+    
+    FreePool (AlignedDevPathNode);
+    
     //
     // Next device path node
     //
     DevPathNode = NextDevicePathNode (DevPathNode);
   }
 
-    gBS->FreePool (DevPath);
   return Buffer;
 }
 
@@ -1128,6 +1134,10 @@ PlatOverMngrExtractConfig (
   EFI_CALLBACK_INFO                *Private;
   EFI_HII_CONFIG_ROUTING_PROTOCOL  *HiiConfigRouting;
 
+  if (Request == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
   Private = EFI_CALLBACK_INFO_FROM_THIS (This);
   HiiConfigRouting = Private->HiiConfigRouting;
 
@@ -1311,74 +1321,6 @@ PlatOverMngrCallback (
 
   return EFI_SUCCESS;
 }
-
-/**
-  Function unpacks a device path data structure so that all the nodes
-  of a device path are naturally aligned.
-
-  @param  DevPath  A pointer to a device path data structure
-
-  @return If the memory for the device path is successfully allocated, then a
-  @return pointer to the new device path is returned.  Otherwise, NULL is returned.
-
-**/
-EFI_DEVICE_PATH_PROTOCOL *
-UnpackDevicePath (
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevPath
-  )
-{
-  EFI_DEVICE_PATH_PROTOCOL  *Src;
-  EFI_DEVICE_PATH_PROTOCOL  *Dest;
-  EFI_DEVICE_PATH_PROTOCOL  *NewPath;
-  UINTN                     Size;
-
-  //
-  // Walk device path and round sizes to valid boundries
-  //
-  Src   = DevPath;
-  Size  = 0;
-  for (;;) {
-    Size += DevicePathNodeLength (Src);
-    Size += ALIGN_SIZE (Size);
-
-    if (IsDevicePathEnd (Src)) {
-      break;
-    }
-
-    Src = NextDevicePathNode (Src);
-  }
-  //
-  // Allocate space for the unpacked path
-  //
-  NewPath = AllocateZeroPool (Size);
-  if (NewPath) {
-
-    ASSERT (((UINTN) NewPath) % MIN_ALIGNMENT_SIZE == 0);
-
-    //
-    // Copy each node
-    //
-    Src   = DevPath;
-    Dest  = NewPath;
-    for (;;) {
-      Size = DevicePathNodeLength (Src);
-      CopyMem (Dest, Src, Size);
-      Size += ALIGN_SIZE (Size);
-      SetDevicePathNodeLength (Dest, Size);
-      Dest->Type |= EFI_DP_TYPE_UNPACKED;
-      Dest = (EFI_DEVICE_PATH_PROTOCOL *) (((UINT8 *) Dest) + Size);
-
-      if (IsDevicePathEnd (Src)) {
-        break;
-      }
-
-      Src = NextDevicePathNode (Src);
-    }
-  }
-
-  return NewPath;
-}
-
 
 /**
   Get the description string by device path.

@@ -15,8 +15,6 @@
 #ifndef __EFI_DRIVER_CONFIGURATION2_H__
 #define __EFI_DRIVER_CONFIGURATION2_H__
 
-#include <PiDxe.h>
-
 ///
 /// Global ID for the Driver Configuration Protocol defined in UEFI 2.0
 ///
@@ -157,36 +155,19 @@ EFI_STATUS
   OUT EFI_DRIVER_CONFIGURATION_ACTION_REQUIRED                *ActionRequired
   );
 
-/**
-  Interface structure for the Driver Configuration Protocol.
-
-  @par Protocol Description:  
-  Used to set configuration options for a controller that an EFI Driver is managing.
-
-  @param SetOptions          Allows the use to set drivers specific configuration 
-                             options for a controller that the driver is currently managing.
-                             
-  @param OptionsValid        Tests to see if a controller's current configuration 
-                             options are valid. 
-                             
-  @param ForceDefaults       Forces a driver to set the default configuration options 
-                             for a controller.
-
-  @param SupportedLanguages  A Null-terminated ASCII string that
-                             contains one or more RFC 3066
-                             language codes.  This is the list
-                             of language codes that this
-                             protocol supports.
-
-**/
+///
+/// Used to set configuration options for a controller that an EFI Driver is managing.
+///
 struct _EFI_DRIVER_CONFIGURATION2_PROTOCOL {
   EFI_DRIVER_CONFIGURATION2_SET_OPTIONS     SetOptions;
   EFI_DRIVER_CONFIGURATION2_OPTIONS_VALID   OptionsValid;
   EFI_DRIVER_CONFIGURATION2_FORCE_DEFAULTS  ForceDefaults;
+  ///
+  /// A Null-terminated ASCII string that contains one or more RFC 3066
+  /// language codes.  This is the list of language codes that this protocol supports.  
+  ///
   CHAR8                                     *SupportedLanguages;
 };
-
-
 
 extern EFI_GUID gEfiDriverConfiguration2ProtocolGuid;
 

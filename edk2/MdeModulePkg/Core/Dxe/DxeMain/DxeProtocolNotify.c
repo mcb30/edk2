@@ -39,11 +39,32 @@ ARCHITECTURAL_PROTOCOL_ENTRY  mArchProtocols[] = {
   { &gEfiCapsuleArchProtocolGuid,          (VOID **)NULL,            NULL, NULL, FALSE },
   { &gEfiMonotonicCounterArchProtocolGuid, (VOID **)NULL,            NULL, NULL, FALSE },
   { &gEfiResetArchProtocolGuid,            (VOID **)NULL,            NULL, NULL, FALSE },
-  { &gEfiRealTimeClockArchProtocolGuid,    (VOID **)NULL,            NULL, NULL, FALSE },
-  { NULL,                                  (VOID **)NULL,            NULL, NULL, FALSE }
+  { &gEfiRealTimeClockArchProtocolGuid,    (VOID **)NULL,            NULL, NULL, FALSE }
 };
 
+//
+// Following is needed to display missing architectural protocols in debug builds
+//
+typedef struct {
+  EFI_GUID                     *ProtocolGuid;
+  CHAR8                        *GuidString;
+} GUID_TO_STRING_PROTOCOL_ENTRY;
 
+GLOBAL_REMOVE_IF_UNREFERENCED CONST GUID_TO_STRING_PROTOCOL_ENTRY MissingProtocols[] = {
+  { &gEfiSecurityArchProtocolGuid,         "Security"           },
+  { &gEfiCpuArchProtocolGuid,              "CPU"                },
+  { &gEfiMetronomeArchProtocolGuid,        "Metronome"          },
+  { &gEfiTimerArchProtocolGuid,            "Timer"              },
+  { &gEfiBdsArchProtocolGuid,              "Bds"                },
+  { &gEfiWatchdogTimerArchProtocolGuid,    "Watchdog Timer"     },
+  { &gEfiRuntimeArchProtocolGuid,          "Runtime"            },
+  { &gEfiVariableArchProtocolGuid,         "Variable"           },
+  { &gEfiVariableWriteArchProtocolGuid,    "Variable Write"     },
+  { &gEfiCapsuleArchProtocolGuid,          "Capsule"            },
+  { &gEfiMonotonicCounterArchProtocolGuid, "Monotonic Counter"  },
+  { &gEfiResetArchProtocolGuid,            "Reset"              },
+  { &gEfiRealTimeClockArchProtocolGuid,    "Real Time Clock"    }
+};
 
 /**
   Return TRUE if all AP services are availible.
@@ -57,10 +78,10 @@ CoreAllEfiServicesAvailable (
   VOID
   )
 {
-  ARCHITECTURAL_PROTOCOL_ENTRY  *Entry;
+  UINTN        Index;
 
-  for (Entry = mArchProtocols; Entry->ProtocolGuid != NULL; Entry++) {
-    if (!Entry->Present) {
+  for (Index = 0; Index < sizeof (mArchProtocols) / sizeof (mArchProtocols[0]); Index++) {
+    if (!mArchProtocols[Index].Present) {
       return EFI_NOT_FOUND;
     }
   }
@@ -93,9 +114,11 @@ GenericArchProtocolNotify (
   BOOLEAN                         Found;
   LIST_ENTRY                      *Link;
   LIST_ENTRY                      TempLinkNode;
+  UINTN                           Index;
 
   Found = FALSE;
-  for (Entry = mArchProtocols; Entry->ProtocolGuid != NULL; Entry++) {
+  for (Index = 0; Index < sizeof (mArchProtocols) / sizeof (mArchProtocols[0]); Index++) {
+    Entry = &mArchProtocols[Index];
 
     Status = CoreLocateProtocol (Entry->ProtocolGuid, Entry->Registration, &Protocol);
     if (EFI_ERROR (Status)) {
@@ -180,8 +203,10 @@ CoreNotifyOnArchProtocolInstallation (
 {
   EFI_STATUS                      Status;
   ARCHITECTURAL_PROTOCOL_ENTRY    *Entry;
+  UINTN                           Index;
 
-  for (Entry = mArchProtocols; Entry->ProtocolGuid != NULL; Entry++) {
+  for (Index = 0; Index < sizeof (mArchProtocols) / sizeof (mArchProtocols[0]); Index++) {
+    Entry = &mArchProtocols[Index];
 
     //
     // Create the event
@@ -208,30 +233,6 @@ CoreNotifyOnArchProtocolInstallation (
   }
 }
 
-//
-// Following is needed to display missing architectural protocols in debug builds
-//
-typedef struct {
-  EFI_GUID                     *ProtocolGuid;
-  CHAR8                        *GuidString;
-} GUID_TO_STRING_PROTOCOL_ENTRY;
-
-GLOBAL_REMOVE_IF_UNREFERENCED CONST GUID_TO_STRING_PROTOCOL_ENTRY MissingProtocols[] = {
-  { &gEfiSecurityArchProtocolGuid,         "Security"           },
-  { &gEfiCpuArchProtocolGuid,              "CPU"                },
-  { &gEfiMetronomeArchProtocolGuid,        "Metronome"          },
-  { &gEfiTimerArchProtocolGuid,            "Timer"              },
-  { &gEfiBdsArchProtocolGuid,              "Bds"                },
-  { &gEfiWatchdogTimerArchProtocolGuid,    "Watchdog Timer"     },
-  { &gEfiRuntimeArchProtocolGuid,          "Runtime"            },
-  { &gEfiVariableArchProtocolGuid,         "Variable"           },
-  { &gEfiVariableWriteArchProtocolGuid,    "Variable Write"     },
-  { &gEfiCapsuleArchProtocolGuid,          "Capsule"            },
-  { &gEfiMonotonicCounterArchProtocolGuid, "Monotonic Counter"  },
-  { &gEfiResetArchProtocolGuid,            "Reset"              },
-  { &gEfiRealTimeClockArchProtocolGuid,    "Real Time Clock"    }
-};
-
 
 /**
   Displays Architectural protocols that were not loaded and are required for DXE
@@ -245,8 +246,10 @@ CoreDisplayMissingArchProtocols (
 {
   CONST GUID_TO_STRING_PROTOCOL_ENTRY  *MissingEntry;
   ARCHITECTURAL_PROTOCOL_ENTRY         *Entry;
+  UINTN                                Index;
 
-  for (Entry = mArchProtocols; Entry->ProtocolGuid != NULL; Entry++) {
+  for (Index = 0; Index < sizeof (mArchProtocols) / sizeof (mArchProtocols[0]); Index++) {
+    Entry = &mArchProtocols[Index];
     if (!Entry->Present) {
       for (MissingEntry = MissingProtocols; TRUE ; MissingEntry++) {
         if (CompareGuid (Entry->ProtocolGuid, MissingEntry->ProtocolGuid)) {

@@ -12,10 +12,8 @@
 
 **/
 
-//
-// Include common header file for this module.
-//
-#include <BaseLibInternals.h>
+
+#include "BaseLibInternals.h"
 
 /**
   Writes the current Interrupt Descriptor Table Register(GDTR) descriptor.

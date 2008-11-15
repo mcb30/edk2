@@ -97,14 +97,27 @@ DestroyThunkContext (
   );
 
 VOID
-DestroyQuestionIdMap (
-  IN LIST_ENTRY     *QuestionIdMapListHead
-  );
-
-
-VOID
 DestoryOneOfOptionMap (
   IN LIST_ENTRY     *OneOfOptionMapListHead
   );
+
+VOID
+GetFormSetGuid (
+  IN  EFI_HII_PACKAGE_HEADER  *Package,
+  OUT EFI_GUID                *FormSetGuid
+  )
+;
+
+EFI_HII_PACKAGE_HEADER *
+GetIfrPackage (
+  IN CONST EFI_HII_PACKAGES               *Packages
+  )
+;
+
+FORM_BROWSER_FORMSET *
+ParseFormSet (
+  IN EFI_HII_HANDLE   UefiHiiHandle
+  )
+;
 
 #endif

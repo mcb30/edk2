@@ -1272,7 +1272,6 @@ Returns:
           );
 }
 
-STATIC
 EFI_STATUS
 ValidateFvHeader (
   EFI_FIRMWARE_VOLUME_HEADER            *FwVolHeader
@@ -1405,7 +1404,6 @@ GetFvbHeader (
   return EFI_SUCCESS;
 }
 
-STATIC
 VOID
 EFIAPI
 OnSimpleFileSystemInstall (
@@ -1501,7 +1499,6 @@ OnSimpleFileSystemInstall (
   }
 }
 
-STATIC
 VOID
 FvbInstallSfsNotify (
   VOID
@@ -1754,7 +1751,7 @@ Returns:
                       NULL
                       );
       ASSERT_EFI_ERROR (Status);
-    } else if (EfiIsDevicePathEnd (TempFwbDevicePath)) {
+    } else if (IsDevicePathEnd (TempFwbDevicePath)) {
       //
       // Device allready exists, so reinstall the FVB protocol
       //

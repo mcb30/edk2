@@ -31,12 +31,12 @@ typedef struct {
 } IGMP_HEAD;
 #pragma pack()
 
-//
-// The status of multicast group. It isn't necessary to maintain
-// explicit state of host state diagram. A group with non-zero
-// DelayTime is in "delaying member" state. otherwise, it is in
-// "idle member" state.
-//
+///
+/// The status of multicast group. It isn't necessary to maintain
+/// explicit state of host state diagram. A group with non-zero
+/// DelayTime is in "delaying member" state. otherwise, it is in
+/// "idle member" state.
+///
 typedef struct {
   LIST_ENTRY              Link;
   INTN                    RefCnt;
@@ -46,17 +46,17 @@ typedef struct {
   EFI_MAC_ADDRESS         Mac;
 } IGMP_GROUP;
 
-//
-// The IGMP status. Each IP4 service instance has a IGMP_SERVICE_DATA
-// attached. The Igmpv1QuerySeen remember whether the server on this
-// connected network is v1 or v2.
-//
+///
+/// The IGMP status. Each IP4 service instance has a IGMP_SERVICE_DATA
+/// attached. The Igmpv1QuerySeen remember whether the server on this
+/// connected network is v1 or v2.
+///
 typedef struct {
   INTN                    Igmpv1QuerySeen;
   LIST_ENTRY              Groups;
 } IGMP_SERVICE_DATA;
 
-enum {
+typedef enum {
   //
   // IGMP message type
   //
@@ -67,7 +67,7 @@ enum {
 
   IGMP_V1ROUTER_PRESENT     = 400,
   IGMP_UNSOLICIATED_REPORT  = 10
-};
+} IGMP_ENUM_TYPES;
 
 EFI_STATUS
 Ip4InitIgmp (

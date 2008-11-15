@@ -142,6 +142,9 @@ EFI_STATUS
   @param  This      A pointer to the EFI_TAPE_IO_PROTOCOL instance.
   @param  Direction Direction and number of data blocks or filemarks to space over on media.
   @param  Type      Type of mark to space over on media.
+                    The following Type marks are mandatory:
+                    BLOCK type    : 0 
+                    FILEMARK type : 1
 
   @retval EFI_SUCCESS       The media was successfully repositioned.
   @retval EFI_END_OF_MEDIA  Beginning or end of media was reached before the
@@ -214,31 +217,12 @@ EFI_STATUS
   IN BOOLEAN              ExtendedVerification
   );    
 
-/**  
-  @par Protocol Description:
-  The EFI_TAPE_IO_PROTOCOL provides basic sequential operations for tape devices. 
-  These include read, write, rewind, space, write filemarks and reset functions. 
-  Per this specification, a boot application uses the services of this protocol 
-  to load the bootloader image from tape.
-
-  @param TapeRead
-  Read a block of data from the tape. 
-
-  @param TapeWrite
-  Write a block of data to the tape. 
-
-  @param TapeRewind
-  Rewind the tape. 
-
-  @param TapeSpace
-  Position the tape. 
-
-  @param TapeWriteFM
-  Write filemarks to the tape. 
-
-  @param TapeReset
-  Reset the tape device or its parent bus. 
-**/
+///
+/// The EFI_TAPE_IO_PROTOCOL provides basic sequential operations for tape devices. 
+/// These include read, write, rewind, space, write filemarks and reset functions. 
+/// Per this specification, a boot application uses the services of this protocol 
+/// to load the bootloader image from tape.
+///
 struct _EFI_TAPE_IO_PROTOCOL {
   EFI_TAPE_READ           TapeRead;
   EFI_TAPE_WRITE          TapeWrite;

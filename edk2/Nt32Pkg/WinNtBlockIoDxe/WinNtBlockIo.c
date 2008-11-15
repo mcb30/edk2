@@ -118,6 +118,7 @@ InitializeWinNtBlockIo(
              &gWinNtBlockIoComponentName,
              &gWinNtBlockIoComponentName2,
              NULL,
+             NULL,
              &gWinNtBlockIoDriverDiagnostics,
              &gWinNtBlockIoDriverDiagnostics2
              );
@@ -158,7 +159,7 @@ Returns:
   Status = gBS->OpenProtocol (
                   Handle,
                   &gEfiWinNtIoProtocolGuid,
-                  &WinNtIo,
+                  (VOID **) &WinNtIo,
                   This->DriverBindingHandle,
                   Handle,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -233,7 +234,7 @@ Returns:
   Status = gBS->OpenProtocol (
                   Handle,
                   &gEfiWinNtIoProtocolGuid,
-                  &WinNtIo,
+                  (VOID **) &WinNtIo,
                   This->DriverBindingHandle,
                   Handle,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -360,7 +361,7 @@ Returns:
   Status = gBS->OpenProtocol (
                   Handle,
                   &gEfiBlockIoProtocolGuid,
-                  &BlockIo,
+                  (VOID **) &BlockIo,
                   This->DriverBindingHandle,
                   Handle,
                   EFI_OPEN_PROTOCOL_GET_PROTOCOL
@@ -407,7 +408,6 @@ Returns:
   return Status;
 }
 
-STATIC
 CHAR16 *
 GetNextElementPastTerminator (
   IN  CHAR16  *EnvironmentVariable,
@@ -443,7 +443,6 @@ Returns:
   return Ptr;
 }
 
-STATIC
 EFI_STATUS
 WinNtBlockIoCreateMapping (
   IN EFI_WIN_NT_IO_PROTOCOL             *WinNtIo,
@@ -587,7 +586,6 @@ Returns:
   return Status;
 }
 
-STATIC
 EFI_STATUS
 WinNtBlockIoOpenDevice (
   WIN_NT_BLOCK_IO_PRIVATE                 *Private
@@ -707,7 +705,6 @@ Done:
   return Status;
 }
 
-STATIC
 EFI_STATUS
 WinNtBlockIoError (
   IN WIN_NT_BLOCK_IO_PRIVATE      *Private
@@ -777,7 +774,6 @@ Returns:
   return Status;
 }
 
-STATIC
 EFI_STATUS
 WinNtBlockIoReadWriteCommon (
   IN  WIN_NT_BLOCK_IO_PRIVATE     *Private,
@@ -873,7 +869,6 @@ Returns:
   return EFI_SUCCESS;
 }
 
-STATIC
 EFI_STATUS
 EFIAPI
 WinNtBlockIoReadBlocks (
@@ -940,7 +935,6 @@ Done:
   return Status;
 }
 
-STATIC
 EFI_STATUS
 EFIAPI
 WinNtBlockIoWriteBlocks (
@@ -1010,7 +1004,6 @@ Done:
 
 }
 
-STATIC
 EFI_STATUS
 EFIAPI
 WinNtBlockIoFlushBlocks (
@@ -1034,7 +1027,6 @@ WinNtBlockIoFlushBlocks (
   return EFI_SUCCESS;
 }
 
-STATIC
 EFI_STATUS
 EFIAPI
 WinNtBlockIoResetBlock (

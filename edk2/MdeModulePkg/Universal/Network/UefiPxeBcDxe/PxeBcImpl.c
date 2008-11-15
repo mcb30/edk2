@@ -32,7 +32,6 @@ Abstract:
   @retval others                  If error occurs when updating arp cache
 
 **/
-STATIC
 EFI_STATUS
 UpdateArpCache (
   IN EFI_PXE_BASE_CODE_PROTOCOL     * This
@@ -74,7 +73,6 @@ UpdateArpCache (
   @param  Context            Context of the timer event
 
 **/
-STATIC
 VOID
 EFIAPI
 ArpCacheUpdateTimeout (
@@ -92,7 +90,6 @@ ArpCacheUpdateTimeout (
   @param  Context
 
 **/
-STATIC
 BOOLEAN
 FindInArpCache (
   EFI_PXE_BASE_CODE_MODE    *PxeBcMode,
@@ -121,7 +118,6 @@ FindInArpCache (
   @return None.
 
 **/
-STATIC
 VOID
 EFIAPI
 IcmpErrorListenHandlerDpc (
@@ -208,7 +204,6 @@ Resume:
   @return None.
 
 **/
-STATIC
 VOID
 EFIAPI
 IcmpErrorListenHandler (
@@ -513,8 +508,9 @@ EfiPxeBcDhcp (
     //
     // Zero those arrays to record the varies numbers of DHCP OFFERS.
     //
-    Private->NumOffers   = 0;
-    Private->BootpIndex  = 0;
+    Private->GotProxyOffer = FALSE;
+    Private->NumOffers     = 0;
+    Private->BootpIndex    = 0;
     ZeroMem (Private->ServerCount, sizeof (Private->ServerCount));
     ZeroMem (Private->ProxyIndex, sizeof (Private->ProxyIndex));
 
@@ -1158,7 +1154,7 @@ EfiPxeBcUdpWrite (
   }
 
   FragCount = (HeaderSize != NULL) ? 2 : 1;
-  Udp4TxData = (EFI_UDP4_TRANSMIT_DATA *) AllocatePool (sizeof (EFI_UDP4_TRANSMIT_DATA) + (FragCount - 1) * sizeof (EFI_UDP4_FRAGMENT_DATA));
+  Udp4TxData = (EFI_UDP4_TRANSMIT_DATA *) AllocateZeroPool (sizeof (EFI_UDP4_TRANSMIT_DATA) + (FragCount - 1) * sizeof (EFI_UDP4_FRAGMENT_DATA));
   if (Udp4TxData == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -1231,7 +1227,6 @@ ON_EXIT:
   @retval FLASE              The UDP package doesn't matches IP filters
 
 **/
-STATIC
 BOOLEAN
 CheckIpByFilter (
   EFI_PXE_BASE_CODE_MODE    *PxeBcMode,

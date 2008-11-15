@@ -1,19 +1,21 @@
-#/** @file
-# Mde Module Package Reference Implementations
+##  @file  MdeModulePkg.dec
 #
-# This module provides headers and libraries that conform to EFI/PI Industry standards.
+# This package provides the modules that conform to EFI/PI Industry standards.
+# It also provides the defintions(including PPIs/PROTOCOLs/GUIDs and library classes) 
+# and libraries instances, which are used for those modules.
+#
 # Copyright (c) 2007 - 2008, Intel Corporation.
 #
 # All rights reserved.
-#    This program and the accompanying materials are licensed and made available under
-#    the terms and conditions of the BSD License which accompanies this distribution.
-#    The full text of the license may be found at
-#    http://opensource.org/licenses/bsd-license.php
+# This program and the accompanying materials are licensed and made available under
+# the terms and conditions of the BSD License which accompanies this distribution.
+# The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
 #
-#    THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-#    WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #
-#**/
+##
 
 
 [Defines]
@@ -27,45 +29,59 @@
 
 
 [LibraryClasses.common]
-  ## IpIo layer upon EFI IP4 Protocol.
+  ##  @libraryclass  IpIo layer upon EFI IP4 Protocol.
   IpIoLib|Include/Library/IpIoLib.h
   
-  ## Basic function for UEFI network stack.
+  ##  @libraryclass  Basic function for UEFI network stack.
   NetLib|Include/Library/NetLib.h
 
-  ## Defines a set of methods to reset whole system.
+  ##  @libraryclass  Defines a set of methods to reset whole system.
   ResetSystemLib|Include/Library/ResetSystemLib.h
   
-  ## The helper routines to access UDP service.
+  ##  @libraryclass  The helper routines to access UDP service.
   UdpIoLib|Include/Library/UdpIoLib.h
   
-  ## Defines a set of methods related do S3 mode.
+  ##  @libraryclass  Defines a set of methods related do S3 mode.
   S3Lib|Include/Library/S3Lib.h
   
-  ## Defines a set of methods related recovery mode.
+  ##  @libraryclass  Defines a set of methods related recovery mode.
   RecoveryLib|Include/Library/RecoveryLib.h
   
-  ## Basic platform driver override functions.
+  ##  @libraryclass  Basic platform driver override functions.
   PlatDriOverLib|Include/Library/PlatDriOverLib.h
+
+  ##  @libraryclass  Provides HII related functions.
+  HiiLib|Include/Library/HiiLib.h
+
+  ##  @libraryclass  Provides a set of interfaces to do IFR opcode creation and interact with a UEFI Form Browser.
+  IfrSupportLib|Include/Library/IfrSupportLib.h
   
-  ## Includes two extended HII functions to create and destory Hii Package 
-  #  by create the virtual Driver Handle.
+  ##  @libraryclass  Includes two extended HII functions to create and destory Hii Package 
+  #                  by create the virtual Driver Handle.
+  ##
   ExtendedHiiLib|Include/Library/ExtendedHiiLib.h
   
-  ## Defines APIs that is related to IFR operations but specific to EDK II implementation.
+  ##  @libraryclass  Defines APIs that is related to IFR operations but specific to EDK II
+  #                  implementation.
+  ##
   ExtendedIfrSupportLib|Include/Library/ExtendedIfrSupportLib.h
   
-  ## Defines a set of interfaces on how to process capusle image update.
+  ##  @libraryclass  Defines a set of interfaces on how to process capusle image update.
   CapsuleLib|Include/Library/CapsuleLib.h
   
-  ## Platform BDS library definition about platform specific behavior.
+  ##  @libraryclass  Platform BDS library definition about platform specific behavior.
   PlatformBdsLib|Include/Library/PlatformBdsLib.h
   
-  ## Generic BDS library definition, include the data structure and function.
+  ##  @libraryclass  Generic BDS library definition, include the data structure and function.
   GenericBdsLib|Include/Library/GenericBdsLib.h
   
-  ## Library for Deferred Procedure Calls.
+  ##  @libraryclass  Library for Deferred Procedure Calls.
   DpcLib|Include/Library/DpcLib.h
+
+  ##  @libraryclass  Provides all FVB runtime services defined in PI specification FVB protocol to provide
+  #                  low level control interfaces over block-oriented firmware devices.
+  ##
+  FvbServiceLib|Include/Library/FvbServiceLib.h
 
 [Guids.common]
   ## MdeModule package token space guid
@@ -283,24 +299,31 @@
   #  FALSE is for size reduction.
   gEfiMdeModulePkgTokenSpaceGuid.PcdSupportHiiImageProtocol|TRUE|BOOLEAN|0x00010100
   
-  ## IF TRUE, Full UEFI Config Routing Protocol will be installed.
+  ## If TRUE, Full UEFI Config Routing Protocol will be installed.
   #  FALSE is for size reduction.
   gEfiMdeModulePkgTokenSpaceGuid.PcdSupportFullConfigRoutingProtocol|TRUE|BOOLEAN|0x00010101
   
-  ## IF TRUE, Default Keyboard Layout is disabled in Usb KeyBoard device.
+  ## If TRUE, Default Keyboard Layout is disabled in Usb KeyBoard device.
   gEfiMdeModulePkgTokenSpaceGuid.PcdDisableDefaultKeyboardLayoutInUsbKbDriver|FALSE|BOOLEAN|0x00010200
 
+  ## If TRUE, Framework Hii is supported to provide backward compatibility
   gEfiMdeModulePkgTokenSpaceGuid.PcdFrameworkHiiCompatibilitySupport|TRUE|BOOLEAN|0x00012008
   
-  ## IF TRUE, the PeiCore will handle the framework FvHob and install FvInfo PPI for it.
+  ## If TRUE, the PeiCore will handle the framework FvHob and install FvInfo PPI for it.
   gEfiMdeModulePkgTokenSpaceGuid.PcdFrameworkFvHobCompatibilitySupport|FALSE|BOOLEAN|0x00012009
+  
+  ##
+  #  If TRUE, HelloWorld Application will print the verbose information.
+  #  This PCD is a sample to explain FeatureFlag PCD usage.
+  ##
+  gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintEnable|TRUE|BOOLEAN|0x0001200a
 
 [PcdsFixedAtBuild.common]
   ## Dynamic type PCD can be registered callback function for Pcd setting action.
   #  PcdMaxPeiPcdCallBackNumberPerPcdEntry indicate maximum number of callback function
   #  for a dynamic PCD used in PEI phase.
-
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxPeiPcdCallBackNumberPerPcdEntry|0x08|UINT32|0x0001000f
+
   ## VPD type PCD allow developer point an absoluted physical address PcdVpdBaseAddress
   #  to store PCD value. 
   #
@@ -359,10 +382,22 @@
 
   ## Default timeout value for displaying progressing bar in before boot OS.
   #  This value can be changed in BDS.
-  gEfiMdeModulePkgTokenSpaceGuid.PcdPlatformBootTimeOutDefault|10|UINT16|0x40000001
+  gEfiMdeModulePkgTokenSpaceGuid.PcdPlatformBootTimeOutDefault|0xffff|UINT16|0x40000001
 
   ## Error level for hardware recorder.
   gEfiMdeModulePkgTokenSpaceGuid.PcdHardwareErrorRecordLevel|1|UINT16|0x40000002
+  
+  ##
+  #  This PCD defines the print string.
+  #  This PCD is a sample to explain FixedAtBuild String PCD usage.
+  ##
+  gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintString|L"UEFI Hello World!\n"|VOID*|0x40000004
+
+  ##
+  #  This PCD defines the times to print hello world string.
+  #  This PCD is a sample to explain FixedAtBuild UINT32 PCD usage.
+  ##
+  gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintTimes|1|UINT32|0x40000005
 
 [PcdsFixedAtBuild.IA32]
   ## Default EFI boot path name for IA32 architecture, this path is relative to 
@@ -405,10 +440,22 @@
 
   ## Default timeout value for displaying progressing bar in before boot OS.
   #  This value can be changed in BDS.
-  gEfiMdeModulePkgTokenSpaceGuid.PcdPlatformBootTimeOutDefault|10|UINT16|0x40000001
+  gEfiMdeModulePkgTokenSpaceGuid.PcdPlatformBootTimeOutDefault|0xffff|UINT16|0x40000001
 
   ## Error level for hardware recorder.
   gEfiMdeModulePkgTokenSpaceGuid.PcdHardwareErrorRecordLevel|1|UINT16|0x40000002
+
+  ##
+  #  This PCD defines the print string.
+  #  This PCD is a sample to explain Dynamic PCD usage.
+  ##
+  gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintString|L"UEFI Hello World!\n"|VOID*|0x40000004
+
+  ##
+  #  This PCD defines the times to print hello world string.
+  #  This PCD is a sample to explain Dynamic UINT32 PCD usage.
+  ##
+  gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintTimes|1|UINT32|0x40000005
 
 [PcdsPatchableInModule.common]
   ## Maximun number of performance log entries during PEI phase.
@@ -434,10 +481,16 @@
 
   ## Default timeout value for displaying progressing bar in before boot OS.
   #  This value can be changed in BDS.
-  gEfiMdeModulePkgTokenSpaceGuid.PcdPlatformBootTimeOutDefault|10|UINT16|0x40000001
+  gEfiMdeModulePkgTokenSpaceGuid.PcdPlatformBootTimeOutDefault|0xffff|UINT16|0x40000001
 
   ## Error level for hardware recorder.
   gEfiMdeModulePkgTokenSpaceGuid.PcdHardwareErrorRecordLevel|1|UINT16|0x40000002
+
+  ##
+  #  This PCD defines the times to print hello world string.
+  #  This PCD is a sample to explain Patchable UINT32 PCD usage.
+  ##
+  gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintTimes|1|UINT32|0x40000005
 
 [PcdsFeatureFlag.IA32]
   ## If TRUE, the DXE IPL will load a 64-bit DxeCore.

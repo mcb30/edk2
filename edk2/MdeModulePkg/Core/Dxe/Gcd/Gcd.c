@@ -15,6 +15,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
 #include "DxeMain.h"
+#include "Gcd.h"
 
 #define MINIMUM_INITIAL_MEMORY_SIZE 0x10000
 
@@ -1123,6 +1124,7 @@ CoreInternalAddMemorySpace (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreAllocateMemorySpace (
   IN     EFI_GCD_ALLOCATE_TYPE  GcdAllocateType,
   IN     EFI_GCD_MEMORY_TYPE    GcdMemoryType,
@@ -1160,6 +1162,7 @@ CoreAllocateMemorySpace (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreAddMemorySpace (
   IN EFI_GCD_MEMORY_TYPE   GcdMemoryType,
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
@@ -1233,6 +1236,7 @@ CoreAddMemorySpace (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreFreeMemorySpace (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length
@@ -1253,6 +1257,7 @@ CoreFreeMemorySpace (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreRemoveMemorySpace (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length
@@ -1296,6 +1301,7 @@ BuildMemoryDescriptor (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreGetMemorySpaceDescriptor (
   IN  EFI_PHYSICAL_ADDRESS             BaseAddress,
   OUT EFI_GCD_MEMORY_SPACE_DESCRIPTOR  *Descriptor
@@ -1348,6 +1354,7 @@ CoreGetMemorySpaceDescriptor (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreSetMemorySpaceAttributes (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length,
@@ -1371,6 +1378,7 @@ CoreSetMemorySpaceAttributes (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreGetMemorySpaceMap (
   OUT UINTN                            *NumberOfDescriptors,
   OUT EFI_GCD_MEMORY_SPACE_DESCRIPTOR  **MemorySpaceMap
@@ -1438,6 +1446,7 @@ Done:
 
 **/
 EFI_STATUS
+EFIAPI
 CoreAddIoSpace (
   IN EFI_GCD_IO_TYPE       GcdIoType,
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
@@ -1472,6 +1481,7 @@ CoreAddIoSpace (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreAllocateIoSpace (
   IN     EFI_GCD_ALLOCATE_TYPE  GcdAllocateType,
   IN     EFI_GCD_IO_TYPE        GcdIoType,
@@ -1507,6 +1517,7 @@ CoreAllocateIoSpace (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreFreeIoSpace (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length
@@ -1527,6 +1538,7 @@ CoreFreeIoSpace (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreRemoveIoSpace (
   IN EFI_PHYSICAL_ADDRESS  BaseAddress,
   IN UINT64                Length
@@ -1568,6 +1580,7 @@ BuildIoDescriptor (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreGetIoSpaceDescriptor (
   IN  EFI_PHYSICAL_ADDRESS         BaseAddress,
   OUT EFI_GCD_IO_SPACE_DESCRIPTOR  *Descriptor
@@ -1619,6 +1632,7 @@ CoreGetIoSpaceDescriptor (
 
 **/
 EFI_STATUS
+EFIAPI
 CoreGetIoSpaceMap (
   OUT UINTN                        *NumberOfDescriptors,
   OUT EFI_GCD_IO_SPACE_DESCRIPTOR  **IoSpaceMap
@@ -1710,12 +1724,11 @@ CoreConvertResourceDescriptorHobAttributesToCapabilities (
 
 
 /**
-  External function. Initializes the GCD and memory services based on the memory
-  descriptor HOBs.  This function is responsible for priming the GCD map and the
-  memory map, so memory allocations and resource allocations can be made.  The first
-  part of this function can not depend on any memory services until at least one
-  memory descriptor is provided to the memory services.  Then the memory services
-  can be used to intialize the GCD map.
+  External function. Initializes memory services based on the memory
+  descriptor HOBs.  This function is responsible for priming the memory
+  map, so memory allocations and resource allocations can be made.
+  The first part of this function can not depend on any memory services
+  until at least one memory descriptor is provided to the memory services.
 
   @param  HobStart               The start address of the HOB.
   @param  MemoryBaseAddress      Start address of memory region found to init DXE
@@ -1925,11 +1938,8 @@ CoreInitializeMemoryServices (
 /**
   External function. Initializes the GCD and memory services based on the memory
   descriptor HOBs.  This function is responsible for priming the GCD map and the
-  memory map, so memory allocations and resource allocations can be made.  The first
-  part of this function can not depend on any memory services until at least one
-  memory descriptor is provided to the memory services.  Then the memory services
-  can be used to intialize the GCD map. The HobStart will be relocated to a pool
-  buffer.
+  memory map, so memory allocations and resource allocations can be made. The
+  HobStart will be relocated to a pool buffer.
 
   @param  HobStart               The start address of the HOB
   @param  MemoryBaseAddress      Start address of memory region found to init DXE

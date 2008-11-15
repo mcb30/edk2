@@ -43,13 +43,10 @@
   ConfigAccess.h
   OpcodeCreation.c
   OpcodeCreation.h
-  UefiIfrParserInternal.h
-  UefiIfrParserCommon.c
-  UefiIfrParserCommon.h
   UefiIfrParser.c
   UefiIfrParser.h
   UefiIfrParserExpression.c
-  UefiIfrParserExpressionInternal.h
+  UefiIfrParserExpression.h
   UefiIfrDefault.c
   UefiIfrDefault.h
   Keyboard.c
@@ -100,6 +97,8 @@
   gEfiHiiDatabaseProtocolGuid AND
   gEfiHiiStringProtocolGuid AND
   gEfiHiiConfigRoutingProtocolGuid AND
-  gEfiHiiFontProtocolGuid
+  gEfiHiiFontProtocolGuid AND
+  gEfiFormBrowser2ProtocolGuid
+
 
 

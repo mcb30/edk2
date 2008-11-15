@@ -12,9 +12,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <PeiMain.h>
+#include "PeiMain.h"
 
-STATIC EFI_PEI_NOTIFY_DESCRIPTOR mNotifyOnFvInfoList = {
+EFI_PEI_NOTIFY_DESCRIPTOR mNotifyOnFvInfoList = {
   (EFI_PEI_PPI_DESCRIPTOR_NOTIFY_CALLBACK | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST),
   &gEfiPeiFirmwareVolumeInfoPpiGuid,
   FirmwareVolmeInfoPpiNotifyCallback 
@@ -163,7 +163,7 @@ PeiFindFileEx (
   FileHeader  = (EFI_FFS_FILE_HEADER **)FileHandle;
 
   FvLength = FwVolHeader->FvLength;
-  if (FwVolHeader->Attributes & EFI_FVB2_ERASE_POLARITY) {
+  if ((FwVolHeader->Attributes & EFI_FVB2_ERASE_POLARITY) != 0) {
     ErasePolarity = 1;
   } else {
     ErasePolarity = 0;
@@ -387,7 +387,7 @@ FirmwareVolmeInfoPpiNotifyCallback (
         //
         // Process FvFile to install FvInfo ppi and build FvHob
         // 
-        ProcessFvFile (PeiServices, FileHandle, &AuthenticationStatus);
+        ProcessFvFile ((CONST EFI_PEI_SERVICES **) PeiServices, FileHandle, &AuthenticationStatus);
       }
     } while (FileHandle != NULL);
   }
@@ -654,7 +654,7 @@ PeiFvFindNextVolume (
       // If Not Found, Install FvInfo Ppi for it.
       //
       if (!Match) {
-        PiLibInstallFvInfoPpi (
+        PeiServicesInstallFvInfoPpi (
           NULL,
           (VOID *)(UINTN)FvHob->BaseAddress,
           (UINT32)FvHob->Length,
@@ -837,9 +837,9 @@ PeiFfsGetVolumeInfo (
 **/
 EFI_STATUS
 ProcessFvFile (
-  IN  EFI_PEI_SERVICES      **PeiServices,
-  IN  EFI_PEI_FILE_HANDLE   FvFileHandle,
-  OUT UINT32                *AuthenticationState
+  IN  CONST EFI_PEI_SERVICES      **PeiServices,
+  IN  EFI_PEI_FILE_HANDLE         FvFileHandle,
+  OUT UINT32                      *AuthenticationState
   )
 {
   EFI_STATUS            Status;
@@ -871,7 +871,7 @@ ProcessFvFile (
   // Find FvImage in FvFile
   //
   Status = PeiFfsFindSectionData (
-             (CONST EFI_PEI_SERVICES **) PeiServices,
+             PeiServices,
              EFI_SECTION_FIRMWARE_VOLUME_IMAGE,
              FvFileHandle,
              (VOID **)&FvImageHandle
@@ -913,7 +913,7 @@ ProcessFvFile (
   //
   // Install FvPpi and Build FvHob
   //
-  PiLibInstallFvInfoPpi (
+  PeiServicesInstallFvInfoPpi (
     NULL,
     FvImageInfo.FvStart,
     (UINT32) FvImageInfo.FvSize,
@@ -923,22 +923,11 @@ ProcessFvFile (
 
   //
   // Inform the extracted FvImage to Fv HOB consumer phase, i.e. DXE phase
-  // based on its parent Fvimage is informed or not.
-  // If FvHob of its parent fvimage is built, the extracted FvImage will be built also. 
-  // Or, the extracted FvImage will not be built.
   //
-  HobPtr.Raw = GetHobList ();
-  while ((HobPtr.Raw = GetNextHob (EFI_HOB_TYPE_FV, HobPtr.Raw)) != NULL) {
-    if (((EFI_PHYSICAL_ADDRESS) (UINTN)FvFileHandle > HobPtr.FirmwareVolume->BaseAddress) && 
-        ((EFI_PHYSICAL_ADDRESS) (UINTN)FvFileHandle < HobPtr.FirmwareVolume->BaseAddress + HobPtr.FirmwareVolume->Length)) {
-      BuildFvHob (
-        (EFI_PHYSICAL_ADDRESS) (UINTN) FvImageInfo.FvStart,
-        FvImageInfo.FvSize
-      );
-      break;
-    }
-    HobPtr.Raw = GET_NEXT_HOB (HobPtr);
-  }
+  BuildFvHob (
+    (EFI_PHYSICAL_ADDRESS) (UINTN) FvImageInfo.FvStart,
+    FvImageInfo.FvSize
+  );
 
   //
   // Makes the encapsulated volume show up in DXE phase to skip processing of

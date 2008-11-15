@@ -61,59 +61,27 @@ struct _EFI_RUNTIME_EVENT_ENTRY {
   EFI_LIST_ENTRY          Link;
 };
 
-//
-// Interface stucture for the Runtime Architectural Protocol
-//
-/**
-  @par Protocol Description:
-  Allows the runtime functionality of the DXE Foundation to be contained in a 
-  separate driver. It also provides hooks for the DXE Foundation to export 
-  information that is needed at runtime. As such, this protocol allows the DXE 
-  Foundation to manage runtime drivers and events. This protocol also implies 
-  that the runtime services required to transition to virtual mode, 
-  SetVirtualAddressMap() and ConvertPointer(), have been registered into the 
-  EFI Runtime Table in the EFI System Partition.  This protocol must be produced 
-  by a runtime DXE driver and may only be consumed by the DXE Foundation.
-
-  @param ImageHead
-  A list of type EFI_RUNTIME_IMAGE_ENTRY.
-
-  @param EventHead
-  A list of type EFI_RUNTIME_EVENT_ENTRY.
-
-  @param MemoryDescriptorSize
-  Size of a memory descriptor that is return by GetMemoryMap().
-
-  @param MemoryDescriptorVersion
-  Version of a memory descriptor that is return by GetMemoryMap().
-
-  @param MemoryMapSize 
-  Size of the memory map in bytes contained in MemoryMapPhysical and MemoryMapVirtual. 
-
-  @param MemoryMapPhysical
-  Pointer to a runtime buffer that contains a copy of 
-  the memory map returned via GetMemoryMap().
-
-  @param MemoryMapVirtual
-  Pointer to MemoryMapPhysical that is updated to virtual mode after SetVirtualAddressMap().
-
-  @param VirtualMode
-  Boolean that is TRUE if SetVirtualAddressMap() has been called.
-
-  @param AtRuntime
-  Boolean that is TRUE if ExitBootServices () has been called.
-
-**/
+///
+/// Allows the runtime functionality of the DXE Foundation to be contained in a 
+/// separate driver. It also provides hooks for the DXE Foundation to export 
+/// information that is needed at runtime. As such, this protocol allows the DXE 
+/// Foundation to manage runtime drivers and events. This protocol also implies 
+/// that the runtime services required to transition to virtual mode, 
+/// SetVirtualAddressMap() and ConvertPointer(), have been registered into the 
+/// EFI Runtime Table in the EFI System Partition.  This protocol must be produced 
+/// by a runtime DXE driver and may only be consumed by the DXE Foundation.
+///
 struct _EFI_RUNTIME_ARCH_PROTOCOL {
-  EFI_LIST_ENTRY          ImageHead;
-  EFI_LIST_ENTRY          EventHead;
-  UINTN                   MemoryDescriptorSize;
-  UINT32                  MemoryDesciptorVersion;
-  UINTN                   MemoryMapSize;
-  EFI_MEMORY_DESCRIPTOR   *MemoryMapPhysical;
-  EFI_MEMORY_DESCRIPTOR   *MemoryMapVirtual;
-  BOOLEAN                 VirtualMode;
-  BOOLEAN                 AtRuntime;
+  EFI_LIST_ENTRY          ImageHead;    ///< A list of type EFI_RUNTIME_IMAGE_ENTRY.
+  EFI_LIST_ENTRY          EventHead;    ///< A list of type EFI_RUNTIME_EVENT_ENTRY.
+  UINTN                   MemoryDescriptorSize;   ///< Size of a memory descriptor that is return by GetMemoryMap().
+  UINT32                  MemoryDesciptorVersion; ///< Version of a memory descriptor that is return by GetMemoryMap().
+  UINTN                   MemoryMapSize;///< Size of the memory map in bytes contained in MemoryMapPhysical and MemoryMapVirtual. 
+  EFI_MEMORY_DESCRIPTOR   *MemoryMapPhysical;     ///< Pointer to a runtime buffer that contains a copy of 
+                                                  ///< the memory map returned via GetMemoryMap().
+  EFI_MEMORY_DESCRIPTOR   *MemoryMapVirtual;      ///< Pointer to MemoryMapPhysical that is updated to virtual mode after SetVirtualAddressMap().
+  BOOLEAN                 VirtualMode;  ///< Boolean that is TRUE if SetVirtualAddressMap() has been called.
+  BOOLEAN                 AtRuntime;    ///< Boolean that is TRUE if ExitBootServices () has been called.
 };
 
 extern EFI_GUID gEfiRuntimeArchProtocolGuid;

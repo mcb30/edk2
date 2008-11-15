@@ -12,10 +12,8 @@
 
 **/
 
-//
-// Include common header file for this module.
-//
-#include <BaseLibInternals.h>
+
+#include "BaseLibInternals.h"
 
 /**
   Worker function that checks ASSERT condition for JumpBuffer

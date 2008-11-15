@@ -173,7 +173,7 @@ BdsLibBootViaBootOption (
   Status = BdsLibUpdateFvFileDevicePath (&DevicePath, &gEfiShellFileGuid);
   if (!EFI_ERROR(Status)) {
     if (Option->DevicePath != NULL) {
-      SafeFreePool(Option->DevicePath);
+      FreePool(Option->DevicePath);
     }
     Option->DevicePath  = AllocateZeroPool (GetDevicePathSize (DevicePath));
     CopyMem (Option->DevicePath, DevicePath, GetDevicePathSize (DevicePath));
@@ -186,7 +186,7 @@ BdsLibBootViaBootOption (
     //
     // free the temporary device path created by BdsLibUpdateFvFileDevicePath()
     //
-    SafeFreePool (DevicePath); 
+    FreePool (DevicePath); 
     DevicePath = Option->DevicePath;
   }
 
@@ -358,7 +358,7 @@ BdsExpandPartitionPartialDevicePathToFull (
       // Come here means the first instance is not matched
       //
       NeedAdjust = TRUE;
-      SafeFreePool(Instance);
+      FreePool(Instance);
     } while (TempNewDevicePath != NULL);
 
     if (DeviceExist) {
@@ -378,14 +378,14 @@ BdsExpandPartitionPartialDevicePathToFull (
         //
         TempNewDevicePath = CachedDevicePath;
         CachedDevicePath  = BdsLibDelPartMatchInstance (CachedDevicePath, Instance );
-        SafeFreePool (TempNewDevicePath);
+        FreePool (TempNewDevicePath);
         
         //
         // Second, append the remaining parth after the matched instance
         //
         TempNewDevicePath = CachedDevicePath;
         CachedDevicePath = AppendDevicePathInstance (Instance, CachedDevicePath );
-        SafeFreePool (TempNewDevicePath);
+        FreePool (TempNewDevicePath);
         //
         // Save the matching Device Path so we don't need to do a connect all next time
         //
@@ -398,8 +398,8 @@ BdsExpandPartitionPartialDevicePathToFull (
                         );
       }
       
-      SafeFreePool (Instance);
-      SafeFreePool (CachedDevicePath);
+      FreePool (Instance);
+      FreePool (CachedDevicePath);
       return FullDevicePath;
     }
   }
@@ -444,15 +444,15 @@ BdsExpandPartitionPartialDevicePathToFull (
         if (BdsLibMatchDevicePaths (CachedDevicePath, BlockIoDevicePath)) {
           TempNewDevicePath = CachedDevicePath;
           CachedDevicePath = BdsLibDelPartMatchInstance (CachedDevicePath, BlockIoDevicePath);
-          SafeFreePool(TempNewDevicePath);
+          FreePool(TempNewDevicePath);
 
           TempNewDevicePath = CachedDevicePath;
           CachedDevicePath = AppendDevicePathInstance (BlockIoDevicePath, CachedDevicePath);
-          SafeFreePool(TempNewDevicePath);
+          FreePool(TempNewDevicePath);
         } else {
           TempNewDevicePath = CachedDevicePath;
           CachedDevicePath = AppendDevicePathInstance (BlockIoDevicePath, CachedDevicePath);
-          SafeFreePool(TempNewDevicePath);
+          FreePool(TempNewDevicePath);
         }
         //
         // Here limit the device path instance number to 12, which is max number for a system support 3 IDE controller
@@ -496,8 +496,10 @@ BdsExpandPartitionPartialDevicePathToFull (
     }
   }
   
-  SafeFreePool (CachedDevicePath);
-  SafeFreePool (BlockIoBuffer);
+  FreePool (CachedDevicePath);
+  if (BlockIoBuffer != NULL) {
+    FreePool (BlockIoBuffer);
+  }
   return FullDevicePath;
 }
 
@@ -521,7 +523,6 @@ MatchPartitionDevicePathNode (
   )
 {
   HARDDRIVE_DEVICE_PATH     *TmpHdPath;
-  HARDDRIVE_DEVICE_PATH     *TempPath;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
   BOOLEAN                   Match;
   EFI_DEVICE_PATH_PROTOCOL  *BlockIoHdDevicePathNode;
@@ -557,20 +558,19 @@ MatchPartitionDevicePathNode (
   // See if the harddrive device path in blockio matches the orig Hard Drive Node
   //
   TmpHdPath = (HARDDRIVE_DEVICE_PATH *) BlockIoHdDevicePathNode;
-  TempPath  = (HARDDRIVE_DEVICE_PATH *) BdsLibUnpackDevicePath ((EFI_DEVICE_PATH_PROTOCOL *) HardDriveDevicePath);
   Match = FALSE;
   
   //
   // Check for the match
   //
-  if ((TmpHdPath->MBRType == TempPath->MBRType) &&
-      (TmpHdPath->SignatureType == TempPath->SignatureType)) {
+  if ((TmpHdPath->MBRType == HardDriveDevicePath->MBRType) &&
+      (TmpHdPath->SignatureType == HardDriveDevicePath->SignatureType)) {
     switch (TmpHdPath->SignatureType) {
     case SIGNATURE_TYPE_GUID:
-      Match = CompareGuid ((EFI_GUID *)TmpHdPath->Signature, (EFI_GUID *)TempPath->Signature);
+      Match = CompareGuid ((EFI_GUID *)TmpHdPath->Signature, (EFI_GUID *)HardDriveDevicePath->Signature);
       break;
     case SIGNATURE_TYPE_MBR:
-      Match = (BOOLEAN)(*((UINT32 *)(&(TmpHdPath->Signature[0]))) == *(UINT32 *)(&(TempPath->Signature[0])));
+      Match = (BOOLEAN)(*((UINT32 *)(&(TmpHdPath->Signature[0]))) == ReadUnaligned32((UINT32 *)(&(HardDriveDevicePath->Signature[0]))));
       break;
     default:
       Match = FALSE;
@@ -649,7 +649,7 @@ BdsLibDeleteOptionFromHandle (
                       );
                       
     if (BootOptionVar == NULL) {
-      SafeFreePool (BootOrder);
+      FreePool (BootOrder);
       return EFI_OUT_OF_RESOURCES;
     }
 
@@ -665,11 +665,11 @@ BdsLibDeleteOptionFromHandle (
     if ((OptionDevicePathSize == DevicePathSize) &&
         (CompareMem (DevicePath, OptionDevicePath, DevicePathSize) == 0)) {
       BdsDeleteBootOption (BootOrder[Index], BootOrder, &BootOrderSize);
-      SafeFreePool (BootOptionVar);
+      FreePool (BootOptionVar);
       break;
     }
 
-    SafeFreePool (BootOptionVar);
+    FreePool (BootOptionVar);
     Index++;
   }
 
@@ -684,7 +684,7 @@ BdsLibDeleteOptionFromHandle (
                   BootOrder
                   );
 
-  SafeFreePool (BootOrder);
+  FreePool (BootOrder);
 
   return Status;
 }
@@ -741,7 +741,7 @@ BdsDeleteAllInvalidEfiBootOption (
                       &BootOptionSize
                       );
     if (NULL == BootOptionVar) {
-      SafeFreePool (BootOrder);
+      FreePool (BootOrder);
       return EFI_OUT_OF_RESOURCES;
     }
 
@@ -755,7 +755,7 @@ BdsDeleteAllInvalidEfiBootOption (
     //
     if ((DevicePathType (OptionDevicePath) == BBS_DEVICE_PATH) &&
         (DevicePathSubType (OptionDevicePath) == BBS_BBS_DP)) {
-      SafeFreePool (BootOptionVar);
+      FreePool (BootOptionVar);
       Index++;
       continue;
     }
@@ -777,7 +777,7 @@ BdsDeleteAllInvalidEfiBootOption (
       BootOrder[Index] = 0xffff;
     }
 
-    SafeFreePool (BootOptionVar);
+    FreePool (BootOptionVar);
     Index++;
   }
 
@@ -799,7 +799,7 @@ BdsDeleteAllInvalidEfiBootOption (
                   BootOrder
                   );
 
-  SafeFreePool (BootOrder);
+  FreePool (BootOrder);
 
   return Status;
 }
@@ -963,7 +963,7 @@ BdsLibEnumerateAllBootOption (
   }
 
   if (NumberBlockIoHandles != 0) {
-    SafeFreePool (BlockIoHandles);
+    FreePool (BlockIoHandles);
   }
 
   //
@@ -1025,7 +1025,7 @@ BdsLibEnumerateAllBootOption (
   }
 
   if (NumberFileSystemHandles != 0) {
-    SafeFreePool (FileSystemHandles);
+    FreePool (FileSystemHandles);
   }
 
   //
@@ -1048,7 +1048,7 @@ BdsLibEnumerateAllBootOption (
   }
 
   if (NumberSimpleNetworkHandles != 0) {
-    SafeFreePool (SimpleNetworkHandles);
+    FreePool (SimpleNetworkHandles);
   }
 
   //
@@ -1102,7 +1102,7 @@ BdsLibEnumerateAllBootOption (
   }
 
   if (FvHandleCount != 0) {
-    SafeFreePool (FvHandleBuffer);
+    FreePool (FvHandleBuffer);
   }
   //
   // Make sure every boot only have one time
@@ -1307,7 +1307,7 @@ BdsLibGetBootableHandle (
                BlockIo->Media->BlockSize,
                Buffer
                );
-      SafeFreePool(Buffer);
+      FreePool(Buffer);
     }
   }
 
@@ -1320,6 +1320,8 @@ BdsLibGetBootableHandle (
   // Try to locate the USB node device path first, if fail then use its previour PCI node to search
   //
   DupDevicePath = DuplicateDevicePath (DevicePath);
+  ASSERT (DupDevicePath != NULL);
+  
   UpdatedDevicePath = DupDevicePath;
   Status = gBS->LocateDevicePath (&gEfiDevicePathProtocolGuid, &UpdatedDevicePath, &Handle);
   //
@@ -1379,9 +1381,11 @@ BdsLibGetBootableHandle (
     }
   }
 
-  SafeFreePool(DupDevicePath);
+  FreePool(DupDevicePath);
 
-  SafeFreePool(SimpleFileSystemHandles);
+  if (SimpleFileSystemHandles != NULL) {
+    FreePool(SimpleFileSystemHandles);
+  }
 
   return ReturnHandle;
 }
@@ -1618,9 +1622,9 @@ BdsLibIsValidEFIBootOptDevicePath (
   // If the boot option point to a file, it is a valid EFI boot option,
   // and assume it is ready to boot now
   //
-  while (!EfiIsDevicePathEnd (TempDevicePath)) {
+  while (!IsDevicePathEnd (TempDevicePath)) {
      LastDeviceNode = TempDevicePath;
-     TempDevicePath = EfiNextDevicePathNode (TempDevicePath);
+     TempDevicePath = NextDevicePathNode (TempDevicePath);
   }
   if ((DevicePathType (LastDeviceNode) == MEDIA_DEVICE_PATH) &&
     (DevicePathSubType (LastDeviceNode) == MEDIA_FILEPATH_DP)) {
@@ -1640,7 +1644,7 @@ BdsLibIsValidEFIBootOptDevicePath (
       return TRUE;
     } else {
       if (Status == EFI_SUCCESS) {
-        SafeFreePool (TempDevicePath); 
+        FreePool (TempDevicePath); 
       }
       return FALSE;
     }
@@ -1759,9 +1763,9 @@ BdsLibUpdateFvFileDevicePath (
   //
   TempDevicePath = *DevicePath;
   LastDeviceNode = TempDevicePath;
-  while (!EfiIsDevicePathEnd (TempDevicePath)) {
+  while (!IsDevicePathEnd (TempDevicePath)) {
      LastDeviceNode = TempDevicePath;
-     TempDevicePath = EfiNextDevicePathNode (TempDevicePath);
+     TempDevicePath = NextDevicePathNode (TempDevicePath);
   }
   GuidPoint = EfiGetNameGuidFromFwVolDevicePathNode (
                 (MEDIA_FW_VOL_FILEPATH_DEVICE_PATH *) LastDeviceNode
@@ -1885,8 +1889,10 @@ BdsLibUpdateFvFileDevicePath (
       FoundFvHandle = FvHandleBuffer[Index];
       break;
     }
-    
-    SafeFreePool (FvHandleBuffer);  
+
+    if (FvHandleBuffer != NULL) {
+      FreePool (FvHandleBuffer);  
+    }
   }
 
   if (FindFvFile) {

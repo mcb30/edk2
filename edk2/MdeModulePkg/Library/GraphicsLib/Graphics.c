@@ -1,6 +1,8 @@
 /** @file
-  Basic Graphics operations based on UEFI HII, Graphics Output protocol or UGA 
-  Draw protocol.
+  Library supports diplaying graphical splash screen,
+  locking of keyboard input and printing character on
+  screen. These basic graphics operations are based on UEFI HII, 
+  Graphics Output protocol or UGA Draw protocol.
 
 Copyright (c) 2006 - 2008, Intel Corporation
 All rights reserved. This program and the accompanying materials
@@ -14,13 +16,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
 
-#include <Uefi.h>
+#include <PiDxe.h>
 
 #include <Protocol/SimpleTextOut.h>
 #include <Protocol/OEMBadging.h>
 #include <Protocol/ConsoleControl.h>
 #include <Protocol/GraphicsOutput.h>
-#include <Protocol/FirmwareVolume2.h>
 #include <Protocol/UgaDraw.h>
 #include <Protocol/HiiFont.h>
 #include <Protocol/HiiImage.h>
@@ -34,10 +35,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/DxePiLib.h>
+#include <Library/DxeServicesLib.h>
 #include <Library/PcdLib.h>
 
-STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mEfiColors[16] = {
+EFI_GRAPHICS_OUTPUT_BLT_PIXEL mEfiColors[16] = {
   { 0x00, 0x00, 0x00, 0x00 },
   { 0x98, 0x00, 0x00, 0x00 },
   { 0x00, 0x98, 0x00, 0x00 },
@@ -110,7 +111,7 @@ GetGraphicsBitMapFromFVEx (
   OUT UINTN         *ImageSize
   )
 {
-  return PiLibGetSectionFromAnyFv (
+  return GetSectionFromAnyFv  (
            FileNameGuid,
            EFI_SECTION_RAW,
            0,
@@ -310,8 +311,7 @@ ConvertBmpToGopBlt (
 
   @param  Password        Password used to lock ConIn device.
 
-  @retval EFI_SUCCESS     ConsoleControl has been flipped to graphics and logo
-                          displayed.
+  @retval EFI_SUCCESS     lock the Console In Spliter virtual handle successfully.
   @retval EFI_UNSUPPORTED Password not found.
 
 **/
@@ -467,7 +467,9 @@ EnableQuietBootEx (
       // Currently only support BMP format.
       //
       if (Format != EfiBadgingFormatBMP) {
-        SafeFreePool (ImageData);
+        if (ImageData != NULL) {
+          FreePool (ImageData);
+        }
         continue;
       }
     } else {
@@ -494,7 +496,9 @@ EnableQuietBootEx (
               &Width
               );
     if (EFI_ERROR (Status)) {
-      SafeFreePool (ImageData);
+      if (ImageData != NULL) {
+        FreePool (ImageData);
+      }
       if (Badging == NULL) {
         return Status;
       } else {
@@ -589,8 +593,12 @@ EnableQuietBootEx (
       }
     }
 
-    SafeFreePool (ImageData);
-    SafeFreePool (Blt);
+    if (ImageData != NULL) {
+      FreePool (ImageData);
+    }
+    if (Blt != NULL) {
+      FreePool (Blt);
+    }
 
     if (Badging == NULL) {
       break;
@@ -780,8 +788,8 @@ Print (
 
     Blt->Image.Bitmap = AllocateZeroPool (Blt->Width * Blt->Height * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
     if (Blt->Image.Bitmap == NULL) {
-      SafeFreePool (Blt);
-      SafeFreePool (Buffer);
+      FreePool (Blt);
+      FreePool (Buffer);
       return EFI_OUT_OF_RESOURCES;
     }
 
@@ -824,15 +832,23 @@ Print (
                           );
     }
 
-    SafeFreePool (RowInfoArray);
-    SafeFreePool (Blt->Image.Bitmap);
+    if (RowInfoArray != NULL) {
+      FreePool (RowInfoArray);
+    }
+    if (Blt->Image.Bitmap != NULL) {
+      FreePool (Blt->Image.Bitmap);
+    }
   } else {
     Status = EFI_UNSUPPORTED;
   }
 
 Error:
-  SafeFreePool (Blt);
-  SafeFreePool (FontInfo);
+  if (Blt != NULL) {
+    FreePool (Blt);
+  }
+  if (FontInfo != NULL) { 
+    FreePool (FontInfo);
+  }
   FreePool (Buffer);
 
   if (EFI_ERROR (Status)) {
@@ -843,7 +859,7 @@ Error:
 }
 
 /**
-  Print to graphics screen at the given X,Y coordinates of the graphics screen.
+  Print Unicode string to graphics screen at the given X,Y coordinates of the graphics screen.
   see definition of Print to find rules for constructing Fmt.
 
   @param  X            Row to start printing at.

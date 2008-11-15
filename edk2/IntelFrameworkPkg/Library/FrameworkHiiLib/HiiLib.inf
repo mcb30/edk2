@@ -38,12 +38,12 @@
 
 [Packages]
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
   IntelFrameworkPkg/IntelFrameworkPkg.dec
 
 [LibraryClasses]
   MemoryAllocationLib
   DebugLib
-  BaseMemoryLib
   UefiBootServicesTableLib
 
 [Protocols]

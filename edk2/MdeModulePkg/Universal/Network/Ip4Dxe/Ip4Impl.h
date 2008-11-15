@@ -50,7 +50,9 @@ Abstract:
 #include "Ip4Input.h"
 #include "Ip4Output.h"
 
-enum {
+
+
+typedef enum {
   IP4_PROTOCOL_SIGNATURE = EFI_SIGNATURE_32 ('I', 'P', '4', 'P'),
   IP4_SERVICE_SIGNATURE  = EFI_SIGNATURE_32 ('I', 'P', '4', 'S'),
 
@@ -74,17 +76,17 @@ enum {
   IP4_SERVICE_STARTED,
   IP4_SERVICE_CONFIGED,
   IP4_SERVICE_DESTORY
-};
+} IP4_IMPL_ENUM_TYPES;
 
-//
-// IP4_TXTOKEN_WRAP wraps the upper layer's transmit token.
-// The user's data is kept in the Packet. When fragment is
-// needed, each fragment of the Packet has a reference to the
-// Packet, no data is actually copied. The Packet will be
-// released when all the fragments of it have been recycled by
-// MNP. Upon then, the IP4_TXTOKEN_WRAP will be released, and
-// user's event signalled.
-//
+///
+/// IP4_TXTOKEN_WRAP wraps the upper layer's transmit token.
+/// The user's data is kept in the Packet. When fragment is
+/// needed, each fragment of the Packet has a reference to the
+/// Packet, no data is actually copied. The Packet will be
+/// released when all the fragments of it have been recycled by
+/// MNP. Upon then, the IP4_TXTOKEN_WRAP will be released, and
+/// user's event signalled.
+///
 typedef struct {
   IP4_PROTOCOL              *IpInstance;
   EFI_IP4_COMPLETION_TOKEN  *Token;
@@ -93,21 +95,22 @@ typedef struct {
   INTN                      Life;
 } IP4_TXTOKEN_WRAP;
 
-//
-// IP4_RXDATA_WRAP wraps the data IP4 child delivers to the
-// upper layers. The received packet is kept in the Packet.
-// The Packet itself may be constructured from some fragments.
-// All the fragments of the Packet is organized by a
-// IP4_ASSEMBLE_ENTRY structure. If the Packet is recycled by
-// the upper layer, the assemble entry and its associated
-// fragments will be freed at last.
-//
+///
+/// IP4_RXDATA_WRAP wraps the data IP4 child delivers to the
+/// upper layers. The received packet is kept in the Packet.
+/// The Packet itself may be constructured from some fragments.
+/// All the fragments of the Packet is organized by a
+/// IP4_ASSEMBLE_ENTRY structure. If the Packet is recycled by
+/// the upper layer, the assemble entry and its associated
+/// fragments will be freed at last.
+///
 typedef struct {
   LIST_ENTRY                Link;
   IP4_PROTOCOL              *IpInstance;
   NET_BUF                   *Packet;
   EFI_IP4_RECEIVE_DATA      RxData;
 } IP4_RXDATA_WRAP;
+
 
 struct _IP4_PROTOCOL {
   UINT32                    Signature;

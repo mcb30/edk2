@@ -53,7 +53,7 @@ ExtendedIfrSupportLibConstructor (
 
 
 
-GLOBAL_REMOVE_IF_UNREFERENCED EFI_GUID mIfrVendorGuid = EFI_IFR_TIANO_GUID;
+GLOBAL_REMOVE_IF_UNREFERENCED CONST EFI_GUID mIfrVendorGuid = EFI_IFR_TIANO_GUID;
 
 /**
   Extract formset class for given HII handle.
@@ -125,7 +125,7 @@ IfrLibExtractClassFromHiiHandle (
     Package = ((UINT8 *) HiiPackageList) + Offset;
     CopyMem (&PackageHeader, Package, sizeof (EFI_HII_PACKAGE_HEADER));
 
-    if (PackageHeader.Type == EFI_HII_PACKAGE_FORM) {
+    if (PackageHeader.Type == EFI_HII_PACKAGE_FORMS) {
       //
       // Search Class Opcode in this Form Package
       //

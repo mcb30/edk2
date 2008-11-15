@@ -83,30 +83,23 @@ EFI_STATUS
   IN OUT EFI_SIMPLE_POINTER_STATE         *State
   );
 
-/**  
-  @par Protocol Description:
-  The EFI_SIMPLE_POINTER_PROTOCOL provides a set of services for a pointer 
-  device that can use used as an input device from an application written 
-  to this specification. The services include the ability to reset the 
-  pointer device, retrieve get the state of the pointer device, and 
-  retrieve the capabilities of the pointer device.
-
-  @param Reset
-  Resets the pointer device. 
-
-  @param GetState
-  Retrieves the current state of the pointer device. 
-
-  @param WaitForInput
-  Event to use with WaitForEvent() to wait for input from the pointer device.
-
-  @param Mode
-  Pointer to EFI_SIMPLE_POINTER_MODE data. 
-**/
+///
+/// The EFI_SIMPLE_POINTER_PROTOCOL provides a set of services for a pointer 
+/// device that can use used as an input device from an application written 
+/// to this specification. The services include the ability to reset the 
+/// pointer device, retrieve get the state of the pointer device, and 
+/// retrieve the capabilities of the pointer device.
+///
 struct _EFI_SIMPLE_POINTER_PROTOCOL {
   EFI_SIMPLE_POINTER_RESET      Reset;
   EFI_SIMPLE_POINTER_GET_STATE  GetState;
+  ///
+  /// Event to use with WaitForEvent() to wait for input from the pointer device.
+  ///
   EFI_EVENT                     WaitForInput;
+  ///
+  /// Pointer to EFI_SIMPLE_POINTER_MODE data.
+  ///
   EFI_SIMPLE_POINTER_MODE       *Mode;
 };
 

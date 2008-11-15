@@ -13,8 +13,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
 
   @par Revision Reference:
-  This PPI is defined in PI.
-  Version 1.00.
+  This PPI is introduced in PI Version 1.0.
 
 **/
 
@@ -46,19 +45,15 @@ EFI_STATUS
   IN UINTN                      Microseconds
   );
 
-/**
-  @par Ppi Description:
-  This service provides a simple, blocking stall with platform-specific resolution. 
-
-  @param Resolution
-  The resolution in microseconds of the stall services.
-
-  @param Stall
-  The actual stall procedure call. 
-
-**/
+///
+/// This service provides a simple, blocking stall with platform-specific resolution. 
+///
 struct _EFI_PEI_STALL_PPI {
+  ///
+  /// The resolution in microseconds of the stall services.
+  ///
   UINTN          Resolution;
+
   EFI_PEI_STALL  Stall;
 };
 
