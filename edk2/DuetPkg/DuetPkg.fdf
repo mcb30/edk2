@@ -120,9 +120,11 @@ INF  MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
 INF  MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
 INF  MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
 
-FILE DRIVER = 961578FE-B6B7-44c3-AF35-6BC705CD2B1F {
-  SECTION PE32 = FatBinPkg/EnhancedFatDxe/Ia32/Fat.efi
-  }
+INF  FatPkg/EnhancedFatDxe/Fat.inf
+
+#FILE DRIVER = 961578FE-B6B7-44c3-AF35-6BC705CD2B1F {
+#  SECTION PE32 = FatBinPkg/EnhancedFatDxe/Ia32/Fat.efi
+#  }
 
 [Rule.Common.PEI_CORE]
   FILE PEI_CORE = $(NAMED_GUID) {
