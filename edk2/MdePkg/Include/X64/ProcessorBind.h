@@ -210,7 +210,7 @@ typedef INT64   INTN;
   /// x64. Warning the assembly code in the MDE x64 does not follow the correct 
   /// ABI for the standard x64 (x86-64) GCC.
   ///
-  #define EFIAPI 
+  #define EFIAPI __attribute__((ms_abi))
 #else
   ///
   /// The default for a non Microsoft* or GCC compiler is to assume the EFI ABI
