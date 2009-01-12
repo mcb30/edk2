@@ -1109,7 +1109,7 @@ BdsLibEnumerateAllBootOption (
   // boot device enumerate
   //
   BdsLibBuildOptionFromVar (BdsBootOptionList, L"BootOrder");
-  mEnumBootDevice = TRUE;
+  //  mEnumBootDevice = TRUE;
 
   return EFI_SUCCESS;
 }
