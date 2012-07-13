@@ -1,0 +1,646 @@
+//
+//  VFR compiler version  1.95 (UEFI 2.1)
+//
+formset
+  guid = { 0xA04A27f4, 0xDF00, 0x4D42, {0xB5, 0x52, 0x39, 0x51, 0x13, 0x02, 0x11, 0x3D} },
+  title = STRING_TOKEN(STR_FORM_SET_TITLE),
+  help = STRING_TOKEN(STR_FORM_SET_TITLE_HELP),
+  classguid = { 0x93039971, 0x8545, 0x4b04, { 0xb4, 0x5e, 0x32, 0xeb, 0x83, 0x26, 0x4, 0xe } },
+  varstore DRIVER_SAMPLE_CONFIGURATION,
+    varid = 0x1234,
+    name = MyIfrNVData,
+    guid = { 0xA04A27f4, 0xDF00, 0x4D42, {0xB5, 0x52, 0x39, 0x51, 0x13, 0x02, 0x11, 0x3D} };
+
+
+
+
+  varstore MY_DATA2,
+    name = MyIfrNVData2,
+    guid = { 0xA04A27f4, 0xDF00, 0x4D42, {0xB5, 0x52, 0x39, 0x51, 0x13, 0x02, 0x11, 0x3D} };
+
+
+
+
+  efivarstore MyEfiVar,
+    attribute = 0x00000002 | 0x00000001,
+    name = STRING_TOKEN(STR_VAR_NAME),
+    varsize = 1,
+    guid = { 0xA04A27f4, 0xDF00, 0x4D42, {0xB5, 0x52, 0x39, 0x51, 0x13, 0x02, 0x11, 0x3D} };
+
+
+
+
+  namevaluevarstore MyNameValueVar,
+    name = STRING_TOKEN(STR_NAME_VALUE_VAR_NAME0),
+    name = STRING_TOKEN(STR_NAME_VALUE_VAR_NAME1),
+    name = STRING_TOKEN(STR_NAME_VALUE_VAR_NAME2),
+    guid = { 0xA04A27f4, 0xDF00, 0x4D42, {0xB5, 0x52, 0x39, 0x51, 0x13, 0x02, 0x11, 0x3D} };
+
+  defaultstore MyStandardDefault,
+    prompt = STRING_TOKEN(STR_STANDARD_DEFAULT_PROMPT),
+    attribute = 0x0000;
+
+  defaultstore MyManufactureDefault,
+    prompt = STRING_TOKEN(STR_MANUFACTURE_DEFAULT_PROMPT),
+    attribute = 0x0001;
+
+
+
+
+  form formid = 1,
+       title = STRING_TOKEN(STR_FORM1_TITLE);
+
+    subtitle text = STRING_TOKEN(STR_SUBTITLE_TEXT);
+
+    subtitle text = STRING_TOKEN(STR_SUBTITLE_TEXT2);
+
+
+
+
+    text
+      help = STRING_TOKEN(STR_TEXT_HELP),
+      text = STRING_TOKEN(STR_CPU_STRING),
+        text = STRING_TOKEN(STR_CPU_STRING2);
+
+
+
+
+    text
+      help = STRING_TOKEN(STR_EXIT_TEXT),
+      text = STRING_TOKEN(STR_EXIT_TEXT),
+        text = STRING_TOKEN(STR_EXIT_TEXT),
+      flags = INTERACTIVE,
+      key = 0x1237;
+
+    text
+      help = STRING_TOKEN(STR_SAVE_TEXT),
+      text = STRING_TOKEN(STR_SAVE_TEXT),
+        text = STRING_TOKEN(STR_SAVE_TEXT),
+      flags = INTERACTIVE,
+      key = 0x1238;
+
+
+
+
+    oneof name = MyOneOf,
+      varid = MyIfrNVData.SuppressGrayOutSomething,
+      prompt = STRING_TOKEN(STR_ONE_OF_PROMPT),
+      help = STRING_TOKEN(STR_ONE_OF_HELP),
+
+
+
+      option text = STRING_TOKEN(STR_ONE_OF_TEXT4), value = 0x0, flags = 0;
+      option text = STRING_TOKEN(STR_ONE_OF_TEXT5), value = 0x1, flags = 0;
+
+
+
+      option text = STRING_TOKEN(STR_ONE_OF_TEXT6), value = 0x2, flags = DEFAULT;
+    endoneof;
+
+    oneof varid = MyIfrNVData.BootOrderLarge,
+      prompt = STRING_TOKEN(STR_ONE_OF_PROMPT),
+      help = STRING_TOKEN(STR_ONE_OF_HELP),
+      default value = cond (pushthis == 0 ? 0 : cond ((questionref(MyOneOf) >> 0x4 & 0xF00) == 0x0 + 0x2 ? 0 : 1)),
+      option text = STRING_TOKEN(STR_BOOT_ORDER1), value = 0x0, flags = 0;
+      option text = STRING_TOKEN(STR_BOOT_ORDER2), value = 0x1, flags = 0;
+    endoneof;
+
+    grayoutif ideqval MyIfrNVData.SuppressGrayOutSomething == 0x1;
+      suppressif questionref(MyOneOf) == 0x0;
+
+        checkbox varid = MyIfrNVData.ChooseToActivateNuclearWeaponry,
+                 prompt = STRING_TOKEN(STR_CHECK_BOX_PROMPT),
+                 help = STRING_TOKEN(STR_CHECK_BOX_HELP),
+
+
+
+
+                 flags = CHECKBOX_DEFAULT | CHECKBOX_DEFAULT_MFG,
+                 key = 0,
+                 default = 1,
+        endcheckbox;
+      endif;
+ endif;
+    suppressif ideqval MyIfrNVData.SuppressGrayOutSomething == 0x0;
+
+
+
+
+
+      label 0x2222;
+
+      orderedlist
+                varid = MyIfrNVData.BootOrder,
+                prompt = STRING_TOKEN(STR_BOOT_OPTIONS),
+                help = STRING_TOKEN(STR_NULL_STRING),
+                option text = STRING_TOKEN(STR_BOOT_OPTION2), value = 2, flags = RESET_REQUIRED;
+                option text = STRING_TOKEN(STR_BOOT_OPTION1), value = 1, flags = RESET_REQUIRED;
+                option text = STRING_TOKEN(STR_BOOT_OPTION3), value = 3, flags = RESET_REQUIRED;
+              suppressif ideqval MyIfrNVData.BootOrderLarge == 0;
+                option text = STRING_TOKEN(STR_BOOT_OPTION4), value = 4, flags = RESET_REQUIRED;
+              endif
+      endlist;
+
+
+
+
+      label 0x2223;
+
+    endif;
+
+    disableif ideqval MyIfrNVData.SuppressGrayOutSomething == 0x2;
+      orderedlist
+        varid = MyIfrNVData.OrderedList,
+        prompt = STRING_TOKEN(STR_TEST_OPCODE),
+        help = STRING_TOKEN(STR_TEXT_HELP),
+        option text = STRING_TOKEN(STR_ONE_OF_TEXT1), value = 3, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ONE_OF_TEXT2), value = 2, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ONE_OF_TEXT3), value = 1, flags = RESET_REQUIRED;
+      endlist;
+    endif;
+
+    label 100;
+
+
+
+
+    goto 0x1234,
+      prompt = STRING_TOKEN(STR_GOTO_DYNAMIC),
+      help = STRING_TOKEN(STR_GOTO_HELP),
+      flags = INTERACTIVE,
+      key = 0x1234;
+
+    goto 0x1234,
+      prompt = STRING_TOKEN(STR_GOTO_DYNAMIC2),
+      help = STRING_TOKEN(STR_GOTO_HELP),
+      flags = INTERACTIVE,
+      key = 0x1235;
+
+    oneof varid = MyIfrNVData.TestLateCheck,
+      prompt = STRING_TOKEN(STR_TEST_OPCODE),
+      help = STRING_TOKEN(STR_ONE_OF_HELP),
+      option text = STRING_TOKEN(STR_ONE_OF_TEXT1), value = 0, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ONE_OF_TEXT2), value = 1, flags = DEFAULT | RESET_REQUIRED;
+
+    endoneof;
+
+    oneof varid = MyIfrNVData.TestLateCheck2,
+      prompt = STRING_TOKEN(STR_TEST_OPCODE2),
+      help = STRING_TOKEN(STR_ONE_OF_HELP),
+      option text = STRING_TOKEN(STR_ONE_OF_TEXT1), value = 0, flags = DEFAULT | RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ONE_OF_TEXT2), value = 1, flags = RESET_REQUIRED;
+
+      inconsistentif prompt = STRING_TOKEN(STR_ERROR_POPUP),
+        ideqid MyIfrNVData.TestLateCheck == MyIfrNVData.TestLateCheck2
+      endif
+
+    endoneof;
+
+    oneof varid = MyIfrNVData.QuestionAboutTreeHugging,
+      prompt = STRING_TOKEN(STR_ONE_OF_PROMPT),
+      help = STRING_TOKEN(STR_ONE_OF_HELP),
+      option text = STRING_TOKEN(STR_ONE_OF_TEXT1), value = 0, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ONE_OF_TEXT2), value = 1, flags = DEFAULT | RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ONE_OF_TEXT3), value = 0x03, flags = RESET_REQUIRED;
+
+    endoneof;
+
+
+
+
+    string varid = MyIfrNVData.MyStringData,
+              prompt = STRING_TOKEN(STR_MY_STRING_PROMPT2),
+              help = STRING_TOKEN(STR_MY_STRING_HELP2),
+              flags = INTERACTIVE,
+              key = 0x1236,
+              minsize = 6,
+              maxsize = 40,
+              inconsistentif prompt = STRING_TOKEN(STR_STRING_CHECK_ERROR_POPUP),
+                pushthis != stringref(STRING_TOKEN(STR_STRING_CHECK))
+              endif
+    endstring;
+
+
+
+
+    numeric varid = MyIfrNVData.HowOldAreYouInYearsManual,
+            prompt = STRING_TOKEN(STR_NUMERIC_READONLY_PROMPT),
+            help = STRING_TOKEN(STR_NUMERIC_HELP0),
+            flags = READ_ONLY,
+            minimum = 0,
+            maximum = 0xf0,
+            step = 0,
+
+            default = 21,
+
+
+    endnumeric;
+
+    numeric varid = MyIfrNVData.HowOldAreYouInYearsManual,
+            prompt = STRING_TOKEN(STR_NUMERIC_MANUAL_PROMPT),
+            help = STRING_TOKEN(STR_NUMERIC_HELP0),
+            minimum = 0,
+            maximum = 0xf0,
+            step = 0,
+            default = 21,
+
+            inconsistentif prompt = STRING_TOKEN(STR_ERROR_POPUP),
+              ideqval MyIfrNVData.HowOldAreYouInYearsManual == 99
+              OR
+              ideqid MyIfrNVData.HowOldAreYouInYearsManual == MyEfiVar
+              OR
+              ideqvallist MyIfrNVData.HowOldAreYouInYearsManual == 1 3 5 7
+            endif
+
+    endnumeric;
+
+    numeric varid = MyEfiVar,
+            questionid = 0x1111,
+            prompt = STRING_TOKEN(STR_TALL_HEX_PROMPT),
+            help = STRING_TOKEN(STR_NUMERIC_HELP1),
+            flags = DISPLAY_UINT_HEX | INTERACTIVE,
+            minimum = 0,
+            maximum = 250,
+            default = 175,
+
+    endnumeric;
+
+
+
+
+    numeric varid = MyNameValueVar[0],
+            prompt = STRING_TOKEN(STR_NAME_VALUE_VAR_NAME0),
+            help = STRING_TOKEN(STR_NAME_VALUE_VAR_NAME0_HELP),
+
+
+
+
+            flags = NUMERIC_SIZE_1,
+            minimum = 0,
+            maximum = 0xff,
+            step = 0,
+    endnumeric;
+
+    numeric varid = MyNameValueVar[1],
+            prompt = STRING_TOKEN(STR_NAME_VALUE_VAR_NAME1),
+            help = STRING_TOKEN(STR_NAME_VALUE_VAR_NAME1_HELP),
+            flags = NUMERIC_SIZE_2,
+            minimum = 0,
+            maximum = 0xffff,
+            step = 0,
+    endnumeric;
+
+
+
+
+    string varid = MyNameValueVar[2],
+              prompt = STRING_TOKEN(STR_NAME_VALUE_VAR_NAME2),
+              help = STRING_TOKEN(STR_NAME_VALUE_VAR_NAME2_HELP),
+              minsize = 2,
+              maxsize = 0x14,
+    endstring;
+
+    label 0x01;
+    label 0x1000;
+
+    grayoutif ideqval MyIfrNVData.HowOldAreYouInYearsManual == 23 AND ideqval MyIfrNVData.SuppressGrayOutSomething == 0x1;
+      numeric varid = MyIfrNVData.HowOldAreYouInYears,
+              prompt = STRING_TOKEN(STR_NUMERIC_STEP_PROMPT),
+              help = STRING_TOKEN(STR_NUMERIC_HELP2),
+              minimum = 0,
+              maximum = 243,
+              step = 1,
+              default = 18, defaultstore = MyStandardDefault,
+              default = 19, defaultstore = MyManufactureDefault,
+
+      endnumeric;
+    endif;
+
+    resetbutton
+      defaultstore = MyStandardDefault,
+      prompt = STRING_TOKEN(STR_STANDARD_DEFAULT_PROMPT),
+      help = STRING_TOKEN(STR_STANDARD_DEFAULT_HELP),
+    endresetbutton;
+
+    resetbutton
+      defaultstore = MyManufactureDefault,
+      prompt = STRING_TOKEN(STR_MANUFACTURE_DEFAULT_PROMPT),
+      help = STRING_TOKEN(STR_MANUFACTURE_DEFAULT_HELP),
+    endresetbutton;
+
+
+
+
+    password varid = MyIfrNVData.WhatIsThePassword,
+              prompt = STRING_TOKEN(STR_PASSWORD_PROMPT),
+              help = STRING_TOKEN(STR_PASSWORD_HELP),
+              minsize = 6,
+              maxsize = 20,
+    endpassword;
+
+    string varid = MyIfrNVData.PasswordClearText,
+              prompt = STRING_TOKEN(STR_MY_STRING_PROMPT),
+              help = STRING_TOKEN(STR_MY_STRING_HELP),
+              minsize = 6,
+              maxsize = 0x14,
+    endstring;
+
+
+
+
+    password varid = MyIfrNVData.WhatIsThePassword2,
+              prompt = STRING_TOKEN(STR_PASSWORD_CALLBACK_PROMPT),
+              help = STRING_TOKEN(STR_PASSWORD_HELP),
+              flags = INTERACTIVE,
+              key = 0x2000,
+              minsize = 6,
+              maxsize = 20,
+    endpassword;
+
+
+
+
+    grayoutif NOT security ({ 0x85b75607, 0xf7ce, 0x471e, { 0xb7, 0xe4, 0x2a, 0xea, 0x5f, 0x72, 0x32, 0xee } });
+      text
+        help = STRING_TOKEN(STR_TEXT_SECRUITY_TEST_HELP),
+        text = STRING_TOKEN(STR_TEXT_SECRUITY_TEST_TEXT);
+    endif;
+
+    goto 2,
+      prompt = STRING_TOKEN(STR_GOTO_FORM2),
+      help = STRING_TOKEN(STR_GOTO_HELP);
+
+    goto 3,
+      prompt = STRING_TOKEN(STR_GOTO_FORM3),
+      help = STRING_TOKEN(STR_GOTO_HELP);
+
+    goto 4,
+      prompt = STRING_TOKEN(STR_GOTO_FORM4),
+      help = STRING_TOKEN(STR_GOTO_HELP);
+
+  endform;
+
+  suppressif ideqval MyIfrNVData.BootOrderLarge == 0;
+    form formid = 2,
+      title = STRING_TOKEN(STR_FORM2_TITLE);
+
+
+      date year varid = Date.Year,
+              prompt = STRING_TOKEN(STR_DATE_PROMPT),
+              help = STRING_TOKEN(STR_DATE_HELP),
+              minimum = 1998,
+              maximum = 2099,
+              step = 1,
+              default = 2004,
+
+              month varid = Date.Month,
+              prompt = STRING_TOKEN(STR_DATE_PROMPT),
+              help = STRING_TOKEN(STR_DATE_HELP),
+              minimum = 1,
+              maximum = 12,
+              step = 1,
+              default = 1,
+
+              day varid = Date.Day,
+              prompt = STRING_TOKEN(STR_DATE_PROMPT),
+              help = STRING_TOKEN(STR_DATE_HELP),
+              minimum = 1,
+              maximum = 31,
+              step = 0x1,
+              default = 1,
+
+        inconsistentif prompt = STRING_TOKEN(STR_ERROR_POPUP),
+          ideqval Date.Day == 31
+          AND
+          ideqvallist Date.Month == 2 4 6 9 11
+        endif
+
+
+
+
+        inconsistentif prompt = STRING_TOKEN(STR_ERROR_POPUP),
+          ideqval Date.Day == 30
+          AND
+          ideqval Date.Month == 2
+        endif
+
+
+
+
+        inconsistentif prompt = STRING_TOKEN(STR_ERROR_POPUP),
+          ideqval Date.Day == 0x1D
+          AND
+          ideqval Date.Month == 2
+          AND
+          NOT
+          ideqvallist Date.Year == 2004 2008 20012 20016 2020 2024 2028 2032 2036
+        endif
+
+      enddate;
+
+      time hour varid = Time.Hours,
+              prompt = STRING_TOKEN(STR_TIME_PROMPT),
+              help = STRING_TOKEN(STR_TIME_HELP),
+              minimum = 0,
+              maximum = 23,
+              step = 1,
+              default = 0,
+
+              minute varid = Time.Minutes,
+              prompt = STRING_TOKEN(STR_TIME_PROMPT),
+              help = STRING_TOKEN(STR_TIME_HELP),
+              minimum = 0,
+              maximum = 59,
+              step = 1,
+              default = 0,
+
+              second varid = Time.Seconds,
+              prompt = STRING_TOKEN(STR_TIME_PROMPT),
+              help = STRING_TOKEN(STR_TIME_HELP),
+              minimum = 0,
+              maximum = 59,
+              step = 1,
+              default = 0,
+
+      endtime;
+
+      checkbox varid = MyIfrNVData.ChooseToActivateNuclearWeaponry,
+              prompt = STRING_TOKEN(STR_CHECK_BOX_PROMPT),
+              help = STRING_TOKEN(STR_CHECK_BOX_HELP),
+              flags = CHECKBOX_DEFAULT,
+              key = 0,
+      endcheckbox;
+
+      text
+        help = STRING_TOKEN(STR_TEXT_HELP),
+        text = STRING_TOKEN(STR_TEXT_TEXT_1);
+
+      text
+        help = STRING_TOKEN(STR_TEXT_HELP),
+        text = STRING_TOKEN(STR_TEXT_TEXT_1),
+        text = STRING_TOKEN(STR_TEXT_TEXT_2);
+
+      goto 1,
+        prompt = STRING_TOKEN(STR_GOTO_FORM1),
+        help = STRING_TOKEN(STR_GOTO_HELP);
+
+    endform;
+  endif;
+
+  form formid = 3, title = STRING_TOKEN(STR_FORM3_TITLE);
+
+    suppressif ideqval MyEfiVar == 111;
+      text
+        help = STRING_TOKEN(STR_TEXT_HELP),
+        text = STRING_TOKEN(STR_TEXT_TEXT_1);
+    endif;
+
+    goto 1,
+      prompt = STRING_TOKEN(STR_GOTO_FORM1),
+      help = STRING_TOKEN(STR_GOTO_HELP);
+
+    numeric varid = MyIfrNVData.DynamicRefresh,
+            prompt = STRING_TOKEN(STR_NUMERIC_MANUAL_PROMPT),
+            help = STRING_TOKEN(STR_NUMERIC_HELP0),
+            flags = INTERACTIVE,
+            key = 0x5678,
+            minimum = 0,
+            maximum = 0xff,
+            step = 0,
+            default = 0,
+            refresh interval = 3
+    endnumeric;
+
+    label 0x2234;
+    label 0x2223;
+
+  endform;
+
+  formmap formid = 4,
+    maptitle = STRING_TOKEN(STR_SAMPL_MAP_METHOD);
+    mapguid = { 0xA04A27f4, 0xDF00, 0x4D42, {0xB5, 0x52, 0x39, 0x51, 0x13, 0x02, 0x11, 0x3D} };
+    maptitle = STRING_TOKEN(STR_STANDARD_MAP_METHOD);
+    mapguid = { 0x3bd2f4ec, 0xe524, 0x46e4, { 0xa9, 0xd8, 0x51, 0x1, 0x17, 0x42, 0x55, 0x62 } };
+
+    oneof varid = MyIfrNVData.SerialPortNo,
+      prompt = STRING_TOKEN(STR_SERIAL_PORT),
+      help = STRING_TOKEN(STR_ONE_OF_HELP),
+
+      read cond (get(MyIfrNVData.SerialPortStatus) != 0 ? 0 : cond ((get(MyIfrNVData.SerialPortIo) & 0xF00) >> 0x8 == get(MyIfrNVData.SerialPortIrq) - 1 ? UNDEFINED : map (get(MyIfrNVData.SerialPortIo) : 0x3f8,1; 0x2F8,2; 0x3E8,3; 0x2E8,4;)));
+      write set(MyIfrNVData.SerialPortStatus, pushthis != 0) AND set(MyIfrNVData.SerialPortIo, map (pushthis : 1,0x3F8; 2,0x2F8; 3,0x3E8; 4,0x2E8;)) AND set (MyIfrNVData.SerialPortIrq, map (pushthis: 1,4; 2,3; 3,4; 4,3;));
+
+      option text = STRING_TOKEN(STR_SERIAL_PORT_DISABLE), value = 0x0, flags = DEFAULT;
+      option text = STRING_TOKEN(STR_SERIAL_PORT1), value = 0x1, flags = 0;
+      option text = STRING_TOKEN(STR_SERIAL_PORT2), value = 0x2, flags = 0;
+      option text = STRING_TOKEN(STR_SERIAL_PORT3), value = 0x3, flags = 0;
+      option text = STRING_TOKEN(STR_SERIAL_PORT4), value = 0x4, flags = 0;
+    endoneof;
+
+    grayoutif TRUE;
+      checkbox varid = MyIfrNVData.SerialPortStatus,
+        prompt = STRING_TOKEN(STR_SERIAL_PORT_STATUS),
+        help = STRING_TOKEN(STR_CHECK_BOX_HELP),
+      endcheckbox;
+    endif;
+
+    grayoutif TRUE;
+      suppressif ideqval MyIfrNVData.SerialPortStatus == 0;
+        oneof varid = MyIfrNVData.SerialPortIo,
+          prompt = STRING_TOKEN(STR_SERIAL_PORT_IO_ADDRESS),
+          help = STRING_TOKEN(STR_ONE_OF_HELP),
+
+          option text = STRING_TOKEN(STR_SERIAL_PORT1_IOADDR), value = 0x3F8, flags = DEFAULT;
+          option text = STRING_TOKEN(STR_SERIAL_PORT2_IOADDR), value = 0x2F8, flags = 0;
+          option text = STRING_TOKEN(STR_SERIAL_PORT3_IOADDR), value = 0x3E8, flags = 0;
+          option text = STRING_TOKEN(STR_SERIAL_PORT4_IOADDR), value = 0x2E8, flags = 0;
+        endoneof;
+      endif;
+    endif;
+
+    grayoutif TRUE;
+      suppressif ideqval MyIfrNVData.SerialPortStatus == 0;
+        oneof varid = MyIfrNVData.SerialPortIrq,
+          prompt = STRING_TOKEN(STR_SERIAL_PORT_IRQ),
+          help = STRING_TOKEN(STR_ONE_OF_HELP),
+
+          option text = STRING_TOKEN(STR_SERIAL_PORT13_IRQ), value = 0x4, flags = DEFAULT;
+          option text = STRING_TOKEN(STR_SERIAL_PORT24_IRQ), value = 0x3, flags = 0;
+        endoneof;
+      endif;
+    endif;
+
+    goto 1,
+      prompt = STRING_TOKEN(STR_GOTO_FORM1),
+      help = STRING_TOKEN(STR_GOTO_HELP);
+
+  endform;
+
+  form formid = 0x1234,
+       title = STRING_TOKEN(STR_DYNAMIC_TITLE);
+
+    label 0x1234;
+
+
+
+    label 0x2223;
+
+  endform;
+
+endformset;
+
+//
+// All Opcode Record List 
+//
+
+Total Size of all record is 0x00000000
+
+
+***************************************************************
+		mPackAlign = 8
+		struct EFI_HII_TIME : mAlign [1] mTotalSize [0x3]
+
+		struct EFI_HII_TIME {
+			+00000000[00000000] Hours <UINT8>
+			+00000001[00000001] Minutes <UINT8>
+			+00000002[00000002] Seconds <UINT8>
+		};
+---------------------------------------------------------------
+		struct EFI_STRING_ID : mAlign [2] mTotalSize [0x2]
+
+		struct EFI_STRING_ID {
+		};
+---------------------------------------------------------------
+		struct EFI_HII_DATE : mAlign [2] mTotalSize [0x4]
+
+		struct EFI_HII_DATE {
+			+00000000[00000000] Year <UINT16>
+			+00000002[00000002] Month <UINT8>
+			+00000003[00000003] Day <UINT8>
+		};
+---------------------------------------------------------------
+		struct BOOLEAN : mAlign [1] mTotalSize [0x1]
+
+		struct BOOLEAN {
+		};
+---------------------------------------------------------------
+		struct UINT8 : mAlign [1] mTotalSize [0x1]
+
+		struct UINT8 {
+		};
+---------------------------------------------------------------
+		struct UINT16 : mAlign [2] mTotalSize [0x2]
+
+		struct UINT16 {
+		};
+---------------------------------------------------------------
+		struct UINT32 : mAlign [4] mTotalSize [0x4]
+
+		struct UINT32 {
+		};
+---------------------------------------------------------------
+		struct UINT64 : mAlign [8] mTotalSize [0x8]
+
+		struct UINT64 {
+		};
+---------------------------------------------------------------
+***************************************************************
