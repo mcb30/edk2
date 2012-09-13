@@ -217,9 +217,11 @@ Returns:
     ));
   FreePool(DevPathStr);
 
+#if 0
   BdsLibUpdateConsoleVariable (VarConsoleOut, DevicePath, NULL);
   BdsLibUpdateConsoleVariable (VarConsoleInp, DevicePath, NULL);
   BdsLibUpdateConsoleVariable (VarErrorOut, DevicePath, NULL);
+#endif
 
   //
   // Register COM2

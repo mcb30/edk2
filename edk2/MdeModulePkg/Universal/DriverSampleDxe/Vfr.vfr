@@ -46,6 +46,9 @@
 #define EFI_USER_INFO_ACCESS_SETUP_ADMIN_GUID \
   { 0x85b75607, 0xf7ce, 0x471e, { 0xb7, 0xe4, 0x2a, 0xea, 0x5f, 0x72, 0x32, 0xee } }
 
+#define EFI_HII_IBM_UCM_COMPLIANT_FORMSET_GUID \
+  {0x5C8E9746, 0xA5F7, 0x4593, 0xAF, 0x1F, 0x66, 0xA8, 0x2A, 0xA1, 0x9C, 0xB1}
+
 //
 // Labels definition
 //
@@ -57,7 +60,7 @@ formset
   guid      = DRIVER_SAMPLE_FORMSET_GUID,
   title     = STRING_TOKEN(STR_FORM_SET_TITLE),
   help      = STRING_TOKEN(STR_FORM_SET_TITLE_HELP),
-  classguid = EFI_HII_PLATFORM_SETUP_FORMSET_GUID,
+  classguid = EFI_HII_PLATFORM_SETUP_FORMSET_GUID | EFI_HII_IBM_UCM_COMPLIANT_FORMSET_GUID,
   
   //
   // Notes: VfrCompiler will insert a Standard Default Storage declaration 

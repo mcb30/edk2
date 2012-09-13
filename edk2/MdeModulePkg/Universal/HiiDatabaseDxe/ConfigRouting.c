@@ -2815,7 +2815,7 @@ EFI_STATUS
 EFIAPI
 HiiConfigRoutingExtractConfig (
   IN  CONST EFI_HII_CONFIG_ROUTING_PROTOCOL  *This,
-  IN  CONST EFI_STRING                       Request,
+  IN  CONST EFI_STRING                       _Request,
   OUT EFI_STRING                             *Progress,
   OUT EFI_STRING                             *Results
   )
@@ -2841,6 +2841,19 @@ HiiConfigRoutingExtractConfig (
   BOOLEAN                             IfrDataParsedFlag;
   BOOLEAN                             IsEfiVarStore;
   EFI_IFR_VARSTORE_EFI                *EfiVarStoreInfo; 
+
+  // HACK
+  EFI_STRING Request = _Request;
+  DEBUG ((EFI_D_INFO, "ExtractConfig %s %p %p\n", Request, Progress, Results ));
+  if ( 1 && StrStr ( Request, L"NAME=" ) == NULL ) {
+	  static CHAR16 buf[512];
+
+	  UnicodeSPrint ( buf, sizeof ( buf ), L"%s", Request );
+	  UnicodeSPrint ( buf + 37, sizeof ( buf ) - 37, L"&NAME=%s%s", &Request[37],
+			  L"&NameValueVar0&NameValueVar1&NameValueVar2" );
+	  Request = buf;
+	  DEBUG ((EFI_D_INFO, "...faking to: %s\n", Request ));
+  }
 
   if (This == NULL || Progress == NULL || Results == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -2959,6 +2972,9 @@ HiiConfigRoutingExtractConfig (
       }
     }
     
+    // HACK
+    DEBUG ((EFI_D_INFO, "... %d\n", __LINE__));
+
     //
     // Check whether ConfigRequest contains request string OFFSET/WIDTH
     //
@@ -2977,6 +2993,12 @@ HiiConfigRoutingExtractConfig (
         *Progress = StrStr (StringPtr, AccessProgress);
         goto Done;
       }
+
+      // HACK
+      DEBUG ((EFI_D_INFO, "... %d\n", __LINE__));
+      DEBUG ((EFI_D_INFO, "... ConfigRequest %s\n", ConfigRequest));
+      DEBUG ((EFI_D_INFO, "\n"));
+
       //
       // Not any request block is found.
       //
@@ -2985,6 +3007,9 @@ HiiConfigRoutingExtractConfig (
         goto NextConfigString;
       }
     }
+
+    // HACK
+    DEBUG ((EFI_D_INFO, "... %d\n", __LINE__));
 
     //
     // Check whether this ConfigRequest is search from Efi varstore type storage.

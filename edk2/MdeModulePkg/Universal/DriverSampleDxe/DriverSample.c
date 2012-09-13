@@ -796,6 +796,9 @@ ExtractConfig (
   CHAR16                           *StrPointer;
   BOOLEAN                          AllocatedRequest;
 
+  DEBUG ((EFI_D_INFO, "*** DriverSample ExtractConfig %s %p %p\n", Request, Progress, Results ));
+  DEBUG ((EFI_D_INFO, "\n"));
+
   if (Progress == NULL || Results == NULL) {
     return EFI_INVALID_PARAMETER;
   }
@@ -1003,6 +1006,9 @@ ExtractConfig (
   } else if (StrStr (Request, L"OFFSET") == NULL) {
     *Progress = Request + StrLen (Request);
   }
+
+  DEBUG ((EFI_D_INFO, "*** DriverSample ExtractConfig returns %s\n", *Results ));
+  DEBUG ((EFI_D_INFO, "\n"));
 
   return Status;
 }
@@ -1835,6 +1841,8 @@ DriverSampleInit (
   MY_EFI_VARSTORE_DATA            *VarStoreConfig;
   EFI_INPUT_KEY                   HotKey;
   EFI_FORM_BROWSER_EXTENSION_PROTOCOL *FormBrowserEx;
+
+  DEBUG ((EFI_D_INFO, "*** DriverSampleInit()\n"));
 
   //
   // Initialize the local variables.
